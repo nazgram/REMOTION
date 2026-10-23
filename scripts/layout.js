@@ -9,6 +9,7 @@ const BPM = 120, BEAT = 60 / BPM, EIGHTH = BEAT / 2;
 const DURATION = 10;
 const DISSOLVE = [6.5, 8.0]; // keep in sync with scripts/make_assets.py
 const TITLE_AT = 8.0;
+const WIND = [3.5, 4.5, 6.3, 7.5]; // gust: starts, full strength, holds, eases off during the wash
 
 // seeded RNG so every run gives the same arrangement
 let s = 20261023;
@@ -72,6 +73,6 @@ TITLE.forEach((ch, i) => {
   t += EIGHTH / 2;
 });
 
-const out = { W, H, FPS, BPM, DURATION, DISSOLVE, TITLE_AT, flowers, letters };
+const out = { W, H, FPS, BPM, DURATION, DISSOLVE, TITLE_AT, WIND, flowers, letters };
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'layout.json'), JSON.stringify(out, null, 1));
 console.log(`${flowers.length} flowers, last pop ${Math.max(...flowers.map((f) => f.popAt))}s, ${letters.length} letters`);

@@ -11,6 +11,13 @@ const WASH_FRAMES = Math.round((DISSOLVE_OUT - DISSOLVE_IN) * layout.FPS) + 1;
 
 type Flower = (typeof layout.flowers)[number];
 
+const [GUST_IN, GUST_PEAK, GUST_HOLD, GUST_OUT] = layout.WIND;
+const gust = (t: number) =>
+  interpolate(t, [GUST_IN, GUST_PEAK, GUST_HOLD, GUST_OUT], [0, 1, 1, 0.5], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+
 const FlowerSprig: React.FC<{ f: Flower; t: number }> = ({ f, t }) => {
   const { fps } = useVideoConfig();
   const local = (t - f.popAt) * fps;
@@ -21,13 +28,18 @@ const FlowerSprig: React.FC<{ f: Flower; t: number }> = ({ f, t }) => {
   // breeze: each sprig sways from its stem at its own phase
   const sway = Math.sin(t * Math.PI * 2 * 0.42 + f.swayPhase) * 2.4 * settle;
   const bob = Math.sin(t * Math.PI * 2 * 0.3 + f.swayPhase * 1.7) * 6 * settle;
-  const rotate = f.rotate + (1 - s) * -28 + sway;
+  // wind: a gust blows left to right across the garden, every sprig leans with it and flutters
+  const g = gust(t) * settle;
+  const wave = Math.sin(t * Math.PI * 2 * 0.9 - f.x / 260 - f.y / 900);
+  const lean = g * (5 + 4.5 * wave) + g * Math.sin(t * Math.PI * 2 * 2.4 + f.swayPhase) * 1.6;
+  const drift = g * (12 + 10 * wave);
+  const rotate = f.rotate + (1 - s) * -28 + sway + lean;
   return (
     <Img
       src={staticFile(`flowers/${String(f.sprig).padStart(2, '0')}.png`)}
       style={{
         position: 'absolute',
-        left: f.x,
+        left: f.x + drift,
         top: f.y + bob,
         height: f.height,
         transform: `translate(-50%, -50%) rotate(${rotate}deg) scale(${s * (f.flip ? -1 : 1)}, ${s})`,
