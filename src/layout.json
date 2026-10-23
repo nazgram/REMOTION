@@ -1,0 +1,298 @@
+{
+ "W": 1080,
+ "H": 1920,
+ "FPS": 30,
+ "BPM": 120,
+ "DURATION": 10,
+ "DISSOLVE": [
+  6.5,
+  8
+ ],
+ "TITLE_AT": 8,
+ "flowers": [
+  {
+   "id": 0,
+   "sprig": 2,
+   "hero": false,
+   "x": 26,
+   "y": 56,
+   "height": 653,
+   "rotate": 12.5,
+   "flip": true,
+   "swayPhase": 1.5,
+   "z": 1,
+   "popAt": 5
+  },
+  {
+   "id": 1,
+   "sprig": 5,
+   "hero": false,
+   "x": 533,
+   "y": 21,
+   "height": 624,
+   "rotate": -34.2,
+   "flip": true,
+   "swayPhase": 1.768,
+   "z": 0,
+   "popAt": 2.75
+  },
+  {
+   "id": 2,
+   "sprig": 9,
+   "hero": false,
+   "x": 901,
+   "y": 105,
+   "height": 658,
+   "rotate": -17.4,
+   "flip": false,
+   "swayPhase": 5.049,
+   "z": 0,
+   "popAt": 0.5
+  },
+  {
+   "id": 3,
+   "sprig": 2,
+   "hero": false,
+   "x": 203,
+   "y": 482,
+   "height": 622,
+   "rotate": -4.5,
+   "flip": true,
+   "swayPhase": 2.695,
+   "z": 0,
+   "popAt": 4.5
+  },
+  {
+   "id": 4,
+   "sprig": 1,
+   "hero": true,
+   "x": 622,
+   "y": 477,
+   "height": 858,
+   "rotate": -4.9,
+   "flip": false,
+   "swayPhase": 5.183,
+   "z": 2,
+   "popAt": 1.75
+  },
+  {
+   "id": 5,
+   "sprig": 7,
+   "hero": false,
+   "x": 1061,
+   "y": 481,
+   "height": 657,
+   "rotate": -19.7,
+   "flip": false,
+   "swayPhase": 1.559,
+   "z": 0,
+   "popAt": 1.5
+  },
+  {
+   "id": 6,
+   "sprig": 10,
+   "hero": false,
+   "x": 59,
+   "y": 802,
+   "height": 650,
+   "rotate": 20.1,
+   "flip": true,
+   "swayPhase": 5.634,
+   "z": 0,
+   "popAt": 5.25
+  },
+  {
+   "id": 7,
+   "sprig": 3,
+   "hero": false,
+   "x": 390,
+   "y": 794,
+   "height": 641,
+   "rotate": -18.6,
+   "flip": true,
+   "swayPhase": 0.919,
+   "z": 0,
+   "popAt": 4.75
+  },
+  {
+   "id": 8,
+   "sprig": 7,
+   "hero": false,
+   "x": 932,
+   "y": 737,
+   "height": 569,
+   "rotate": -2.3,
+   "flip": true,
+   "swayPhase": 0.534,
+   "z": 1,
+   "popAt": 3.5
+  },
+  {
+   "id": 9,
+   "sprig": 6,
+   "hero": true,
+   "x": 281,
+   "y": 1118,
+   "height": 825,
+   "rotate": 14.3,
+   "flip": true,
+   "swayPhase": 3.1,
+   "z": 2,
+   "popAt": 3.75
+  },
+  {
+   "id": 10,
+   "sprig": 2,
+   "hero": false,
+   "x": 675,
+   "y": 1145,
+   "height": 633,
+   "rotate": 16.2,
+   "flip": false,
+   "swayPhase": 5.88,
+   "z": 1,
+   "popAt": 3.25
+  },
+  {
+   "id": 11,
+   "sprig": 5,
+   "hero": false,
+   "x": 1023,
+   "y": 1122,
+   "height": 596,
+   "rotate": -13.9,
+   "flip": false,
+   "swayPhase": 0.693,
+   "z": 1,
+   "popAt": 4.25
+  },
+  {
+   "id": 12,
+   "sprig": 9,
+   "hero": false,
+   "x": 119,
+   "y": 1541,
+   "height": 593,
+   "rotate": 19.6,
+   "flip": true,
+   "swayPhase": 6.173,
+   "z": 1,
+   "popAt": 2.5
+  },
+  {
+   "id": 13,
+   "sprig": 4,
+   "hero": true,
+   "x": 374,
+   "y": 1480,
+   "height": 852,
+   "rotate": -20.5,
+   "flip": false,
+   "swayPhase": 0.911,
+   "z": 2,
+   "popAt": 1
+  },
+  {
+   "id": 14,
+   "sprig": 3,
+   "hero": false,
+   "x": 862,
+   "y": 1531,
+   "height": 549,
+   "rotate": -20.3,
+   "flip": true,
+   "swayPhase": 4.032,
+   "z": 1,
+   "popAt": 2.25
+  },
+  {
+   "id": 15,
+   "sprig": 8,
+   "hero": true,
+   "x": 231,
+   "y": 1874,
+   "height": 807,
+   "rotate": -31.2,
+   "flip": true,
+   "swayPhase": 4.638,
+   "z": 2,
+   "popAt": 3
+  },
+  {
+   "id": 16,
+   "sprig": 9,
+   "hero": false,
+   "x": 612,
+   "y": 1887,
+   "height": 555,
+   "rotate": 5.6,
+   "flip": true,
+   "swayPhase": 5.924,
+   "z": 1,
+   "popAt": 2
+  },
+  {
+   "id": 17,
+   "sprig": 2,
+   "hero": false,
+   "x": 1010,
+   "y": 1812,
+   "height": 656,
+   "rotate": -16.3,
+   "flip": false,
+   "swayPhase": 4.436,
+   "z": 1,
+   "popAt": 4
+  }
+ ],
+ "letters": [
+  {
+   "ch": "P",
+   "i": 0,
+   "at": 8,
+   "line": 0
+  },
+  {
+   "ch": "E",
+   "i": 1,
+   "at": 8.125,
+   "line": 0
+  },
+  {
+   "ch": "T",
+   "i": 2,
+   "at": 8.25,
+   "line": 0
+  },
+  {
+   "ch": "A",
+   "i": 3,
+   "at": 8.375,
+   "line": 0
+  },
+  {
+   "ch": "L",
+   "i": 4,
+   "at": 8.5,
+   "line": 0
+  },
+  {
+   "ch": "P",
+   "i": 6,
+   "at": 8.75,
+   "line": 1
+  },
+  {
+   "ch": "O",
+   "i": 7,
+   "at": 8.875,
+   "line": 1
+  },
+  {
+   "ch": "P",
+   "i": 8,
+   "at": 9,
+   "line": 1
+  }
+ ]
+}
