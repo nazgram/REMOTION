@@ -18,7 +18,8 @@ animation-studio skill. Title font: DM Serif Display (SIL OFL, `public/fonts`).
 
 ## Petal Pop intro (PetalPopIntro)
 
-10 s 9:16 intro for NAFESA: the Petal Pop motifs pop onto berry, sway, wash away like watercolor, the title
+11 s 9:16 intro for NAFESA: the Petal Pop motifs pop on, recolour through five colorways (Dahlia, Bluebell,
+Moonflower, Toffee Rose, Peony), wash away like watercolor, a thin tagline eases in, the title
 "Petal Pop" pops in letter by letter and breathes out, then the NAFESA logo fades in. SFX only, no music.
 
 ```bash

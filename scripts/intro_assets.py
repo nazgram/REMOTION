@@ -1,7 +1,8 @@
 """Prepare public/intro/ assets for the PetalPopIntro composition.
 
 Usage: python3 scripts/intro_assets.py <"intro video AI" folder>
-  FLOWER.png         -> public/intro/flowers/01..09.png (one motif per file, trimmed)
+  Aset/<colorway>    -> public/intro/flowers/<colorway>/01..09.png (one motif per file, trimmed; the five
+                        colorway sheets share one layout, so motif N is the same shape in every colorway)
   Logo_Nafesa-04.png -> public/intro/logo_mark.png + logo_word.png (diamond and wordmark, animated apart)
   wash masks         -> public/intro/wash/NN.png (watercolor dissolve, white = flowers still visible)
   Petal Pop.svg      -> src/intro/title.json (outlined Fabulosa, one path per letter)
@@ -9,7 +10,9 @@ Usage: python3 scripts/intro_assets.py <"intro video AI" folder>
 import json
 import os
 import re
+import subprocess
 import sys
+import tempfile
 
 import numpy as np
 from PIL import Image, ImageFilter
@@ -21,18 +24,42 @@ from make_assets import fbm  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "public", "intro")
 FPS = 30
-DISSOLVE = (5.0, 6.3)  # seconds, keep in sync with scripts/intro_layout.js
+DISSOLVE = (6.0, 7.0)  # seconds, keep in sync with scripts/intro_layout.js
+COLORWAYS = {  # name -> sprite sheet inside Aset/
+    "dahlia": "Aset Dahlia/Dahlia flower.svg",
+    "bluebell": "Aset Bluebell/Bluebell flower.png",
+    "moonflower": "Aset Moonflower/moonflower.svg",
+    "toffee": "Aset Toffee Rose/flower Toffee.svg",
+    "peony": "Aset Peony/FLOWER.png",
+}
 
 
-def flowers(src):
-    os.makedirs(os.path.join(OUT, "flowers"), exist_ok=True)
-    im = Image.open(os.path.join(src, "FLOWER.png")).convert("RGBA")
+def sheet(src, rel):
+    path = os.path.join(src, "Aset", rel)
+    if path.endswith(".png"):
+        return path
+    out = os.path.join(tempfile.mkdtemp(), "sheet.png")
+    subprocess.run(["node", os.path.join(ROOT, "scripts", "raster_svg.js"), json.dumps([[path, out]])], check=True)
+    return out
+
+
+def flowers(name, path):
+    os.makedirs(os.path.join(OUT, "flowers", name), exist_ok=True)
+    im = Image.open(path).convert("RGBA")
     small = im.reduce(8)  # label on a small copy, cut out of the full one
     a = np.asarray(small.getchannel("A")) > 10
-    lab, n = ndimage.label(ndimage.binary_dilation(a, iterations=2))
-    ids = [i for i in range(1, n + 1) if (lab == i).sum() > 300]
+    lab, n = ndimage.label(ndimage.binary_dilation(a, iterations=1))
+    sizes = ndimage.sum(np.ones_like(lab), lab, range(1, n + 1))
+    ids = [i for i in range(1, n + 1) if sizes[i - 1] > 300]
+    # stray bits (stamens, leaf tips) join the nearest motif
+    centers = {i: np.argwhere(lab == i).mean(axis=0) for i in ids}
+    for j in range(1, n + 1):
+        if j not in ids:
+            c = np.argwhere(lab == j).mean(axis=0)
+            lab[lab == j] = min(ids, key=lambda i: np.hypot(*(centers[i] - c)))
     objs = ndimage.find_objects(lab)
     boxes = {i: objs[i - 1] for i in ids}
+    assert len(ids) == 9, f"{name}: expected 9 motifs, found {len(ids)}"
     ids.sort(key=lambda i: (boxes[i][0].start // 200, boxes[i][1].start))  # reading order: rows, then left to right
     for k, i in enumerate(ids, 1):
         ys, xs = boxes[i]
@@ -42,8 +69,8 @@ def flowers(src):
         crop = piece.crop((xs.start * 8, ys.start * 8, xs.stop * 8, ys.stop * 8))
         crop = crop.crop(crop.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox())
         crop.thumbnail((900, 900), Image.LANCZOS)
-        crop.save(os.path.join(OUT, "flowers", f"{k:02d}.png"), optimize=True)
-        print(f"flower {k:02d}", crop.size)
+        crop.save(os.path.join(OUT, "flowers", name, f"{k:02d}.png"), optimize=True)
+        print(name, f"{k:02d}", crop.size)
 
 
 def logo(src):
@@ -94,7 +121,8 @@ def title(src):
 
 
 if __name__ == "__main__":
-    flowers(sys.argv[1])
+    for name, rel in COLORWAYS.items():
+        flowers(name, sheet(sys.argv[1], rel))
     logo(sys.argv[1])
     title(sys.argv[1])
     masks()

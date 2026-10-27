@@ -5,12 +5,22 @@ const fs = require('fs');
 const path = require('path');
 
 const W = 1080, H = 1920, FPS = 30;
-const DURATION = 10;
-const POPS = [0.3, 2.0]; // first and last flower pop
-const DISSOLVE = [5.0, 6.3]; // keep in sync with scripts/intro_assets.py
-const TITLE_AT = 6.45; // first letter
-const TITLE_OUT = [8.0, 8.55];
-const LOGO_AT = 8.45; // diamond; the wordmark follows
+const DURATION = 11;
+const POPS = [0.2, 1.6]; // first and last flower pop
+// the whole print (motifs + background) recolours in place, one colorway to the next; Peony stays to the end
+const FADE = 0.45; // crossfade length
+const COLORWAYS = [
+  { name: 'dahlia', bg: '#733548', at: 0 },
+  { name: 'bluebell', bg: '#153D4F', at: 1.0 },
+  { name: 'moonflower', bg: '#020202', at: 2.25 },
+  { name: 'toffee', bg: '#774930', at: 3.5 },
+  { name: 'peony', bg: '#971E5A', at: 4.75 },
+];
+const DISSOLVE = [6.0, 7.0]; // keep in sync with scripts/intro_assets.py
+const TAGLINE = { text: ['Ready to pop into', 'something pretty?'], at: 6.9 }; // thin line above the title
+const TITLE_AT = 7.5; // first letter
+const TITLE_OUT = [9.0, 9.45];
+const LOGO_AT = 9.35; // diamond; the wordmark follows
 
 let s = 20261027;
 const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
@@ -71,7 +81,7 @@ order.forEach((f, i) => {
 });
 
 // a light frame of flowers around the edges, popping in after the wash and staying under the title and logo
-const BORDER_POPS = [6.2, 6.7];
+const BORDER_POPS = [6.75, 7.25];
 const EDGE = [
   [-30, -20], [1110, 20], [-40, 1950], [1100, 1920], // corners
   [400, -90], [770, -70], [320, 2010], [740, 1990], // top, bottom
@@ -103,7 +113,7 @@ let t = TITLE_AT;
   t += 0.09;
 });
 
-const out = { W, H, FPS, DURATION, POPS, DISSOLVE, TITLE_AT, TITLE_OUT, LOGO_AT, flowers, border, letters };
+const out = { W, H, FPS, DURATION, POPS, FADE, COLORWAYS, DISSOLVE, TAGLINE, TITLE_AT, TITLE_OUT, LOGO_AT, flowers, border, letters };
 fs.mkdirSync(path.join(__dirname, '..', 'src', 'intro'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'intro', 'layout.json'), JSON.stringify(out, null, 1));
 console.log(`${flowers.length} flowers + ${border.length} border, last pop ${Math.max(...flowers.map((f) => f.popAt))}s, ${letters.length} letters`);

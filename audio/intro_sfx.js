@@ -31,6 +31,13 @@ const POPS = ['pop_1.wav', 'pop_2.wav', 'pop_3.wav'];
   verb.addMono(pop, f.popAt, 0.04);
 });
 
+// colorway changes: Nas's whole three-pop clip on each recolour, so the print goes pop-pop-pop into its new colours
+const POP3 = loadWav('pop3.wav');
+L.COLORWAYS.slice(1).forEach((c) => {
+  fx.addMono(POP3, c.at, 0.6);
+  verb.addMono(POP3, c.at, 0.06);
+});
+
 // dissolve: a wet, falling wash of filtered noise
 const [d0, d1] = L.DISSOLVE;
 fx.addMono(I.noiseSweep(d1 - d0 + 0.5, 4500, 450, { q: 0.9, pink: true, seed: 32 }), d0, 0.32, 0.1);

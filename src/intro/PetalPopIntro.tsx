@@ -1,14 +1,29 @@
 import { AbsoluteFill, Audio, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { loadFont } from '@remotion/fonts';
 import layout from './layout.json';
 // "Petal Pop" set in Fabulosa (Adobe Fonts) and outlined in Illustrator, one path per letter
 import title from './title.json';
 
+const taglineFont = 'Montserrat';
+loadFont({ family: taglineFont, url: staticFile('intro/fonts/Montserrat.ttf'), weight: '100 900' });
+
 // NAFESA Petal Pop color sheet
 export const COLORS = { berry: '#971D59', blush: '#F2A3BC', peach: '#FFC7B8', ivory: '#F8EAD9' };
+
+// colorway crossfade: every later colorway fades in over the one before; layers under a fully faded-in one are skipped
+type Layer = { name: string; bg: string; opacity: number };
+const colorways = (t: number): Layer[] => {
+  const all = layout.COLORWAYS.map((c, i) => ({
+    name: c.name,
+    bg: c.bg,
+    opacity: i === 0 ? 1 : interpolate(t, [c.at, c.at + layout.FADE], [0, 1], clamp),
+  }));
+  const top = all.map((l) => l.opacity >= 1).lastIndexOf(true);
+  return all.slice(top).filter((l) => l.opacity > 0);
+};
+const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const [DISSOLVE_IN, DISSOLVE_OUT] = layout.DISSOLVE;
 const WASH_FRAMES = Math.round((DISSOLVE_OUT - DISSOLVE_IN) * layout.FPS) + 1;
-const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
-
 type Flower = (typeof layout.flowers)[number];
 
 const Motif: React.FC<{ f: Flower; t: number }> = ({ f, t }) => {
@@ -21,18 +36,24 @@ const Motif: React.FC<{ f: Flower; t: number }> = ({ f, t }) => {
   // breeze: each motif sways around its centre at its own phase
   const sway = Math.sin(t * Math.PI * 2 * 0.4 + f.swayPhase) * 2.6 * settle;
   const bob = Math.sin(t * Math.PI * 2 * 0.28 + f.swayPhase * 1.7) * 6 * settle;
+  const fadeIn = Math.min(1, local / 2);
   return (
-    <Img
-      src={staticFile(`intro/flowers/${String(f.motif).padStart(2, '0')}.png`)}
-      style={{
-        position: 'absolute',
-        left: f.x,
-        top: f.y + bob,
-        height: f.height,
-        transform: `translate(-50%, -50%) rotate(${f.rotate + (1 - s) * -28 + sway}deg) scale(${s * (f.flip ? -1 : 1)}, ${s})`,
-        opacity: Math.min(1, local / 2),
-      }}
-    />
+    <>
+      {colorways(t).map((c) => (
+        <Img
+          key={c.name}
+          src={staticFile(`intro/flowers/${c.name}/${String(f.motif).padStart(2, '0')}.png`)}
+          style={{
+            position: 'absolute',
+            left: f.x,
+            top: f.y + bob,
+            height: f.height,
+            transform: `translate(-50%, -50%) rotate(${f.rotate + (1 - s) * -28 + sway}deg) scale(${s * (f.flip ? -1 : 1)}, ${s})`,
+            opacity: fadeIn * c.opacity,
+          }}
+        />
+      ))}
+    </>
   );
 };
 
@@ -48,6 +69,34 @@ const Garden: React.FC<{ t: number }> = ({ t }) => (
 
 const TITLE_W = 860;
 
+// thin tagline that eases in above the title before the letters pop
+const Tagline: React.FC<{ t: number }> = ({ t }) => {
+  const p = interpolate(t, [layout.TAGLINE.at, layout.TAGLINE.at + 0.7], [0, 1], {
+    ...clamp,
+    easing: (x) => 1 - Math.pow(1 - x, 3),
+  });
+  return (
+    <div
+      style={{
+        fontFamily: taglineFont,
+        fontWeight: 200,
+        fontSize: 64,
+        lineHeight: 1.3,
+        letterSpacing: 6 - p * 3,
+        textAlign: 'center',
+        color: COLORS.ivory,
+        opacity: p,
+        transform: `translateY(${(1 - p) * 24}px)`,
+        filter: p < 1 ? `blur(${(1 - p) * 8}px)` : undefined,
+      }}
+    >
+      {layout.TAGLINE.text.map((line) => (
+        <div key={line}>{line}</div>
+      ))}
+    </div>
+  );
+};
+
 const Title: React.FC<{ t: number }> = ({ t }) => {
   const { fps } = useVideoConfig();
   const [OUT_IN, OUT_END] = layout.TITLE_OUT;
@@ -62,8 +111,11 @@ const Title: React.FC<{ t: number }> = ({ t }) => {
         opacity: 1 - out,
         filter: out > 0 ? `blur(${out * 14}px)` : undefined,
         transform: `translateY(${-out * 40}px)`,
+        flexDirection: 'column',
+        gap: 70,
       }}
     >
+      <Tagline t={t} />
       <svg width={TITLE_W} viewBox={`0 0 ${title.width} ${title.height}`} style={{ overflow: 'visible' }}>
         {title.letters.map((d, k) => {
           const l = layout.letters[k];
@@ -131,7 +183,7 @@ export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) =
   const t = frame / fps;
 
   // watercolor wash: a blotchy mask eats the flowers from the centre out while they soften and pale,
-  // and a blurred blush ghost of the garden bleeds into the berry like wet paint
+  // and a blurred ghost of the garden bleeds into the background like wet paint
   const p = interpolate(t, [DISSOLVE_IN, DISSOLVE_OUT], [0, 1], clamp);
   const washing = t >= DISSOLVE_IN;
   const washFrame = Math.round(p * (WASH_FRAMES - 1));
@@ -144,7 +196,10 @@ export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) =
   );
 
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.berry, overflow: 'hidden' }}>
+    <AbsoluteFill style={{ overflow: 'hidden' }}>
+      {colorways(t).map((c) => (
+        <AbsoluteFill key={c.name} style={{ backgroundColor: c.bg, opacity: c.opacity }} />
+      ))}
       {ghost > 0 && (
         <AbsoluteFill style={{ opacity: ghost, filter: `blur(${10 + p * 16}px) saturate(0.6) brightness(1.15)` }}>
           <Garden t={t} />
@@ -166,7 +221,7 @@ export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) =
       {layout.border.map((f) => (
         <Motif key={f.id} f={f} t={t} />
       ))}
-      {t >= layout.TITLE_AT - 0.1 && <Title t={t} />}
+      {t >= layout.TAGLINE.at && <Title t={t} />}
       {t >= layout.LOGO_AT && <Logo t={t} />}
       {withAudio && <Audio src={staticFile('intro/sfx.wav')} />}
     </AbsoluteFill>
