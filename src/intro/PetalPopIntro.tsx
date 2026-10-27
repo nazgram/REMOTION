@@ -163,6 +163,9 @@ export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) =
           <Garden t={t} />
         </AbsoluteFill>
       )}
+      {layout.border.map((f) => (
+        <Motif key={f.id} f={f} t={t} />
+      ))}
       {t >= layout.TITLE_AT - 0.1 && <Title t={t} />}
       {t >= layout.LOGO_AT && <Logo t={t} />}
       {withAudio && <Audio src={staticFile('intro/sfx.wav')} />}

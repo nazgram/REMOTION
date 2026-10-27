@@ -52,6 +52,29 @@ order.forEach((f, i) => {
   f.popAt = +(POPS[0] + (POPS[1] - POPS[0]) * Math.pow(p, 0.85)).toFixed(3); // starts sparse, speeds up
 });
 
+// a light frame of flowers around the edges, popping in after the wash and staying under the title and logo
+const BORDER_POPS = [6.2, 6.7];
+const EDGE = [
+  [-30, -20], [1110, 20], [-40, 1950], [1100, 1920], // corners
+  [400, -90], [770, -70], [320, 2010], [740, 1990], // top, bottom
+  [-70, 600], [-60, 1330], [1140, 720], [1130, 1260], // sides
+];
+const border = EDGE.map(([x, y], i) => ({
+  id: 100 + i,
+  motif: [...HERO, ...OTHER][(i * 4) % 9],
+  hero: false,
+  x,
+  y,
+  height: Math.round(between(400, 480)),
+  rotate: +between(-180, 180).toFixed(1),
+  flip: rnd() < 0.5,
+  swayPhase: +between(0, Math.PI * 2).toFixed(3),
+  z: 0,
+}));
+[...border]
+  .sort(() => rnd() - 0.5)
+  .forEach((f, i) => { f.popAt = +(BORDER_POPS[0] + ((BORDER_POPS[1] - BORDER_POPS[0]) * i) / (border.length - 1)).toFixed(3); });
+
 // title letters pop one by one, a short breath at the space
 const TITLE = 'Petal Pop';
 const letters = [];
@@ -62,7 +85,7 @@ let t = TITLE_AT;
   t += 0.09;
 });
 
-const out = { W, H, FPS, DURATION, POPS, DISSOLVE, TITLE_AT, TITLE_OUT, LOGO_AT, flowers, letters };
+const out = { W, H, FPS, DURATION, POPS, DISSOLVE, TITLE_AT, TITLE_OUT, LOGO_AT, flowers, border, letters };
 fs.mkdirSync(path.join(__dirname, '..', 'src', 'intro'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'intro', 'layout.json'), JSON.stringify(out, null, 1));
-console.log(`${flowers.length} flowers, last pop ${Math.max(...flowers.map((f) => f.popAt))}s, ${letters.length} letters`);
+console.log(`${flowers.length} flowers + ${border.length} border, last pop ${Math.max(...flowers.map((f) => f.popAt))}s, ${letters.length} letters`);

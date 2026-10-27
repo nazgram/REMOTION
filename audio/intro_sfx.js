@@ -11,8 +11,8 @@ const L = require('../src/intro/layout.json');
 const N = Math.ceil(L.DURATION * SR);
 const fx = new Bus(N), verb = new Bus(N);
 
-// flowers: soft pops, higher on screen = brighter, panned by x; heroes a touch louder
-for (const f of L.flowers) {
+// flowers and the edge frame: soft pops, higher on screen = brighter, panned by x; heroes a touch louder
+for (const f of [...L.flowers, ...L.border]) {
   const y = Math.min(1, Math.max(0, 1 - f.y / L.H));
   const pan = Math.max(-0.8, Math.min(0.8, (f.x / L.W - 0.5) * 1.4));
   const pop = I.pop(1200 + y * 1300, f.id + 3);
