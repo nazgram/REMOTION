@@ -62,12 +62,27 @@ L.TAGLINE.text.join('').split('').forEach((ch, i) => {
   if (ch !== ' ') fx.addMono(TICK, L.TAGLINE.at + i * L.TAGLINE.perChar, 0.12 + (i % 3) * 0.03, (i % 5 - 2) * 0.08);
 });
 
-// title: each letter one of Nas's pops, climbing in pitch
+// logo: each letter one of Nas's pops, climbing in pitch
 L.letters.forEach((l, i) => {
   const pop = loadWav(POPS[i % 3], 1 + i * 0.04);
   fx.addMono(pop, l.at, 0.5, (i - 3.5) * 0.08);
   verb.addMono(pop, l.at, 0.1);
 });
+
+// logo motifs: the big flower a deeper pop, the leaf a little flick of air, the tulip a rising swish
+// as it grows, the heart a bloop and a sparkle
+const LM = L.LOGO_MOTIFS;
+const deep = loadWav(POPS[0], 0.82);
+fx.addMono(deep, LM.flower, 0.6, -0.3);
+verb.addMono(deep, LM.flower, 0.12);
+fx.addMono(I.noiseSweep(0.18, 2500, 7000, { q: 1.1, pink: true, seed: 71, shape: (x) => Math.sin(Math.PI * x) }), LM.leaf - 0.08, 0.16, 0.1);
+fx.addMono(loadWav(POPS[2], 1.3), LM.leaf + 0.05, 0.3, 0.1);
+fx.addMono(I.noiseSweep(0.45, 500, 3200, { q: 0.9, pink: true, seed: 72, shape: (x) => Math.pow(x, 1.5) * (1 - Math.pow(x, 6)) }), LM.tulip, 0.18, 0.4);
+fx.addMono(loadWav(POPS[1], 1.12), LM.tulip + 0.35, 0.45, 0.4);
+const hb = bloop(300, 1100);
+fx.addMono(hb, LM.heart, 0.5, 0.35);
+verb.addMono(hb, LM.heart, 0.15);
+fx.addMono(I.ting(m('A6')), LM.heart + 0.03, 0.1, 0.35);
 
 // title out: a short airy breath
 const [o0, o1] = L.TITLE_OUT;

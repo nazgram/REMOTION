@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const W = 1080, H = 1920, FPS = 30;
-const DURATION = 11;
+const DURATION = 12;
 const POPS = [0.2, 1.6]; // first and last flower pop
 // the whole print (motifs + background) cuts to the next colorway in place, on a pop; Peony stays to the end
 const COLORWAYS = [
@@ -18,9 +18,11 @@ const COLORWAYS = [
 const DISSOLVE = [6.0, 7.0]; // keep in sync with scripts/intro_assets.py
 // thin line above the title, typed out one character at a time
 const TAGLINE = { text: ['Ready to pop into', 'something pretty?'], at: 6.9, perChar: 0.03 };
-const TITLE_AT = 8.05; // first letter
-const TITLE_OUT = [9.1, 9.55];
-const LOGO_AT = 9.45; // diamond; the wordmark follows
+const TITLE_AT = 8.05; // first letter of the Petal Pop logo
+// the logo's drawn motifs land after the letters (parts from scripts/intro_newlogo.py)
+const LOGO_MOTIFS = { flower: 8.85, leaf: 9.05, tulip: 9.2, heart: 9.55 };
+const TITLE_OUT = [10.2, 10.65];
+const LOGO_AT = 10.55; // NAFESA diamond; the wordmark follows
 
 let s = 20261027;
 const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
@@ -103,17 +105,16 @@ const border = EDGE.map(([x, y], i) => ({
   .sort(() => rnd() - 0.5)
   .forEach((f, i) => { f.popAt = +(BORDER_POPS[0] + ((BORDER_POPS[1] - BORDER_POPS[0]) * i) / (border.length - 1)).toFixed(3); });
 
-// title letters pop one by one, a short breath at the space
-const TITLE = 'Petal Pop';
+// logo letters pop one by one, a short breath between the lines; names match public/intro/newlogo/
+const TITLE = [['P', 'e', 't', 'a', 'l'], ['P2', 'o', 'p']];
 const letters = [];
 let t = TITLE_AT;
-[...TITLE].forEach((ch, i) => {
-  if (ch === ' ') { t += 0.06; return; }
-  letters.push({ ch, i, at: +t.toFixed(3) });
-  t += 0.09;
+TITLE.forEach((line, j) => {
+  if (j) t += 0.06;
+  line.forEach((name) => { letters.push({ name, at: +t.toFixed(3) }); t += 0.09; });
 });
 
-const out = { W, H, FPS, DURATION, POPS, COLORWAYS, DISSOLVE, TAGLINE, TITLE_AT, TITLE_OUT, LOGO_AT, flowers, border, letters };
+const out = { W, H, FPS, DURATION, POPS, COLORWAYS, DISSOLVE, TAGLINE, TITLE_AT, LOGO_MOTIFS, TITLE_OUT, LOGO_AT, flowers, border, letters };
 fs.mkdirSync(path.join(__dirname, '..', 'src', 'intro'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'intro', 'layout.json'), JSON.stringify(out, null, 1));
 console.log(`${flowers.length} flowers + ${border.length} border, last pop ${Math.max(...flowers.map((f) => f.popAt))}s, ${letters.length} letters`);

@@ -1,8 +1,8 @@
 import { AbsoluteFill, Audio, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { loadFont } from '@remotion/fonts';
 import layout from './layout.json';
-// "Petal Pop" set in Fabulosa (Adobe Fonts) and outlined in Illustrator, one path per letter
-import title from './title.json';
+// Nas's "Petal Pop" lockup, cut into letters and drawn motifs by scripts/intro_newlogo.py
+import newlogo from './newlogo.json';
 
 const taglineFont = 'Montserrat';
 loadFont({ family: taglineFont, url: staticFile('intro/fonts/Montserrat.ttf'), weight: '100 900' });
@@ -62,7 +62,10 @@ const Garden: React.FC<{ t: number }> = ({ t }) => (
   </>
 );
 
-const TITLE_W = 860;
+const LOGO_W = 900;
+const LOGO_K = LOGO_W / newlogo.width;
+type Part = (typeof newlogo.parts)[number];
+const part = (name: string) => newlogo.parts.find((p) => p.name === name) as Part;
 
 // thin tagline typed out above the title before the letters pop; untyped characters keep their space so
 // the centred lines never shift, and a thin caret blinks after the last typed one
@@ -116,12 +119,85 @@ const Tagline: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
-const Title: React.FC<{ t: number }> = ({ t }) => {
+// one layer of the lockup, placed at its spot and moved around its own origin
+const Piece: React.FC<{ p: Part; origin: string; transform: string; opacity: number }> = ({ p, origin, transform, opacity }) => (
+  <Img
+    src={staticFile(`intro/newlogo/${p.name}.png`)}
+    style={{
+      position: 'absolute',
+      left: p.x * LOGO_K,
+      top: p.y * LOGO_K,
+      width: p.w * LOGO_K,
+      height: p.h * LOGO_K,
+      transformOrigin: origin,
+      transform,
+      opacity,
+    }}
+  />
+);
+
+const NewLogo: React.FC<{ t: number; out: number }> = ({ t, out }) => {
   const { fps } = useVideoConfig();
+  const M = layout.LOGO_MOTIFS;
+  const since = (at: number) => (t - at) * fps;
+  const pop = (at: number, config = { damping: 8, mass: 0.5, stiffness: 190 }) =>
+    since(at) < 0 ? 0 : spring({ frame: since(at), fps, config });
+  const show = (at: number) => (since(at) < 0 ? 0 : Math.min(1, since(at) / 2));
+
+  // flower: spins open from a dot, then keeps turning very slowly
+  const fl = pop(M.flower, { damping: 9, mass: 0.6, stiffness: 150 });
+  const flSpin = (1 - fl) * -140 + Math.max(0, t - M.flower) * 5;
+  // leaf: drifts down from the upper right onto the e, then flutters
+  const lf = pop(M.leaf, { damping: 11, mass: 0.7, stiffness: 120 });
+  const lfFlutter = Math.sin((t - M.leaf) * Math.PI * 2 * 0.7) * 4 * lf;
+  // tulip: the stem grows up from its foot, the bloom opens at the top, then it sways in the breeze
+  const tgrow = interpolate(t, [M.tulip, M.tulip + 0.45], [0, 1], { ...clamp, easing: (x) => 1 - Math.pow(1 - x, 3) });
+  const tbloom = pop(M.tulip + 0.3, { damping: 7, mass: 0.5, stiffness: 200 });
+  const tsway = Math.sin((t - M.tulip) * Math.PI * 2 * 0.45) * 3.5 * tgrow;
+  // heart: bounces in and floats
+  const hr = pop(M.heart, { damping: 6, mass: 0.45, stiffness: 220 });
+  const hbob = Math.sin((t - M.heart) * Math.PI * 2 * 0.8) * 5 * hr;
+
+  const nLetters = layout.letters.length;
+  return (
+    <div style={{ position: 'relative', width: LOGO_W, height: newlogo.height * LOGO_K }}>
+      <Piece p={part('flower')} origin="50% 50%" transform={`rotate(${flSpin}deg) scale(${fl})`} opacity={show(M.flower)} />
+      <Piece
+        p={part('tulip')}
+        origin="40% 92%"
+        transform={`rotate(${tsway}deg) scale(${0.6 + 0.4 * tbloom}, ${tgrow})`}
+        opacity={show(M.tulip)}
+      />
+      <Piece p={part('heart')} origin="50% 50%" transform={`translateY(${hbob}px) scale(${hr})`} opacity={show(M.heart)} />
+      {layout.letters.map((l, k) => {
+        const s = pop(l.at);
+        // letters spread from the centre as they leave
+        const spread = (k - (nLetters - 1) / 2) * out * 30;
+        return (
+          <Piece
+            key={l.name}
+            p={part(l.name)}
+            origin="50% 100%"
+            transform={`translate(${spread}px, ${(1 - s) * 30}px) rotate(${(1 - s) * -14}deg) scale(${s})`}
+            opacity={show(l.at)}
+          />
+        );
+      })}
+      <Piece
+        p={part('leaf')}
+        origin="20% 90%"
+        transform={`translate(${(1 - lf) * 120}px, ${(1 - lf) * -160}px) rotate(${(1 - lf) * 70 + lfFlutter}deg) scale(${0.5 + 0.5 * lf})`}
+        opacity={show(M.leaf)}
+      />
+    </div>
+  );
+};
+
+const Title: React.FC<{ t: number }> = ({ t }) => {
   const [OUT_IN, OUT_END] = layout.TITLE_OUT;
   const out = interpolate(t, [OUT_IN, OUT_END], [0, 1], clamp);
   if (out >= 1) return null;
-  // exit: letters drift apart and float up while they blur away, like a breath out
+  // exit: the logo drifts apart and floats up while it blurs away, like a breath out
   return (
     <AbsoluteFill
       style={{
@@ -131,32 +207,11 @@ const Title: React.FC<{ t: number }> = ({ t }) => {
         filter: out > 0 ? `blur(${out * 14}px)` : undefined,
         transform: `translateY(${-out * 40}px)`,
         flexDirection: 'column',
-        gap: 70,
+        gap: 60,
       }}
     >
       <Tagline t={t} />
-      <svg width={TITLE_W} viewBox={`0 0 ${title.width} ${title.height}`} style={{ overflow: 'visible' }}>
-        {title.letters.map((d, k) => {
-          const l = layout.letters[k];
-          const local = (t - l.at) * fps;
-          const s = local < 0 ? 0 : spring({ frame: local, fps, config: { damping: 8, mass: 0.5, stiffness: 190 } });
-          // letters spread from the centre as they leave
-          const spread = (k - (title.letters.length - 1) / 2) * out * 30;
-          return (
-            <path
-              key={k}
-              d={d}
-              fill={COLORS.ivory}
-              style={{
-                transformBox: 'fill-box',
-                transformOrigin: '50% 100%',
-                transform: `translate(${spread}px, ${(1 - s) * 30}px) rotate(${(1 - s) * -14}deg) scale(${s})`,
-                opacity: local < 0 ? 0 : Math.min(1, local / 2),
-              }}
-            />
-          );
-        })}
-      </svg>
+      <NewLogo t={t} out={out} />
     </AbsoluteFill>
   );
 };
