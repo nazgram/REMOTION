@@ -10,18 +10,61 @@ loadFont({ family: taglineFont, url: staticFile('intro/fonts/Montserrat.ttf'), w
 // NAFESA Petal Pop color sheet
 export const COLORS = { berry: '#971D59', blush: '#F2A3BC', peach: '#FFC7B8', ivory: '#F8EAD9' };
 
-// colorway: a straight cut to the latest one that has started
-type Layer = { name: string; bg: string; opacity: number };
+// colorway change: the new print pops open from the centre in a growing circle over the old one,
+// with a thin ivory ring riding its edge
+type Layer = { name: string; bg: string; clip?: string };
+const cwIndex = (t: number) => layout.COLORWAYS.filter((k) => t >= k.at).length - 1;
+const POP_DUR = 0.4;
+const popOpen = (t: number, at: number) =>
+  spring({ frame: (t - at) * layout.FPS, fps: layout.FPS, config: { damping: 14, mass: 0.6, stiffness: 160 } });
 const colorways = (t: number): Layer[] => {
-  const c = [...layout.COLORWAYS].reverse().find((k) => t >= k.at) ?? layout.COLORWAYS[0];
-  return [{ name: c.name, bg: c.bg, opacity: 1 }];
+  const i = cwIndex(t);
+  const c = layout.COLORWAYS[Math.max(0, i)];
+  if (i > 0 && t - c.at < POP_DUR) {
+    const prev = layout.COLORWAYS[i - 1];
+    const r = popOpen(t, c.at) * 75; // 75% of the frame's reference radius covers the corners
+    return [
+      { name: prev.name, bg: prev.bg },
+      { name: c.name, bg: c.bg, clip: `circle(${r}% at 50% 50%)` },
+    ];
+  }
+  return [{ name: c.name, bg: c.bg }];
+};
+// flowers give a little bounce each time the colorway pops
+const punch = (t: number) =>
+  layout.COLORWAYS.slice(1).reduce((acc, k) => {
+    const d = t - k.at;
+    return d < 0 || d > 0.6 ? acc : acc + 0.09 * Math.sin(d * Math.PI * 5) * Math.exp(-d * 6);
+  }, 1);
+const PopRing: React.FC<{ t: number }> = ({ t }) => {
+  const i = cwIndex(t);
+  const c = layout.COLORWAYS[i];
+  if (i <= 0 || t - c.at > POP_DUR + 0.15) return null;
+  const d = Math.sqrt(layout.W ** 2 + layout.H ** 2) / Math.SQRT2; // what circle() percentages refer to
+  const r = popOpen(t, c.at) * 0.75 * d;
+  const fade = interpolate(t - c.at, [0, 0.08, POP_DUR + 0.15], [0, 0.9, 0], { extrapolateRight: 'clamp' });
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: layout.W / 2 - r,
+        top: layout.H / 2 - r,
+        width: r * 2,
+        height: r * 2,
+        borderRadius: '50%',
+        border: `${6 + 10 * (1 - fade)}px solid ${COLORS.ivory}`,
+        opacity: fade,
+        boxSizing: 'border-box',
+      }}
+    />
+  );
 };
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const [DISSOLVE_IN, DISSOLVE_OUT] = layout.DISSOLVE;
 const WASH_FRAMES = Math.round((DISSOLVE_OUT - DISSOLVE_IN) * layout.FPS) + 1;
 type Flower = (typeof layout.flowers)[number];
 
-const Motif: React.FC<{ f: Flower; t: number }> = ({ f, t }) => {
+const Motif: React.FC<{ f: Flower; t: number; cw: string }> = ({ f, t, cw }) => {
   const { fps } = useVideoConfig();
   const local = (t - f.popAt) * fps;
   if (local < 0) return null;
@@ -32,32 +75,28 @@ const Motif: React.FC<{ f: Flower; t: number }> = ({ f, t }) => {
   const sway = Math.sin(t * Math.PI * 2 * 0.4 + f.swayPhase) * 2.6 * settle;
   const bob = Math.sin(t * Math.PI * 2 * 0.28 + f.swayPhase * 1.7) * 6 * settle;
   const fadeIn = Math.min(1, local / 2);
+  const p = punch(t);
   return (
-    <>
-      {colorways(t).map((c) => (
-        <Img
-          key={c.name}
-          src={staticFile(`intro/flowers/${c.name}/${String(f.motif).padStart(2, '0')}.png`)}
-          style={{
-            position: 'absolute',
-            left: f.x,
-            top: f.y + bob,
-            height: f.height,
-            transform: `translate(-50%, -50%) rotate(${f.rotate + (1 - s) * -28 + sway}deg) scale(${s * (f.flip ? -1 : 1)}, ${s})`,
-            opacity: fadeIn * c.opacity,
-          }}
-        />
-      ))}
-    </>
+    <Img
+      src={staticFile(`intro/flowers/${cw}/${String(f.motif).padStart(2, '0')}.png`)}
+      style={{
+        position: 'absolute',
+        left: f.x,
+        top: f.y + bob,
+        height: f.height,
+        transform: `translate(-50%, -50%) rotate(${f.rotate + (1 - s) * -28 + sway}deg) scale(${s * p * (f.flip ? -1 : 1)}, ${s * p})`,
+        opacity: fadeIn,
+      }}
+    />
   );
 };
 
-const Garden: React.FC<{ t: number }> = ({ t }) => (
+const Garden: React.FC<{ t: number; cw: string }> = ({ t, cw }) => (
   <>
     {[...layout.flowers]
       .sort((a, b) => a.z - b.z || a.popAt - b.popAt)
       .map((f) => (
-        <Motif key={f.id} f={f} t={t} />
+        <Motif key={f.id} f={f} t={t} cw={cw} />
       ))}
   </>
 );
@@ -269,17 +308,29 @@ export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) =
     clamp,
   );
 
+  const layers = colorways(t);
+  const cw = layers[layers.length - 1].name;
   return (
     <AbsoluteFill style={{ overflow: 'hidden' }}>
-      {colorways(t).map((c) => (
-        <AbsoluteFill key={c.name} style={{ backgroundColor: c.bg, opacity: c.opacity }} />
-      ))}
-      {ghost > 0 && (
+      {layers.length > 1 ? (
+        // mid-pop: the old print underneath, the new one opening over it (always before the wash)
+        <>
+          {layers.map((c) => (
+            <AbsoluteFill key={c.name} style={{ backgroundColor: c.bg, clipPath: c.clip }}>
+              <Garden t={t} cw={c.name} />
+            </AbsoluteFill>
+          ))}
+          <PopRing t={t} />
+        </>
+      ) : (
+        <AbsoluteFill style={{ backgroundColor: layers[0].bg }} />
+      )}
+      {layers.length === 1 && ghost > 0 && (
         <AbsoluteFill style={{ opacity: ghost, filter: `blur(${10 + p * 16}px) saturate(0.6) brightness(1.15)` }}>
-          <Garden t={t} />
+          <Garden t={t} cw={cw} />
         </AbsoluteFill>
       )}
-      {(!washing || p < 1) && (
+      {layers.length === 1 && (!washing || p < 1) && (
         <AbsoluteFill
           style={{
             WebkitMaskImage: mask,
@@ -289,11 +340,11 @@ export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) =
             filter: washing ? `blur(${p * 3}px) saturate(${1 - p * 0.4}) brightness(${1 + p * 0.1})` : undefined,
           }}
         >
-          <Garden t={t} />
+          <Garden t={t} cw={cw} />
         </AbsoluteFill>
       )}
       {layout.border.map((f) => (
-        <Motif key={f.id} f={f} t={t} />
+        <Motif key={f.id} f={f} t={t} cw={cw} />
       ))}
       {t >= layout.TAGLINE.at && <Title t={t} />}
       {t >= layout.LOGO_AT && <Logo t={t} />}
