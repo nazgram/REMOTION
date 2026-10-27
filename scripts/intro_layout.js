@@ -43,6 +43,24 @@ for (let r = 0; r < ROWS; r++) {
   }
 }
 
+// a denser cluster in the middle so the centre fills up first and stays full
+const CENTER = [[0.5, 0.42], [0.3, 0.33], [0.7, 0.36], [0.4, 0.52], [0.62, 0.55], [0.28, 0.62], [0.74, 0.66], [0.5, 0.7], [0.36, 0.44], [0.6, 0.46], [0.46, 0.6], [0.55, 0.3]];
+CENTER.forEach(([cx, cy], i) => {
+  const hero = i % 3 === 0;
+  flowers.push({
+    id: flowers.length,
+    motif: hero ? HERO[h++ % HERO.length] : OTHER[(o++ * 5 + i) % OTHER.length],
+    hero,
+    x: Math.round(cx * W + between(-40, 40)),
+    y: Math.round(cy * H + between(-40, 40)),
+    height: Math.round(hero ? between(360, 420) : between(300, 380)),
+    rotate: +between(-180, 180).toFixed(1),
+    flip: rnd() < 0.5,
+    swayPhase: +between(0, Math.PI * 2).toFixed(3),
+    z: hero ? 3 : 1,
+  });
+});
+
 // pop order: outwards from the centre, slightly shuffled so it feels hand-placed
 const order = [...flowers].sort(
   (a, b) => Math.hypot(a.x - W / 2, (a.y - H / 2) * 0.6) + between(-120, 120) - Math.hypot(b.x - W / 2, (b.y - H / 2) * 0.6),

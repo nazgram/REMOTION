@@ -1,6 +1,7 @@
-// SFX for PetalPopIntro (no music): a pop per flower, a wet wash under the dissolve, a pop per title letter,
+// SFX for PetalPopIntro (no music): a pop per flower (Nas's "POP 3 sfx.MP3", cut into audio/sfx/pop_1..3.wav), a wet wash under the dissolve, a pop per title letter,
 // a soft breath as the title leaves and a shimmer under the NAFESA logo. All timed from src/intro/layout.json.
 //   node audio/intro_sfx.js   ->  public/intro/sfx.wav
+const fs = require('fs');
 const path = require('path');
 const { SR, Bus, reverb } = require('./engine/audio/dsp');
 const I = require('./engine/audio/instruments');
@@ -11,23 +12,33 @@ const L = require('../src/intro/layout.json');
 const N = Math.ceil(L.DURATION * SR);
 const fx = new Bus(N), verb = new Bus(N);
 
-// flowers and the edge frame: soft pops, higher on screen = brighter, panned by x; heroes a touch louder
-for (const f of [...L.flowers, ...L.border]) {
-  const y = Math.min(1, Math.max(0, 1 - f.y / L.H));
-  const pan = Math.max(-0.8, Math.min(0.8, (f.x / L.W - 0.5) * 1.4));
-  const pop = I.pop(1200 + y * 1300, f.id + 3);
-  fx.addMono(pop, f.popAt, f.hero ? 0.42 : 0.3, pan);
-  verb.addMono(pop, f.popAt, 0.05);
+// 16-bit mono 48 kHz WAV -> Float32Array, optionally resampled to shift pitch (rate > 1 = higher)
+function loadWav(file, rate = 1) {
+  const b = fs.readFileSync(path.join(__dirname, 'sfx', file));
+  const data = b.indexOf('data') + 8;
+  const src = new Float32Array((b.length - data) >> 1).map((_, i) => b.readInt16LE(data + i * 2) / 32768);
+  return Float32Array.from({ length: Math.floor(src.length / rate) }, (_, i) => src[Math.floor(i * rate)]);
 }
+const POPS = ['pop_1.wav', 'pop_2.wav', 'pop_3.wav'];
+
+// flowers and the edge frame: Nas's three pops in turn, a little higher on screen = slightly higher pitch,
+// panned by x; heroes a touch louder so the busy build still has accents
+[...L.flowers, ...L.border].forEach((f, i) => {
+  const y = Math.min(1, Math.max(0, 1 - f.y / L.H));
+  const pan = Math.max(-0.7, Math.min(0.7, (f.x / L.W - 0.5) * 1.2));
+  const pop = loadWav(POPS[i % 3], 0.94 + y * 0.14);
+  fx.addMono(pop, f.popAt, f.hero ? 0.55 : 0.38, pan);
+  verb.addMono(pop, f.popAt, 0.04);
+});
 
 // dissolve: a wet, falling wash of filtered noise
 const [d0, d1] = L.DISSOLVE;
 fx.addMono(I.noiseSweep(d1 - d0 + 0.5, 4500, 450, { q: 0.9, pink: true, seed: 32 }), d0, 0.32, 0.1);
 fx.addMono(I.noiseSweep(d1 - d0 + 0.3, 2500, 300, { q: 1.2, pink: true, seed: 33 }), d0 + 0.15, 0.18, -0.15);
 
-// title: each letter a crisp pop climbing in pitch
+// title: each letter one of Nas's pops, climbing in pitch
 L.letters.forEach((l, i) => {
-  const pop = I.pop(1900 + i * 140, 40 + i);
+  const pop = loadWav(POPS[i % 3], 1 + i * 0.04);
   fx.addMono(pop, l.at, 0.5, (i - 3.5) * 0.08);
   verb.addMono(pop, l.at, 0.1);
 });
