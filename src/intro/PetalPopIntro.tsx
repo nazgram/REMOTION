@@ -62,7 +62,7 @@ const Garden: React.FC<{ t: number }> = ({ t }) => (
   </>
 );
 
-const LOGO_W = 900;
+const LOGO_W = 700;
 const LOGO_K = LOGO_W / newlogo.width;
 type Part = (typeof newlogo.parts)[number];
 const part = (name: string) => newlogo.parts.find((p) => p.name === name) as Part;

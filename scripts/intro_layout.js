@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const W = 1080, H = 1920, FPS = 30;
-const DURATION = 12;
+const DURATION = 14; // NAFESA logo holds ~3s at the end
 const POPS = [0.2, 1.6]; // first and last flower pop
 // the whole print (motifs + background) cuts to the next colorway in place, on a pop; Peony stays to the end
 const COLORWAYS = [
@@ -86,8 +86,7 @@ order.forEach((f, i) => {
 const BORDER_POPS = [6.75, 7.25];
 const EDGE = [
   [-30, -20], [1110, 20], [-40, 1950], [1100, 1920], // corners
-  [400, -90], [770, -70], [320, 2010], [740, 1990], // top, bottom
-  [-70, 600], [-60, 1330], [1140, 720], [1130, 1260], // sides
+  [-80, 760], [1150, 1160], // one on each side, staggered
 ];
 const border = EDGE.map(([x, y], i) => ({
   id: 100 + i,
@@ -95,7 +94,7 @@ const border = EDGE.map(([x, y], i) => ({
   hero: false,
   x,
   y,
-  height: Math.round(between(400, 480)),
+  height: Math.round(between(330, 390)),
   rotate: +between(-180, 180).toFixed(1),
   flip: rnd() < 0.5,
   swayPhase: +between(0, Math.PI * 2).toFixed(3),

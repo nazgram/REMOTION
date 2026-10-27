@@ -2,7 +2,7 @@
  "W": 1080,
  "H": 1920,
  "FPS": 30,
- "DURATION": 12,
+ "DURATION": 14,
  "POPS": [
   0.2,
   1.6
@@ -639,12 +639,12 @@
    "hero": false,
    "x": -30,
    "y": -20,
-   "height": 475,
+   "height": 387,
    "rotate": 49.8,
    "flip": false,
    "swayPhase": 4.633,
    "z": 0,
-   "popAt": 6.75
+   "popAt": 7.15
   },
   {
    "id": 101,
@@ -652,12 +652,12 @@
    "hero": false,
    "x": 1110,
    "y": 20,
-   "height": 415,
+   "height": 341,
    "rotate": -3.3,
    "flip": false,
    "swayPhase": 1.611,
    "z": 0,
-   "popAt": 6.795
+   "popAt": 6.75
   },
   {
    "id": 102,
@@ -665,12 +665,12 @@
    "hero": false,
    "x": -40,
    "y": 1950,
-   "height": 427,
+   "height": 350,
    "rotate": 24.3,
    "flip": true,
    "swayPhase": 3.974,
    "z": 0,
-   "popAt": 6.886
+   "popAt": 6.85
   },
   {
    "id": 103,
@@ -678,116 +678,38 @@
    "hero": false,
    "x": 1100,
    "y": 1920,
-   "height": 459,
+   "height": 374,
    "rotate": 24.2,
    "flip": false,
    "swayPhase": 2.517,
    "z": 0,
-   "popAt": 6.932
+   "popAt": 7.25
   },
   {
    "id": 104,
    "motif": 6,
    "hero": false,
-   "x": 400,
-   "y": -90,
-   "height": 432,
+   "x": -80,
+   "y": 760,
+   "height": 354,
    "rotate": 67.4,
    "flip": true,
    "swayPhase": 0.39,
    "z": 0,
-   "popAt": 6.977
+   "popAt": 6.95
   },
   {
    "id": 105,
    "motif": 8,
    "hero": false,
-   "x": 770,
-   "y": -70,
-   "height": 429,
+   "x": 1150,
+   "y": 1160,
+   "height": 352,
    "rotate": -152.2,
    "flip": true,
    "swayPhase": 3.038,
    "z": 0,
-   "popAt": 7.023
-  },
-  {
-   "id": 106,
-   "motif": 5,
-   "hero": false,
-   "x": 320,
-   "y": 2010,
-   "height": 429,
-   "rotate": 28.5,
-   "flip": true,
-   "swayPhase": 4.103,
-   "z": 0,
-   "popAt": 7.114
-  },
-  {
-   "id": 107,
-   "motif": 7,
-   "hero": false,
-   "x": 740,
-   "y": 1990,
-   "height": 444,
-   "rotate": 74.1,
-   "flip": true,
-   "swayPhase": 5.474,
-   "z": 0,
-   "popAt": 7.159
-  },
-  {
-   "id": 108,
-   "motif": 4,
-   "hero": false,
-   "x": -70,
-   "y": 600,
-   "height": 443,
-   "rotate": -156.8,
-   "flip": true,
-   "swayPhase": 4.43,
-   "z": 0,
-   "popAt": 7.205
-  },
-  {
-   "id": 109,
-   "motif": 1,
-   "hero": false,
-   "x": -60,
-   "y": 1330,
-   "height": 458,
-   "rotate": 61.6,
-   "flip": true,
-   "swayPhase": 1.765,
-   "z": 0,
-   "popAt": 7.25
-  },
-  {
-   "id": 110,
-   "motif": 3,
-   "hero": false,
-   "x": 1140,
-   "y": 720,
-   "height": 443,
-   "rotate": 133.1,
-   "flip": false,
-   "swayPhase": 4.705,
-   "z": 0,
-   "popAt": 7.068
-  },
-  {
-   "id": 111,
-   "motif": 9,
-   "hero": false,
-   "x": 1130,
-   "y": 1260,
-   "height": 443,
-   "rotate": 107,
-   "flip": true,
-   "swayPhase": 6.236,
-   "z": 0,
-   "popAt": 6.841
+   "popAt": 7.05
   }
  ],
  "letters": [
