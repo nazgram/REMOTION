@@ -31,17 +31,36 @@ const POPS = ['pop_1.wav', 'pop_2.wav', 'pop_3.wav'];
   verb.addMono(pop, f.popAt, 0.04);
 });
 
-// colorway changes: Nas's whole three-pop clip on each recolour, so the print goes pop-pop-pop into its new colours
-const POP3 = loadWav('pop3.wav');
-L.COLORWAYS.slice(1).forEach((c) => {
-  fx.addMono(POP3, c.at, 0.6);
-  verb.addMono(POP3, c.at, 0.06);
+// colorway cuts: a short airy swish into a round "bloop" right on the cut, with a tiny sparkle on top
+function bloop(f0 = 260, f1 = 880) {
+  const n = Math.round(0.16 * SR), out = new Float32Array(n);
+  let ph = 0;
+  for (let i = 0; i < n; i++) {
+    const t = i / SR;
+    const f = f1 - (f1 - f0) * Math.exp(-t / 0.018); // fast upward glide, like a bubble popping open
+    ph += f / SR;
+    out[i] = (Math.sin(2 * Math.PI * ph) + 0.25 * Math.sin(4 * Math.PI * ph)) * Math.exp(-t / 0.05) * Math.min(1, t / 0.002);
+  }
+  return out;
+}
+L.COLORWAYS.slice(1).forEach((c, i) => {
+  fx.addMono(I.noiseSweep(0.22, 1200, 6000, { q: 0.8, pink: true, seed: 60 + i, shape: (x) => Math.pow(x, 2.2) * (1 - Math.pow(x, 8)) }), c.at - 0.2, 0.2, i % 2 ? 0.25 : -0.25);
+  const b = bloop(240 + i * 30, 820 + i * 60);
+  fx.addMono(b, c.at, 0.55);
+  verb.addMono(b, c.at, 0.12);
+  fx.addMono(I.ting(m(['C7', 'D7', 'E7', 'G7'][i])), c.at + 0.02, 0.07);
 });
 
 // dissolve: a wet, falling wash of filtered noise
 const [d0, d1] = L.DISSOLVE;
 fx.addMono(I.noiseSweep(d1 - d0 + 0.5, 4500, 450, { q: 0.9, pink: true, seed: 32 }), d0, 0.32, 0.1);
 fx.addMono(I.noiseSweep(d1 - d0 + 0.3, 2500, 300, { q: 1.2, pink: true, seed: 33 }), d0 + 0.15, 0.18, -0.15);
+
+// tagline: a soft key tick per typed character
+const TICK = I.woodTick(1.6);
+L.TAGLINE.text.join('').split('').forEach((ch, i) => {
+  if (ch !== ' ') fx.addMono(TICK, L.TAGLINE.at + i * L.TAGLINE.perChar, 0.12 + (i % 3) * 0.03, (i % 5 - 2) * 0.08);
+});
 
 // title: each letter one of Nas's pops, climbing in pitch
 L.letters.forEach((l, i) => {

@@ -10,16 +10,11 @@ loadFont({ family: taglineFont, url: staticFile('intro/fonts/Montserrat.ttf'), w
 // NAFESA Petal Pop color sheet
 export const COLORS = { berry: '#971D59', blush: '#F2A3BC', peach: '#FFC7B8', ivory: '#F8EAD9' };
 
-// colorway crossfade: every later colorway fades in over the one before; layers under a fully faded-in one are skipped
+// colorway: a straight cut to the latest one that has started
 type Layer = { name: string; bg: string; opacity: number };
 const colorways = (t: number): Layer[] => {
-  const all = layout.COLORWAYS.map((c, i) => ({
-    name: c.name,
-    bg: c.bg,
-    opacity: i === 0 ? 1 : interpolate(t, [c.at, c.at + layout.FADE], [0, 1], clamp),
-  }));
-  const top = all.map((l) => l.opacity >= 1).lastIndexOf(true);
-  return all.slice(top).filter((l) => l.opacity > 0);
+  const c = [...layout.COLORWAYS].reverse().find((k) => t >= k.at) ?? layout.COLORWAYS[0];
+  return [{ name: c.name, bg: c.bg, opacity: 1 }];
 };
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const [DISSOLVE_IN, DISSOLVE_OUT] = layout.DISSOLVE;
@@ -69,12 +64,15 @@ const Garden: React.FC<{ t: number }> = ({ t }) => (
 
 const TITLE_W = 860;
 
-// thin tagline that eases in above the title before the letters pop
+// thin tagline typed out above the title before the letters pop; untyped characters keep their space so
+// the centred lines never shift, and a thin caret blinks after the last typed one
 const Tagline: React.FC<{ t: number }> = ({ t }) => {
-  const p = interpolate(t, [layout.TAGLINE.at, layout.TAGLINE.at + 0.7], [0, 1], {
-    ...clamp,
-    easing: (x) => 1 - Math.pow(1 - x, 3),
-  });
+  const { fps } = useVideoConfig();
+  const typed = Math.floor((t - layout.TAGLINE.at) / layout.TAGLINE.perChar) + 1;
+  const total = layout.TAGLINE.text.join('').length;
+  const done = typed >= total;
+  const caretOn = !done || Math.floor((t * fps) / 12) % 2 === 0;
+  let n = 0;
   return (
     <div
       style={{
@@ -82,16 +80,37 @@ const Tagline: React.FC<{ t: number }> = ({ t }) => {
         fontWeight: 200,
         fontSize: 64,
         lineHeight: 1.3,
-        letterSpacing: 6 - p * 3,
+        letterSpacing: 3,
         textAlign: 'center',
         color: COLORS.ivory,
-        opacity: p,
-        transform: `translateY(${(1 - p) * 24}px)`,
-        filter: p < 1 ? `blur(${(1 - p) * 8}px)` : undefined,
+        whiteSpace: 'pre',
       }}
     >
       {layout.TAGLINE.text.map((line) => (
-        <div key={line}>{line}</div>
+        <div key={line}>
+          {[...line].map((ch, i) => {
+            const k = n++;
+            const caret = k === Math.min(typed, total) - 1 && caretOn;
+            return (
+              <span key={i} style={{ position: 'relative', opacity: k < typed ? 1 : 0 }}>
+                {ch}
+                {caret && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: '100%',
+                      top: '12%',
+                      bottom: '8%',
+                      width: 3,
+                      marginLeft: 4,
+                      backgroundColor: COLORS.ivory,
+                    }}
+                  />
+                )}
+              </span>
+            );
+          })}
+        </div>
       ))}
     </div>
   );

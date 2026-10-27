@@ -7,8 +7,7 @@ const path = require('path');
 const W = 1080, H = 1920, FPS = 30;
 const DURATION = 11;
 const POPS = [0.2, 1.6]; // first and last flower pop
-// the whole print (motifs + background) recolours in place, one colorway to the next; Peony stays to the end
-const FADE = 0.45; // crossfade length
+// the whole print (motifs + background) cuts to the next colorway in place, on a pop; Peony stays to the end
 const COLORWAYS = [
   { name: 'dahlia', bg: '#733548', at: 0 },
   { name: 'bluebell', bg: '#153D4F', at: 1.0 },
@@ -17,10 +16,11 @@ const COLORWAYS = [
   { name: 'peony', bg: '#971E5A', at: 4.75 },
 ];
 const DISSOLVE = [6.0, 7.0]; // keep in sync with scripts/intro_assets.py
-const TAGLINE = { text: ['Ready to pop into', 'something pretty?'], at: 6.9 }; // thin line above the title
-const TITLE_AT = 7.5; // first letter
-const TITLE_OUT = [9.0, 9.45];
-const LOGO_AT = 9.35; // diamond; the wordmark follows
+// thin line above the title, typed out one character at a time
+const TAGLINE = { text: ['Ready to pop into', 'something pretty?'], at: 6.9, perChar: 0.03 };
+const TITLE_AT = 8.05; // first letter
+const TITLE_OUT = [9.1, 9.55];
+const LOGO_AT = 9.45; // diamond; the wordmark follows
 
 let s = 20261027;
 const rnd = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
@@ -113,7 +113,7 @@ let t = TITLE_AT;
   t += 0.09;
 });
 
-const out = { W, H, FPS, DURATION, POPS, FADE, COLORWAYS, DISSOLVE, TAGLINE, TITLE_AT, TITLE_OUT, LOGO_AT, flowers, border, letters };
+const out = { W, H, FPS, DURATION, POPS, COLORWAYS, DISSOLVE, TAGLINE, TITLE_AT, TITLE_OUT, LOGO_AT, flowers, border, letters };
 fs.mkdirSync(path.join(__dirname, '..', 'src', 'intro'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, '..', 'src', 'intro', 'layout.json'), JSON.stringify(out, null, 1));
 console.log(`${flowers.length} flowers + ${border.length} border, last pop ${Math.max(...flowers.map((f) => f.popAt))}s, ${letters.length} letters`);
