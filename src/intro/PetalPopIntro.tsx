@@ -1,0 +1,164 @@
+import { AbsoluteFill, Audio, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { loadFont } from '@remotion/fonts';
+import layout from './layout.json';
+
+// placeholder title font until the outlined Fabulosa SVG arrives
+const fontFamily = 'Fraunces';
+loadFont({ family: fontFamily, url: staticFile('intro/fonts/Fraunces.ttf') });
+
+// NAFESA Petal Pop color sheet
+export const COLORS = { berry: '#971D59', blush: '#F2A3BC', peach: '#FFC7B8', ivory: '#F8EAD9' };
+const [DISSOLVE_IN, DISSOLVE_OUT] = layout.DISSOLVE;
+const WASH_FRAMES = Math.round((DISSOLVE_OUT - DISSOLVE_IN) * layout.FPS) + 1;
+const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
+
+type Flower = (typeof layout.flowers)[number];
+
+const Motif: React.FC<{ f: Flower; t: number }> = ({ f, t }) => {
+  const { fps } = useVideoConfig();
+  const local = (t - f.popAt) * fps;
+  if (local < 0) return null;
+  // pop: from a dot to ~112% and back, a little spin as it lands
+  const s = spring({ frame: local, fps, config: { damping: 9, mass: 0.55, stiffness: 170 } });
+  const settle = Math.min(1, local / (fps * 0.7));
+  // breeze: each motif sways around its centre at its own phase
+  const sway = Math.sin(t * Math.PI * 2 * 0.4 + f.swayPhase) * 2.6 * settle;
+  const bob = Math.sin(t * Math.PI * 2 * 0.28 + f.swayPhase * 1.7) * 6 * settle;
+  return (
+    <Img
+      src={staticFile(`intro/flowers/${String(f.motif).padStart(2, '0')}.png`)}
+      style={{
+        position: 'absolute',
+        left: f.x,
+        top: f.y + bob,
+        height: f.height,
+        transform: `translate(-50%, -50%) rotate(${f.rotate + (1 - s) * -28 + sway}deg) scale(${s * (f.flip ? -1 : 1)}, ${s})`,
+        opacity: Math.min(1, local / 2),
+      }}
+    />
+  );
+};
+
+const Garden: React.FC<{ t: number }> = ({ t }) => (
+  <>
+    {[...layout.flowers]
+      .sort((a, b) => a.z - b.z || a.popAt - b.popAt)
+      .map((f) => (
+        <Motif key={f.id} f={f} t={t} />
+      ))}
+  </>
+);
+
+const Title: React.FC<{ t: number }> = ({ t }) => {
+  const { fps } = useVideoConfig();
+  const [OUT_IN, OUT_END] = layout.TITLE_OUT;
+  const out = interpolate(t, [OUT_IN, OUT_END], [0, 1], clamp);
+  if (out >= 1) return null;
+  // exit: letters drift apart and float up while they blur away, like a breath out
+  return (
+    <AbsoluteFill
+      style={{
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: 1 - out,
+        filter: out > 0 ? `blur(${out * 14}px)` : undefined,
+        transform: `translateY(${-out * 40}px)`,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 + out * 40 }}>
+        {layout.letters.map((l, k) => {
+          const local = (t - l.at) * fps;
+          const s = local < 0 ? 0 : spring({ frame: local, fps, config: { damping: 8, mass: 0.5, stiffness: 190 } });
+          const gap = k > 0 && layout.letters[k - 1].i !== l.i - 1;
+          return (
+            <span
+              key={l.i}
+              style={{
+                fontFamily,
+                fontVariationSettings: '"opsz" 144, "wght" 700, "SOFT" 100, "WONK" 1',
+                fontSize: 200,
+                lineHeight: 1,
+                color: COLORS.ivory,
+                display: 'inline-block',
+                marginLeft: gap ? 44 : 0,
+                transform: `translateY(${(1 - s) * 50}px) rotate(${(1 - s) * -14}deg) scale(${s})`,
+                opacity: local < 0 ? 0 : Math.min(1, local / 2),
+              }}
+            >
+              {l.ch}
+            </span>
+          );
+        })}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// the white logo PNG is used as a mask so it can be painted in the ivory of the color sheet
+const LogoPart: React.FC<{ src: string; width: number; aspect: number; at: number; t: number }> = ({ src, width, aspect, at, t }) => {
+  const p = interpolate(t, [at, at + 0.7], [0, 1], { ...clamp, easing: (x) => 1 - Math.pow(1 - x, 3) });
+  const mask = `url(${staticFile(src)})`;
+  return (
+    <div
+      style={{
+        width,
+        height: width / aspect,
+        backgroundColor: COLORS.ivory,
+        WebkitMaskImage: mask,
+        maskImage: mask,
+        WebkitMaskSize: '100% 100%',
+        maskSize: '100% 100%',
+        opacity: p,
+        transform: `translateY(${(1 - p) * 18}px) scale(${0.96 + p * 0.04})`,
+        filter: p < 1 ? `blur(${(1 - p) * 6}px)` : undefined,
+      }}
+    />
+  );
+};
+
+const Logo: React.FC<{ t: number }> = ({ t }) => (
+  <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: 70 }}>
+    <LogoPart src="intro/logo_mark.png" width={280} aspect={1038 / 1116} at={layout.LOGO_AT} t={t} />
+    <LogoPart src="intro/logo_word.png" width={560} aspect={1400 / 303} at={layout.LOGO_AT + 0.35} t={t} />
+  </AbsoluteFill>
+);
+
+export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const t = frame / fps;
+
+  // watercolor wash: a blotchy mask eats the flowers from the centre out while they soften and pale,
+  // and a blurred blush ghost of the garden bleeds into the berry like wet paint
+  const p = interpolate(t, [DISSOLVE_IN, DISSOLVE_OUT], [0, 1], clamp);
+  const washing = t >= DISSOLVE_IN;
+  const washFrame = Math.round(p * (WASH_FRAMES - 1));
+  const mask = washing ? `url(${staticFile(`intro/wash/${String(washFrame).padStart(2, '0')}.png`)})` : undefined;
+  const ghost = interpolate(t, [DISSOLVE_IN, DISSOLVE_IN + 0.6, DISSOLVE_OUT, DISSOLVE_OUT + 0.5], [0, 0.4, 0.22, 0], clamp);
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: COLORS.berry, overflow: 'hidden' }}>
+      {ghost > 0 && (
+        <AbsoluteFill style={{ opacity: ghost, filter: `blur(${10 + p * 16}px) saturate(0.6) brightness(1.15)` }}>
+          <Garden t={t} />
+        </AbsoluteFill>
+      )}
+      {(!washing || p < 1) && (
+        <AbsoluteFill
+          style={{
+            WebkitMaskImage: mask,
+            WebkitMaskSize: '100% 100%',
+            maskImage: mask,
+            maskSize: '100% 100%',
+            filter: washing ? `blur(${p * 3}px) saturate(${1 - p * 0.4}) brightness(${1 + p * 0.1})` : undefined,
+          }}
+        >
+          <Garden t={t} />
+        </AbsoluteFill>
+      )}
+      {t >= layout.TITLE_AT - 0.1 && <Title t={t} />}
+      {t >= layout.LOGO_AT && <Logo t={t} />}
+      {withAudio && <Audio src={staticFile('intro/sfx.wav')} />}
+    </AbsoluteFill>
+  );
+};
