@@ -28,4 +28,4 @@ node audio/intro_sfx.js                                    # public/intro/sfx.wa
 npx remotion render PetalPopIntro out/petal-pop-intro.mp4 --props='{"withAudio":true}'
 ```
 
-The title is set in Fraunces (SIL OFL) as a placeholder until the outlined Fabulosa SVG is in.
+The title is "Petal Pop" in Fabulosa (Adobe Fonts), outlined in Illustrator (`Petal Pop.svg` in the folder) so no font file is needed.

@@ -4,8 +4,11 @@ Usage: python3 scripts/intro_assets.py <"intro video AI" folder>
   FLOWER.png         -> public/intro/flowers/01..09.png (one motif per file, trimmed)
   Logo_Nafesa-04.png -> public/intro/logo_mark.png + logo_word.png (diamond and wordmark, animated apart)
   wash masks         -> public/intro/wash/NN.png (watercolor dissolve, white = flowers still visible)
+  Petal Pop.svg      -> src/intro/title.json (outlined Fabulosa, one path per letter)
 """
+import json
 import os
+import re
 import sys
 
 import numpy as np
@@ -81,7 +84,17 @@ def masks():
     print("wash frames", n_frames)
 
 
+def title(src):
+    svg = open(os.path.join(src, "Petal Pop.svg"), encoding="utf-8").read()
+    _, _, w, h = map(float, re.search(r'viewBox="([^"]+)"', svg).group(1).split())
+    paths = re.findall(r'<path d="([^"]+)"', svg)
+    with open(os.path.join(ROOT, "src", "intro", "title.json"), "w") as f:
+        json.dump({"width": w, "height": h, "letters": paths}, f)
+    print("title letters", len(paths))
+
+
 if __name__ == "__main__":
     flowers(sys.argv[1])
     logo(sys.argv[1])
+    title(sys.argv[1])
     masks()

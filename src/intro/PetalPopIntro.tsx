@@ -1,10 +1,7 @@
 import { AbsoluteFill, Audio, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
-import { loadFont } from '@remotion/fonts';
 import layout from './layout.json';
-
-// placeholder title font until the outlined Fabulosa SVG arrives
-const fontFamily = 'Fraunces';
-loadFont({ family: fontFamily, url: staticFile('intro/fonts/Fraunces.ttf') });
+// "Petal Pop" set in Fabulosa (Adobe Fonts) and outlined in Illustrator, one path per letter
+import title from './title.json';
 
 // NAFESA Petal Pop color sheet
 export const COLORS = { berry: '#971D59', blush: '#F2A3BC', peach: '#FFC7B8', ivory: '#F8EAD9' };
@@ -49,6 +46,8 @@ const Garden: React.FC<{ t: number }> = ({ t }) => (
   </>
 );
 
+const TITLE_W = 860;
+
 const Title: React.FC<{ t: number }> = ({ t }) => {
   const { fps } = useVideoConfig();
   const [OUT_IN, OUT_END] = layout.TITLE_OUT;
@@ -65,37 +64,40 @@ const Title: React.FC<{ t: number }> = ({ t }) => {
         transform: `translateY(${-out * 40}px)`,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 + out * 40 }}>
-        {layout.letters.map((l, k) => {
+      <svg width={TITLE_W} viewBox={`0 0 ${title.width} ${title.height}`} style={{ overflow: 'visible' }}>
+        {title.letters.map((d, k) => {
+          const l = layout.letters[k];
           const local = (t - l.at) * fps;
           const s = local < 0 ? 0 : spring({ frame: local, fps, config: { damping: 8, mass: 0.5, stiffness: 190 } });
-          const gap = k > 0 && layout.letters[k - 1].i !== l.i - 1;
+          // letters spread from the centre as they leave
+          const spread = (k - (title.letters.length - 1) / 2) * out * 30;
           return (
-            <span
-              key={l.i}
+            <path
+              key={k}
+              d={d}
+              fill={COLORS.ivory}
               style={{
-                fontFamily,
-                fontVariationSettings: '"opsz" 144, "wght" 700, "SOFT" 100, "WONK" 1',
-                fontSize: 200,
-                lineHeight: 1,
-                color: COLORS.ivory,
-                display: 'inline-block',
-                marginLeft: gap ? 44 : 0,
-                transform: `translateY(${(1 - s) * 50}px) rotate(${(1 - s) * -14}deg) scale(${s})`,
+                transformBox: 'fill-box',
+                transformOrigin: '50% 100%',
+                transform: `translate(${spread}px, ${(1 - s) * 30}px) rotate(${(1 - s) * -14}deg) scale(${s})`,
                 opacity: local < 0 ? 0 : Math.min(1, local / 2),
               }}
-            >
-              {l.ch}
-            </span>
+            />
           );
         })}
-      </div>
+      </svg>
     </AbsoluteFill>
   );
 };
 
 // the white logo PNG is used as a mask so it can be painted in the ivory of the color sheet
-const LogoPart: React.FC<{ src: string; width: number; aspect: number; at: number; t: number }> = ({ src, width, aspect, at, t }) => {
+const LogoPart: React.FC<{ src: string; width: number; aspect: number; at: number; t: number }> = ({
+  src,
+  width,
+  aspect,
+  at,
+  t,
+}) => {
   const p = interpolate(t, [at, at + 0.7], [0, 1], { ...clamp, easing: (x) => 1 - Math.pow(1 - x, 3) });
   const mask = `url(${staticFile(src)})`;
   return (
@@ -134,7 +136,12 @@ export const PetalPopIntro: React.FC<{ withAudio: boolean }> = ({ withAudio }) =
   const washing = t >= DISSOLVE_IN;
   const washFrame = Math.round(p * (WASH_FRAMES - 1));
   const mask = washing ? `url(${staticFile(`intro/wash/${String(washFrame).padStart(2, '0')}.png`)})` : undefined;
-  const ghost = interpolate(t, [DISSOLVE_IN, DISSOLVE_IN + 0.6, DISSOLVE_OUT, DISSOLVE_OUT + 0.5], [0, 0.4, 0.22, 0], clamp);
+  const ghost = interpolate(
+    t,
+    [DISSOLVE_IN, DISSOLVE_IN + 0.6, DISSOLVE_OUT, DISSOLVE_OUT + 0.5],
+    [0, 0.4, 0.22, 0],
+    clamp,
+  );
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.berry, overflow: 'hidden' }}>
