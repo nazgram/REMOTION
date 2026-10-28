@@ -114,7 +114,7 @@ const Marquee: React.FC<{ x0: number; y0: number; x1: number; y1: number; t: num
 };
 
 // ---------- pieces ----------
-// header lockup while the pages play (kept small; everything sits inside the top 1521 px)
+// header lockup while the pages play (kept small; logo and pages sit inside the top 1521 px, the palette stays at the bottom)
 const HEAD = { w: 280, cy: 150, pill: 262, pillS: 0.5 };
 const LOGO_W0 = 880; // centre stage logo width; header logo is narrower
 const LOGO_AR = 325 / 555;
@@ -158,7 +158,7 @@ const slide = (t: number, tin: number, tout: number) => {
   return { dx: (1 - a) * 1150 - b * 1250, rot: (1 - a) * 9 - b * 7, vis: t >= tin && t < tout + 0.36 };
 };
 const cardPt = (p: number[]) => [CARD.x + p[0] * PS, CARD.y + p[1] * PS];
-const SLOT = (j: number) => ({ x: 540 + (j - 2) * 182, y: 1420 });
+const SLOT = (j: number) => ({ x: 540 + (j - 2) * 182, y: 1765 });
 
 export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) => {
   const t = useCurrentFrame() / L.FPS;
