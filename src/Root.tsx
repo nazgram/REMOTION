@@ -5,6 +5,8 @@ import { PetalPopIntro } from './intro/PetalPopIntro';
 import introLayout from './intro/layout.json';
 import { PetalPopDrop1 } from './drop1/PetalPopDrop1';
 import drop1 from './drop1/timeline.json';
+import { PetalPopBTS } from './bts/PetalPopBTS';
+import bts from './bts/timeline.json';
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -33,6 +35,15 @@ export const RemotionRoot: React.FC = () => (
       fps={drop1.FPS}
       width={drop1.W}
       height={drop1.H}
+      defaultProps={{ withAudio: false }}
+    />
+    <Composition
+      id="PetalPopBTS"
+      component={PetalPopBTS}
+      durationInFrames={bts.DURATION * bts.FPS}
+      fps={bts.FPS}
+      width={bts.W}
+      height={bts.H}
       defaultProps={{ withAudio: false }}
     />
   </>
