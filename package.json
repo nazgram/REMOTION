@@ -1,0 +1,23 @@
+{
+  "name": "petal-pop",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "studio": "remotion studio",
+    "layout": "node scripts/layout.js",
+    "assets": "python3 scripts/make_assets.py",
+    "stills": "node scripts/stills.js",
+    "render": "remotion render PetalPop out/petal-pop.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.538",
+    "@remotion/fonts": "4.0.538",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.538"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}
