@@ -114,12 +114,14 @@ const Marquee: React.FC<{ x0: number; y0: number; x1: number; y1: number; t: num
 };
 
 // ---------- pieces ----------
+// header lockup while the pages play (kept small; everything sits inside the top 1521 px)
+const HEAD = { w: 280, cy: 150, pill: 262, pillS: 0.5 };
 const LOGO_W0 = 880; // centre stage logo width; header logo is narrower
 const LOGO_AR = 325 / 555;
 const PILL = (t: number) => {
   // centre-stage pill under the big logo, rides up with the logo to the header
   const k = lerp(t, LOGO.toHeader[0], LOGO.toHeader[1], 0, 1);
-  return { x: 540, y: interpolate(k, [0, 1], [1215, 345]), s: interpolate(k, [0, 1], [1, 0.62]) };
+  return { x: 540, y: interpolate(k, [0, 1], [1215, HEAD.pill]), s: interpolate(k, [0, 1], [1, HEAD.pillS]) };
 };
 const Pill: React.FC<{ x: number; y: number; s: number; op?: number }> = ({ x, y, s, op = 1 }) => (
   <div
@@ -156,7 +158,7 @@ const slide = (t: number, tin: number, tout: number) => {
   return { dx: (1 - a) * 1150 - b * 1250, rot: (1 - a) * 9 - b * 7, vis: t >= tin && t < tout + 0.36 };
 };
 const cardPt = (p: number[]) => [CARD.x + p[0] * PS, CARD.y + p[1] * PS];
-const SLOT = (j: number) => ({ x: 540 + (j - 2) * 182, y: 1765 });
+const SLOT = (j: number) => ({ x: 540 + (j - 2) * 182, y: 1420 });
 
 export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) => {
   const t = useCurrentFrame() / L.FPS;
@@ -168,15 +170,15 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   const hk = lerp(t, LOGO.toHeader[0], LOGO.toHeader[1], 0, 1);
   const ek = lerp(t, END.toCenter[0], END.toCenter[1], 0, 1);
   const outK = lerp(t, END.logoOut[0], END.logoOut[1], 0, 1, Easing.in(Easing.back(1.6)));
-  const logoW = LOGO_W0 * stageScale * interpolate(hk, [0, 1], [1, 380 / LOGO_W0]) * interpolate(ek, [0, 1], [1, 860 / 380]);
-  const logoCy = interpolate(hk, [0, 1], [830, 190]) + interpolate(ek, [0, 1], [0, 650]);
+  const logoW = LOGO_W0 * stageScale * interpolate(hk, [0, 1], [1, HEAD.w / LOGO_W0]) * interpolate(ek, [0, 1], [1, 860 / HEAD.w]);
+  const logoCy = interpolate(hk, [0, 1], [830, HEAD.cy]) + interpolate(ek, [0, 1], [0, 760 - HEAD.cy]);
   const logoH = logoW * LOGO_AR;
   const box = { cx: 540, cy: 830, w: LOGO_W0 * stageScale + 40, h: LOGO_W0 * stageScale * LOGO_AR + 40 };
   const boxOp = interpolate(t, [LOGO.in + 0.1, LOGO.in + 0.2, LOGO.release + 0.05, LOGO.release + 0.25], [0, 1, 1, 0], clamp);
   const pill = PILL(t);
   const pillPulse = 1 + 0.25 * Math.sin(Math.max(0, t - PACK.pulse) * 14) * Math.exp(-Math.max(0, t - PACK.pulse) * 6) * (t > PACK.pulse ? 1 : 0);
-  const pillY = pill.y + interpolate(ek, [0, 1], [0, 870]);
-  const pillS = pill.s * pillPulse * interpolate(ek, [0, 1], [1, 1.6]);
+  const pillY = pill.y + interpolate(ek, [0, 1], [0, 1080 - HEAD.pill]);
+  const pillS = pill.s * pillPulse * interpolate(ek, [0, 1], [1, 1 / HEAD.pillS]);
 
   // ---- current colorway (for the background tint)
   const picked = CW.filter((c) => t >= c.click + 0.05);
@@ -189,7 +191,7 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   // ---- pack: thumbnails pop into a row, get marquee-selected, then the cursor scales them all into the DROP 1 pill
   const packK = lerp(t, PACK.drag[0], PACK.drag[1], 0, 1, Easing.in(Easing.quad));
   const groupS = interpolate(packK, [0, 1], [1, 0.06]);
-  const groupCy = interpolate(packK, [0, 1], [CARD.y + CARD.h / 2, 345]);
+  const groupCy = interpolate(packK, [0, 1], [CARD.y + CARD.h / 2, HEAD.pill]);
   const thumbs = CW.map((c, j) => {
     const a = pop(t, PACK.fan[0] + 0.05 + j * 0.05, 12);
     return { c, x: 540 + (j - 2) * 196, s: a };
@@ -224,8 +226,8 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   keys.push({ t: PACK.grab - 0.03, x: mq.x1, y: mq.y1, kind: 'resize' });
   keys.push({ t: PACK.grab, x: mq.x1, y: mq.y1, kind: 'resize', down: true });
   const g1 = { w: (mq.x1 - mq.x0) * 0.06, h: (mq.y1 - mq.y0) * 0.06 };
-  keys.push({ t: PACK.drag[1], x: 540 + g1.w / 2, y: 345 + g1.h / 2, kind: 'resize', down: true });
-  keys.push({ t: PACK.drag[1] + 0.08, x: 540 + g1.w / 2 + 6, y: 345 + g1.h / 2 + 6, kind: 'arrow' });
+  keys.push({ t: PACK.drag[1], x: 540 + g1.w / 2, y: HEAD.pill + g1.h / 2, kind: 'resize', down: true });
+  keys.push({ t: PACK.drag[1] + 0.08, x: 540 + g1.w / 2 + 6, y: HEAD.pill + g1.h / 2 + 6, kind: 'arrow' });
   keys.push({ t: END.toCenter[0], x: 1150, y: 1300, hide: true });
   const cur = cursorAt(t, keys);
   // cursor follows the grabbed handle exactly while dragging the logo / the pack group
