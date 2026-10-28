@@ -47,3 +47,16 @@ SCALE=0.4 node scripts/drop1_stills.mjs out/sb PetalPopDrop1 1.0 4.8 7.8   # sto
 npx remotion render PetalPopDrop1 out/drop1.mp4 --props='{"withAudio":true}' \
   --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
 ```
+
+## Drop 1 behind the scenes (PetalPopBTS)
+
+25 s 9:16 "how we made it" for the Drop 1 reel: hook (reel tears into code, "takde SATU keyframe pun"), then a
+macOS desktop where the brief goes to Claude, the Remotion code types itself, Studio previews with the storyboard,
+the terminal renders, and the reel ends on 18s / 540 frame / 0 keyframe. Clawd (Claude's mascot) helps out. No
+brand logos. Malay voiceover from Magnific TTS (`public/bts/vo`) + SFX; English cut `PetalPopBTSEn` (lang "en", macOS Samantha voice in `public/bts/vo_en`). VO timings in `src/bts/timeline.json`.
+
+```bash
+node audio/bts_sfx.js                           # public/bts/sfx.wav
+npx remotion render PetalPopBTS out/bts.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
