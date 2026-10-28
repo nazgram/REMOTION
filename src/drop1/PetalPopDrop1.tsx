@@ -9,8 +9,6 @@ import CUT from './cutouts.json';
 
 const font = 'Montserrat';
 loadFont({ family: font, url: staticFile('intro/fonts/Montserrat.ttf'), weight: '100 900' });
-const serif = 'DM Serif Display';
-loadFont({ family: serif, url: staticFile('fonts/dm-serif-display-latin-400-normal.woff2') });
 
 const C = { berry: '#971D59', blush: '#F2A3BC', peach: '#FFC7B8', leaf: '#B3AE64', lavender: '#ADB4D6', ivory: '#F8EAD9', ink: '#2B1A22' };
 const UI = C.berry; // editor overlays (transform box, ants, tooltips)
@@ -162,19 +160,15 @@ const slide = (t: number, tin: number, tout: number) => {
 const cardPt = (p: number[]) => [CARD.x + p[0] * PS, CARD.y + p[1] * PS];
 const SLOT = (j: number) => ({ x: 540 + (j - 2) * 182, y: 1765 });
 
-// cut out placement: 'card' sits exactly on the page photo, 'hero' shows the whole model + scarf big, standing on the
-// bottom edge (only the hem of the blouse runs off frame, never the scarf)
+// cut out "pop out": the page photo keeps its background; the model + whole scarf cut out sits exactly on it (k=0),
+// then grows 10% from the card's bottom edge (k=1) so her head and scarf break out over the frame
 type Cut = { x: number; y: number; w: number; h: number; outline: string };
 const cutOf = (page: string) => (CUT as Record<string, Cut>)[page];
-const heroMap = (c: Cut) => {
-  const s = Math.min(1440 / c.h, 1000 / c.w);
-  return { s, left: 540 - (c.w * s) / 2, top: H + 8 - c.h * s };
-};
+const POP_OUT = 0.1;
 const placeCut = (c: Cut, k: number) => {
-  const h = heroMap(c);
-  const s = PS + (h.s - PS) * k;
-  const left = CARD.x + c.x * PS + (h.left - (CARD.x + c.x * PS)) * k;
-  const top = CARD.y + c.y * PS + (h.top - (CARD.y + c.y * PS)) * k;
+  const f = 1 + POP_OUT * k, ax = CARD.x + CARD.w / 2, ay = CARD.y + CARD.h;
+  const s = PS * f;
+  const left = ax + (CARD.x + c.x * PS - ax) * f, top = ay + (CARD.y + c.y * PS - ay) * f;
   return { s, left, top, at: (p: number[]) => [left + (p[0] - c.x) * s, top + (p[1] - c.y) * s] };
 };
 // white sticker edge + soft shadow around a cut out
@@ -218,9 +212,9 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   const groupS = interpolate(packK, [0, 1], [1, 0.06]);
   const rowCy = 1040;
   const groupCy = interpolate(packK, [0, 1], [rowCy, 345]);
-  const TH = 360, TW = 190;
-  const thumbs = CW.map((c, j) => ({ c, x: 540 + (j - 2) * 200, s: pop(t, PACK.fan[0] + 0.05 + j * 0.05, 12) }));
-  const mq = { x0: 540 - 500 - 20, y0: rowCy - TH / 2 - 40, x1: 540 + 500 + 20, y1: rowCy + TH / 2 + 40 };
+  const TW = 182, TH = (TW * PAGE.h) / PAGE.w;
+  const thumbs = CW.map((c, j) => ({ c, x: 540 + (j - 2) * 196, s: pop(t, PACK.fan[0] + 0.05 + j * 0.05, 12) }));
+  const mq = { x0: 540 - 490 - 30, y0: rowCy - TH / 2 - 40, x1: 540 + 490 + 30, y1: rowCy + TH / 2 + 40 };
 
   // ---- cursor path
   const keys: Key[] = [];
@@ -242,7 +236,13 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
     keys.push({ t: c.select[0] - 0.25, x: sx + 60, y: sy + 80 });
     keys.push({ t: c.select[0], x: sx, y: sy, down: true });
     keys.push({ t: c.select[0] + 0.1, x: sx, y: sy });
-    const [px, py] = placeCut(cut, 1).at(c.pick);
+    // free transform: grab the top-right handle and pull her out of the frame
+    const p0 = placeCut(cut, 0), p1 = placeCut(cut, 1);
+    keys.push({ t: c.lift[0] - 0.02, x: p0.left + cut.w * p0.s + 12, y: p0.top - 12, kind: 'resize' });
+    keys.push({ t: c.lift[0] + 0.08, x: p0.left + cut.w * p0.s + 12, y: p0.top - 12, kind: 'resize', down: true });
+    keys.push({ t: c.lift[1], x: p1.left + cut.w * p1.s + 12, y: p1.top - 12, kind: 'resize', down: true });
+    keys.push({ t: c.lift[1] + 0.06, x: p1.left + cut.w * p1.s + 12, y: p1.top - 12, kind: 'arrow' });
+    const [px, py] = p1.at(c.pick);
     keys.push({ t: c.click - 0.32, x: px + 70, y: py + 90, kind: 'dropper' });
     keys.push({ t: c.click - 0.04, x: px, y: py, kind: 'dropper' });
     keys.push({ t: c.click, x: px, y: py, kind: 'dropper', down: true });
@@ -262,6 +262,13 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   if (t >= LOGO.grab && t <= LOGO.dragEnd) Object.assign(cur, { x: 540 + box.w / 2, y: 830 + box.h / 2 });
   const groupBox = { w: (mq.x1 - mq.x0) * groupS, h: (mq.y1 - mq.y0) * groupS };
   if (t >= PACK.drag[0] && t <= PACK.drag[1]) Object.assign(cur, { x: 540 + groupBox.w / 2, y: groupCy + groupBox.h / 2 });
+  // follow the grabbed corner exactly while she is pulled out of the frame
+  CW.forEach((c) => {
+    if (t >= c.lift[0] + 0.1 && t <= c.lift[1]) {
+      const cut = cutOf(c.page), pl = placeCut(cut, lerp(t, c.lift[0] + 0.1, c.lift[1], 0, 1, Easing.bezier(0.3, 1.3, 0.5, 1)));
+      Object.assign(cur, { x: pl.left + cut.w * pl.s + 12, y: pl.top - 12 });
+    }
+  });
   const curOp = interpolate(t, [LOGO.in, LOGO.in + 0.15, END.toCenter[0] - 0.1, END.toCenter[0]], [0, 1, 1, 0], clamp);
 
   const nafesa = pop(t, END.nafesa, 14);
@@ -277,7 +284,7 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
         return s.vis ? <Card src="page01" dx={s.dx} rot={s.rot} s={1} /> : null;
       })()}
 
-      {/* colorways: page card -> select subject -> the photo falls away and she grows into a full cut out */}
+      {/* colorways: page card -> select subject -> she pops out of the photo as a cut out (background stays) */}
       {CW.map((c, i) => {
         const tout = i === CW.length - 1 ? PACK.fan[0] : c.out;
         const s = slide(t, c.in, tout);
@@ -285,38 +292,31 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
         const cut = cutOf(c.page);
         const lk = lerp(t, c.lift[0] + 0.1, c.lift[1], 0, 1, Easing.bezier(0.3, 1.3, 0.5, 1));
         const pl = placeCut(cut, lk);
-        const photo = lerp(t, c.lift[0], c.lift[0] + 0.25, 1, 0);
-        const name = pop(t, c.lift[1] - 0.15, 12);
+        const soft = lerp(t, c.lift[0], c.lift[0] + 0.3, 0, 1);
         return (
           <div key={c.name} style={{ position: 'absolute', inset: 0, transform: `translateX(${s.dx}px) rotate(${s.rot}deg)` }}>
-            {photo > 0 && <Card src={c.page} dx={0} rot={0} s={1 - 0.05 * (1 - photo)} op={photo} />}
-            {name > 0 && (
-              <div style={{ position: 'absolute', left: 0, width: W, top: 470, textAlign: 'center', fontFamily: serif, fontSize: c.name.length > 9 ? 150 : 172,
-                lineHeight: 1, color: c.hex === '#020202' ? '#2a2326' : c.hex, opacity: Math.min(1, name), transform: `translateY(${(1 - name) * 60}px) scale(${0.85 + 0.15 * name})` }}>
-                {c.name}
-              </div>
-            )}
+            <div style={{ filter: `blur(${(soft * 4).toFixed(1)}px) brightness(${(1 - 0.12 * soft).toFixed(3)})` }}>
+              <Card src={c.page} dx={0} rot={0} s={1} />
+            </div>
             {t >= c.select[0] && (
               <Img src={staticFile(`drop1/cut/${c.page}.png`)}
-                style={{ position: 'absolute', left: pl.left, top: pl.top, width: cut.w * pl.s, height: cut.h * pl.s, filter: sticker(lerp(t, c.lift[0], c.lift[0] + 0.3, 0, 1)) }} />
+                style={{ position: 'absolute', left: pl.left, top: pl.top, width: cut.w * pl.s, height: cut.h * pl.s, filter: sticker(lerp(t, c.lift[0], c.lift[0] + 0.3, 0, 1)),
+                  WebkitMaskImage: 'linear-gradient(to top, transparent 0, #000 70px)', maskImage: 'linear-gradient(to top, transparent 0, #000 70px)' }} />
             )}
           </div>
         );
       })}
 
-      {/* pack row: the five cut outs as stickers */}
+      {/* pack row: the five pages as thumbnails */}
       {t >= PACK.fan[0] && t < PACK.drag[1] + 0.02 && (
         <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, transformOrigin: `540px ${rowCy}px`,
           transform: `translateY(${groupCy - rowCy}px) scale(${groupS})` }}>
-          {thumbs.map(({ c, x, s }) => {
-            const cut = cutOf(c.page);
-            const k = Math.min(TW / cut.w, TH / cut.h);
-            return (
-              <Img key={c.name} src={staticFile(`drop1/cut/${c.page}.png`)}
-                style={{ position: 'absolute', left: x - (cut.w * k) / 2, top: rowCy + TH / 2 - cut.h * k, width: cut.w * k, height: cut.h * k,
-                  transform: `scale(${s})`, transformOrigin: 'bottom center', filter: sticker(1, 4) }} />
-            );
-          })}
+          {thumbs.map(({ c, x, s }) => (
+            <div key={c.name} style={{ position: 'absolute', left: x - TW / 2, top: rowCy - TH / 2, width: TW, height: TH, borderRadius: 10, overflow: 'hidden',
+              transform: `scale(${s})`, boxShadow: '0 10px 24px rgba(60,20,40,.25)' }}>
+              <Img src={staticFile(`drop1/${c.page}.png`)} style={{ width: '100%', height: '100%' }} />
+            </div>
+          ))}
         </div>
       )}
 
@@ -385,6 +385,14 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
               <Tip x={W - 60} y={CARD.y + 50} text="SELECT SUBJECT" anchor="end" op={interpolate(t, [c.select[0], c.select[0] + 0.08], [0, 1], clamp)} />
             </g>
           );
+        })}
+        {CW.map((c) => {
+          const op = interpolate(t, [c.lift[0] - 0.05, c.lift[0] + 0.05, c.lift[1] + 0.05, c.lift[1] + 0.2], [0, 1, 1, 0], clamp);
+          if (op <= 0) return null;
+          const cut = cutOf(c.page), pl = placeCut(cut, lerp(t, c.lift[0] + 0.1, c.lift[1], 0, 1, Easing.bezier(0.3, 1.3, 0.5, 1)));
+          const w = cut.w * pl.s + 24, h = cut.h * pl.s + 24;
+          return <TransformBox key={c.name + '-tb'} cx={pl.left - 12 + w / 2} cy={pl.top - 12 + h / 2} w={w} h={h} op={op} active={2}
+            label={`SCALE ${Math.round((pl.s / PS) * 100)}%`} />;
         })}
         {CW.map((c) => {
           const [px, py] = placeCut(cutOf(c.page), 1).at(c.pick);
