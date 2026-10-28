@@ -14,22 +14,21 @@ const COVER = { in: 2.45, marquee: [2.95, 3.45], out: 3.95 };
 
 // colorway pages, the click point on the scarf (page px) and the official colorway hex
 const CW = [
-  { name: 'Bluebell', page: 'page03', hex: '#153D4F', pick: [505, 1322] },
-  { name: 'Dahlia', page: 'page05', hex: '#733548', pick: [272, 1244] },
-  { name: 'Moonflower', page: 'page07', hex: '#020202', pick: [544, 1225] },
-  { name: 'Peony', page: 'page09', hex: '#971E5A', pick: [560, 1150] },
-  { name: 'Toffee Rose', page: 'page11', hex: '#774930', pick: [650, 1100] },
+  { name: 'Bluebell', page: 'page03', hex: '#153D4F', pick: [505, 1322], dur: 1.65 },
+  { name: 'Dahlia', page: 'page05', hex: '#733548', pick: [272, 1244], dur: 1.65 },
+  { name: 'Moonflower', page: 'page07', hex: '#020202', pick: [544, 1225], dur: 1.65 },
+  { name: 'Peony', page: 'page09', hex: '#971E5A', pick: [560, 1150], dur: 1.65 },
+  { name: 'Toffee Rose', page: 'page11', hex: '#774930', pick: [650, 1100], dur: 1.65 },
 ];
-const CW_DUR = 2.3;
 let t = COVER.out;
 for (const c of CW) {
-  // page slides in, cursor "select subject" (ants around her), the photo falls away leaving the cut out,
-  // which grows to hero size (whole scarf in frame), then the eyedropper picks the scarf colour
   c.in = r(t);
-  c.select = [r(t + 0.45), r(t + 0.8)];
-  c.lift = [r(t + 0.85), r(t + 1.3)];
-  c.click = r(t + 1.6);
-  t += CW_DUR;
+  if (c.zoom) {
+    c.zoomIn = [r(t + 0.4), r(t + 0.72)];
+    c.zoomOut = [r(t + 1.1), r(t + 1.4)];
+    c.click = r(t + 1.62);
+  } else c.click = r(t + 0.8);
+  t += c.dur;
   c.out = r(t);
 }
 const PACK = { fan: [r(t), r(t + 0.4)], marquee: [r(t + 0.5), r(t + 0.85)], grab: r(t + 0.95), drag: [r(t + 0.95), r(t + 1.4)], pulse: r(t + 1.45) };
@@ -50,8 +49,7 @@ ev(COVER.marquee[0], 'click'); ev(COVER.marquee[0] + 0.03, 'swish', 0.4); ev(COV
 CW.forEach((c, i) => {
   ev(c.in - 0.02, 'swish', 0.7);
   ev(c.in + 0.15, 'pop', 0.9, 0.95 + i * 0.05);
-  ev(c.select[0], 'click'); ev(c.select[0] + 0.03, 'zoom', 0.5, 1.2);
-  ev(c.lift[0], 'swish', 0.7); ev(c.lift[0] + 0.12, 'pop', 1, 0.85 + i * 0.04);
+  if (c.zoom) { ev(c.zoomIn[0], 'click'); ev(c.zoomIn[0] + 0.02, 'zoom', 0.8, 1); ev(c.zoomOut[0], 'zoom', 0.6, 0.8); }
   ev(c.click, 'click', 1, 1.1);
   ev(c.click + 0.45, 'pop', 0.8, 1.1 + i * 0.06);
 });

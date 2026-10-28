@@ -1,11 +1,9 @@
 import { AbsoluteFill, Audio, Easing, Img, interpolate, spring, staticFile, useCurrentFrame } from 'remotion';
 import { loadFont } from '@remotion/fonts';
 import L from './timeline.json';
-// model + scarf cut out of each page (scripts/drop1_cutouts.py): bbox and outline in page px
-import CUT from './cutouts.json';
 
 // Petal Pop Drop 1 catalog (Nas's PetalPop_Drop1_PNG pages) cut as an "editor moves" reel: the pages are visibly
-// edited by a cursor (free transform, marquee, select subject + cut out, eyedropper) in the Petal Pop palette instead of the blueprint look.
+// edited by a cursor (free transform, marquee, eyedropper) in the Petal Pop palette instead of the blueprint look.
 
 const font = 'Montserrat';
 loadFont({ family: font, url: staticFile('intro/fonts/Montserrat.ttf'), weight: '100 900' });
@@ -160,23 +158,6 @@ const slide = (t: number, tin: number, tout: number) => {
 const cardPt = (p: number[]) => [CARD.x + p[0] * PS, CARD.y + p[1] * PS];
 const SLOT = (j: number) => ({ x: 540 + (j - 2) * 182, y: 1765 });
 
-// cut out "pop out": the page photo keeps its background; the model + whole scarf cut out sits exactly on it (k=0),
-// then grows 10% from the card's bottom edge (k=1) so her head and scarf break out over the frame
-type Cut = { x: number; y: number; w: number; h: number; outline: string };
-const cutOf = (page: string) => (CUT as Record<string, Cut>)[page];
-const POP_OUT = 0.1;
-const placeCut = (c: Cut, k: number) => {
-  const f = 1 + POP_OUT * k, ax = CARD.x + CARD.w / 2, ay = CARD.y + CARD.h;
-  const s = PS * f;
-  const left = ax + (CARD.x + c.x * PS - ax) * f, top = ay + (CARD.y + c.y * PS - ay) * f;
-  return { s, left, top, at: (p: number[]) => [left + (p[0] - c.x) * s, top + (p[1] - c.y) * s] };
-};
-// white sticker edge + soft shadow around a cut out
-const sticker = (k: number, px = 7) => {
-  const o = Math.max(0, px * k).toFixed(1);
-  return `drop-shadow(${o}px 0 0 #fff) drop-shadow(-${o}px 0 0 #fff) drop-shadow(0 ${o}px 0 #fff) drop-shadow(0 -${o}px 0 #fff) drop-shadow(0 22px 26px rgba(60,20,40,${(0.3 * k).toFixed(2)}))`;
-};
-
 export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) => {
   const t = useCurrentFrame() / L.FPS;
 
@@ -197,27 +178,27 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   const pillY = pill.y + interpolate(ek, [0, 1], [0, 870]);
   const pillS = pill.s * pillPulse * interpolate(ek, [0, 1], [1, 1.6]);
 
-  // ---- background: tints toward the colorway on screen once she is cut out
-  const lifted = CW.filter((c) => t >= c.lift[0]);
-  const cur0 = lifted[lifted.length - 1];
-  const prev0 = lifted[lifted.length - 2];
-  const tk = cur0 ? lerp(t, cur0.lift[0], cur0.lift[0] + 0.45, 0, 1) : 0;
-  const tintOut = lerp(t, PACK.fan[0], PACK.drag[1], 1, 0);
-  const rgb = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-  const from = rgb(prev0 ? prev0.hex : C.ivory), to = cur0 ? rgb(cur0.hex) : from, iv = rgb(C.ivory);
-  const bg = `rgb(${iv.map((v, i) => Math.round(v + (from[i] + (to[i] - from[i]) * tk - v) * 0.2 * tintOut)).join(',')})`;
+  // ---- current colorway (for the background tint)
+  const picked = CW.filter((c) => t >= c.click + 0.05);
+  const last = picked[picked.length - 1];
+  const tintK = last ? lerp(t, last.click + 0.05, last.click + 0.45, 0, 1) : 0;
+  const prevTint = picked.length > 1 ? picked[picked.length - 2].hex : C.ivory;
+  const tintOut = lerp(t, PACK.drag[1], END.toCenter[1], 1, 0);
+  const tint = last ? mix(C.ivory, last.hex, (interpolate(tintK, [0, 1], [prevTint === C.ivory ? 0 : 0.14, 0.14])) * tintOut) : C.ivory;
 
-  // ---- pack: the five cut outs pop into a row, get marquee-selected, then the cursor scales them all into the DROP 1 pill
+  // ---- pack: thumbnails pop into a row, get marquee-selected, then the cursor scales them all into the DROP 1 pill
   const packK = lerp(t, PACK.drag[0], PACK.drag[1], 0, 1, Easing.in(Easing.quad));
   const groupS = interpolate(packK, [0, 1], [1, 0.06]);
-  const rowCy = 1040;
-  const groupCy = interpolate(packK, [0, 1], [rowCy, 345]);
-  const TW = 182, TH = (TW * PAGE.h) / PAGE.w;
-  const thumbs = CW.map((c, j) => ({ c, x: 540 + (j - 2) * 196, s: pop(t, PACK.fan[0] + 0.05 + j * 0.05, 12) }));
-  const mq = { x0: 540 - 490 - 30, y0: rowCy - TH / 2 - 40, x1: 540 + 490 + 30, y1: rowCy + TH / 2 + 40 };
+  const groupCy = interpolate(packK, [0, 1], [CARD.y + CARD.h / 2, 345]);
+  const thumbs = CW.map((c, j) => {
+    const a = pop(t, PACK.fan[0] + 0.05 + j * 0.05, 12);
+    return { c, x: 540 + (j - 2) * 196, s: a };
+  });
+  const rowW = 5 * 196, rowH = (182 * PAGE.h) / PAGE.w;
 
   // ---- cursor path
   const keys: Key[] = [];
+  const handle0 = { x: 540 + box.w / 2, y: 830 + box.h / 2 };
   const bigBox = { w: LOGO_W0 * LOGO.startScale + 40, h: LOGO_W0 * LOGO.startScale * LOGO_AR + 40 };
   const smallBox = { w: LOGO_W0 + 40, h: LOGO_W0 * LOGO_AR + 40 };
   keys.push({ t: 0, x: 1150, y: 1500, hide: true }, { t: LOGO.in + 0.1, x: 1000, y: 1500 });
@@ -230,25 +211,13 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   keys.push({ t: COVER.marquee[1], x: CARD.x + CARD.w + 25, y: CARD.y + CARD.h + 25, down: true });
   keys.push({ t: COVER.marquee[1] + 0.06, x: CARD.x + CARD.w + 25, y: CARD.y + CARD.h + 25 });
   CW.forEach((c) => {
-    const cut = cutOf(c.page);
-    // "select subject": click on her (the scarf at chest height), on the page as it sits in the card
-    const [sx, sy] = placeCut(cut, 0).at([cut.x + cut.w * 0.55, cut.y + cut.h * 0.45]);
-    keys.push({ t: c.select[0] - 0.25, x: sx + 60, y: sy + 80 });
-    keys.push({ t: c.select[0], x: sx, y: sy, down: true });
-    keys.push({ t: c.select[0] + 0.1, x: sx, y: sy });
-    // free transform: grab the top-right handle and pull her out of the frame
-    const p0 = placeCut(cut, 0), p1 = placeCut(cut, 1);
-    keys.push({ t: c.lift[0] - 0.02, x: p0.left + cut.w * p0.s + 12, y: p0.top - 12, kind: 'resize' });
-    keys.push({ t: c.lift[0] + 0.08, x: p0.left + cut.w * p0.s + 12, y: p0.top - 12, kind: 'resize', down: true });
-    keys.push({ t: c.lift[1], x: p1.left + cut.w * p1.s + 12, y: p1.top - 12, kind: 'resize', down: true });
-    keys.push({ t: c.lift[1] + 0.06, x: p1.left + cut.w * p1.s + 12, y: p1.top - 12, kind: 'arrow' });
-    const [px, py] = p1.at(c.pick);
+    const [px, py] = cardPt(c.pick);
     keys.push({ t: c.click - 0.32, x: px + 70, y: py + 90, kind: 'dropper' });
     keys.push({ t: c.click - 0.04, x: px, y: py, kind: 'dropper' });
     keys.push({ t: c.click, x: px, y: py, kind: 'dropper', down: true });
     keys.push({ t: c.click + 0.12, x: px, y: py, kind: 'dropper' });
-    keys.push({ t: c.click + 0.3, x: px + 40, y: py + 50, kind: 'arrow' });
   });
+  const mq = { x0: 540 - rowW / 2 - 30, y0: CARD.y + CARD.h / 2 - rowH / 2 - 40, x1: 540 + rowW / 2 + 30, y1: CARD.y + CARD.h / 2 + rowH / 2 + 40 };
   keys.push({ t: PACK.marquee[0] - 0.2, x: mq.x0, y: mq.y0, kind: 'arrow' });
   keys.push({ t: PACK.marquee[0], x: mq.x0, y: mq.y0, down: true });
   keys.push({ t: PACK.marquee[1], x: mq.x1, y: mq.y1, down: true });
@@ -259,22 +228,16 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
   keys.push({ t: PACK.drag[1] + 0.08, x: 540 + g1.w / 2 + 6, y: 345 + g1.h / 2 + 6, kind: 'arrow' });
   keys.push({ t: END.toCenter[0], x: 1150, y: 1300, hide: true });
   const cur = cursorAt(t, keys);
+  // cursor follows the grabbed handle exactly while dragging the logo / the pack group
   if (t >= LOGO.grab && t <= LOGO.dragEnd) Object.assign(cur, { x: 540 + box.w / 2, y: 830 + box.h / 2 });
   const groupBox = { w: (mq.x1 - mq.x0) * groupS, h: (mq.y1 - mq.y0) * groupS };
   if (t >= PACK.drag[0] && t <= PACK.drag[1]) Object.assign(cur, { x: 540 + groupBox.w / 2, y: groupCy + groupBox.h / 2 });
-  // follow the grabbed corner exactly while she is pulled out of the frame
-  CW.forEach((c) => {
-    if (t >= c.lift[0] + 0.1 && t <= c.lift[1]) {
-      const cut = cutOf(c.page), pl = placeCut(cut, lerp(t, c.lift[0] + 0.1, c.lift[1], 0, 1, Easing.bezier(0.3, 1.3, 0.5, 1)));
-      Object.assign(cur, { x: pl.left + cut.w * pl.s + 12, y: pl.top - 12 });
-    }
-  });
   const curOp = interpolate(t, [LOGO.in, LOGO.in + 0.15, END.toCenter[0] - 0.1, END.toCenter[0]], [0, 1, 1, 0], clamp);
 
   const nafesa = pop(t, END.nafesa, 14);
 
   return (
-    <AbsoluteFill style={{ background: bg, overflow: 'hidden' }}>
+    <AbsoluteFill style={{ background: tint, overflow: 'hidden' }}>
       {/* soft paper dots */}
       <AbsoluteFill style={{ backgroundImage: `radial-gradient(${mix(C.berry, C.ivory, 0.88)} 2px, transparent 2.5px)`, backgroundSize: '44px 44px', opacity: 0.6 }} />
 
@@ -284,35 +247,22 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
         return s.vis ? <Card src="page01" dx={s.dx} rot={s.rot} s={1} /> : null;
       })()}
 
-      {/* colorways: page card -> select subject -> she pops out of the photo as a cut out (background stays) */}
+      {/* colorway pages */}
       {CW.map((c, i) => {
-        const tout = i === CW.length - 1 ? PACK.fan[0] : c.out;
+        const tout = i === CW.length - 1 ? 1e9 : c.out;
         const s = slide(t, c.in, tout);
-        if (!s.vis) return null;
-        const cut = cutOf(c.page);
-        const lk = lerp(t, c.lift[0] + 0.1, c.lift[1], 0, 1, Easing.bezier(0.3, 1.3, 0.5, 1));
-        const pl = placeCut(cut, lk);
-        const soft = lerp(t, c.lift[0], c.lift[0] + 0.3, 0, 1);
-        return (
-          <div key={c.name} style={{ position: 'absolute', inset: 0, transform: `translateX(${s.dx}px) rotate(${s.rot}deg)` }}>
-            <div style={{ filter: `blur(${(soft * 4).toFixed(1)}px) brightness(${(1 - 0.12 * soft).toFixed(3)})` }}>
-              <Card src={c.page} dx={0} rot={0} s={1} />
-            </div>
-            {t >= c.select[0] && (
-              <Img src={staticFile(`drop1/cut/${c.page}.png`)}
-                style={{ position: 'absolute', left: pl.left, top: pl.top, width: cut.w * pl.s, height: cut.h * pl.s, filter: sticker(lerp(t, c.lift[0], c.lift[0] + 0.3, 0, 1)),
-                  WebkitMaskImage: 'linear-gradient(to top, transparent 0, #000 70px)', maskImage: 'linear-gradient(to top, transparent 0, #000 70px)' }} />
-            )}
-          </div>
-        );
+        if (!s.vis || t >= PACK.fan[0] + 0.3) return null;
+        // last page shrinks into its thumbnail slot as the row pops in
+        const shrink = i === CW.length - 1 ? lerp(t, PACK.fan[0], PACK.fan[0] + 0.3, 1, 0) : 1;
+        return <Card key={c.name} src={c.page} dx={s.dx} rot={s.rot} s={shrink} op={shrink < 1 ? shrink : 1} />;
       })}
 
-      {/* pack row: the five pages as thumbnails */}
+      {/* pack row */}
       {t >= PACK.fan[0] && t < PACK.drag[1] + 0.02 && (
-        <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, transformOrigin: `540px ${rowCy}px`,
-          transform: `translateY(${groupCy - rowCy}px) scale(${groupS})` }}>
+        <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, transformOrigin: `540px ${CARD.y + CARD.h / 2}px`,
+          transform: `translateY(${groupCy - (CARD.y + CARD.h / 2)}px) scale(${groupS})` }}>
           {thumbs.map(({ c, x, s }) => (
-            <div key={c.name} style={{ position: 'absolute', left: x - TW / 2, top: rowCy - TH / 2, width: TW, height: TH, borderRadius: 10, overflow: 'hidden',
+            <div key={c.name} style={{ position: 'absolute', left: x - 91, top: CARD.y + CARD.h / 2 - rowH / 2, width: 182, height: rowH, borderRadius: 10, overflow: 'hidden',
               transform: `scale(${s})`, boxShadow: '0 10px 24px rgba(60,20,40,.25)' }}>
               <Img src={staticFile(`drop1/${c.page}.png`)} style={{ width: '100%', height: '100%' }} />
             </div>
@@ -324,7 +274,7 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
       {CW.map((c, j) => {
         const fly = lerp(t, c.click + 0.05, c.click + 0.45, 0, 1);
         if (t < c.click + 0.02) return null;
-        const [px, py] = placeCut(cutOf(c.page), 1).at(c.pick);
+        const [px, py] = cardPt(c.pick);
         const sl = SLOT(j);
         const x = interpolate(fly, [0, 1], [px, sl.x]), y = interpolate(fly, [0, 1], [py, sl.y]) - Math.sin(fly * Math.PI) * 140;
         const land = pop(t, c.click + 0.45, 9);
@@ -333,18 +283,17 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
         return (
           <div key={c.name} style={{ position: 'absolute', left: x - 50, top: y - 50, width: 100, opacity: out, transform: `scale(${s * (0.6 + 0.4 * out)})` }}>
             <div style={{ width: 100, height: 100, borderRadius: 50, background: c.hex, border: '6px solid #fff', boxSizing: 'border-box', boxShadow: '0 6px 16px rgba(0,0,0,.25)' }} />
-            <div style={{ marginTop: 6, marginLeft: -30, width: 160, textAlign: 'center', fontFamily: font, fontWeight: 700, fontSize: 19, letterSpacing: 1.5, color: C.ink,
-              textShadow: '0 0 6px #fff, 0 0 3px #fff', opacity: lerp(t, c.click + 0.45, c.click + 0.7, 0, 1) }}>
+            <div style={{ marginTop: 8, marginLeft: -30, width: 160, textAlign: 'center', fontFamily: font, fontWeight: 600, fontSize: 19, letterSpacing: 1.5, color: C.ink,
+              opacity: lerp(t, c.click + 0.45, c.click + 0.7, 0, 1) }}>
               {c.name.toUpperCase()}
             </div>
           </div>
         );
       })}
 
-      {/* Petal Pop logo + DROP 1 pill (alone in the centre for the first outro beat) */}
+      {/* Petal Pop logo + DROP 1 pill */}
       {t >= LOGO.in && outK < 1 && (
-        <Img src={staticFile('drop1/logo.png')} style={{ position: 'absolute', left: 540 - logoW / 2, top: logoCy - logoH / 2, width: logoW, height: logoH,
-          transform: `scale(${logoIn * (1 - outK)})` }} />
+        <Img src={staticFile('drop1/logo.png')} style={{ position: 'absolute', left: 540 - logoW / 2, top: logoCy - logoH / 2, width: logoW, height: logoH, transform: `scale(${logoIn * (1 - outK)})` }} />
       )}
       {t >= LOGO.pill && outK < 1 && <Pill x={pill.x} y={pillY} s={pillS * pop(t, LOGO.pill, 9) * (1 - outK)} />}
 
@@ -363,39 +312,7 @@ export const PetalPopDrop1: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
           t={t} op={interpolate(t, [COVER.marquee[0], COVER.marquee[0] + 0.02, COVER.out - 0.1, COVER.out], [0, 1, 1, 0], clamp)}
           label={t > COVER.marquee[1] ? 'COVER · DROP 1' : undefined} />
         {CW.map((c) => {
-          // marching ants around her outline, drawn on from the click, riding the lift
-          const op = interpolate(t, [c.select[0], c.select[0] + 0.05, c.lift[1] - 0.15, c.lift[1]], [0, 1, 1, 0], clamp);
-          if (op <= 0) return null;
-          const cut = cutOf(c.page);
-          const pl = placeCut(cut, lerp(t, c.lift[0] + 0.1, c.lift[1], 0, 1, Easing.bezier(0.3, 1.3, 0.5, 1)));
-          const draw = lerp(t, c.select[0], c.select[1], 0, 1);
-          const tr = `translate(${pl.left - cut.x * pl.s} ${pl.top - cut.y * pl.s}) scale(${pl.s})`;
-          const ants = { fill: 'none', vectorEffect: 'non-scaling-stroke' as const, strokeWidth: 3 };
-          return (
-            <g key={c.name} opacity={op}>
-              <defs>
-                <clipPath id={`draw-${c.page}`}>
-                  <circle cx={540} cy={1000} r={draw * 1200} />
-                </clipPath>
-              </defs>
-              <g clipPath={`url(#draw-${c.page})`}>
-                <path d={cut.outline} transform={tr} stroke="#fff" {...ants} />
-                <path d={cut.outline} transform={tr} stroke={C.ink} {...ants} strokeDasharray="12 10" strokeDashoffset={-t * 60} />
-              </g>
-              <Tip x={W - 60} y={CARD.y + 50} text="SELECT SUBJECT" anchor="end" op={interpolate(t, [c.select[0], c.select[0] + 0.08], [0, 1], clamp)} />
-            </g>
-          );
-        })}
-        {CW.map((c) => {
-          const op = interpolate(t, [c.lift[0] - 0.05, c.lift[0] + 0.05, c.lift[1] + 0.05, c.lift[1] + 0.2], [0, 1, 1, 0], clamp);
-          if (op <= 0) return null;
-          const cut = cutOf(c.page), pl = placeCut(cut, lerp(t, c.lift[0] + 0.1, c.lift[1], 0, 1, Easing.bezier(0.3, 1.3, 0.5, 1)));
-          const w = cut.w * pl.s + 24, h = cut.h * pl.s + 24;
-          return <TransformBox key={c.name + '-tb'} cx={pl.left - 12 + w / 2} cy={pl.top - 12 + h / 2} w={w} h={h} op={op} active={2}
-            label={`SCALE ${Math.round((pl.s / PS) * 100)}%`} />;
-        })}
-        {CW.map((c) => {
-          const [px, py] = placeCut(cutOf(c.page), 1).at(c.pick);
+          const [px, py] = cardPt(c.pick);
           const op = interpolate(t, [c.click, c.click + 0.05, c.click + 0.5, c.click + 0.65], [0, 1, 1, 0], clamp);
           return op > 0 ? <Tip key={c.name} x={px + 40} y={py - 60} text={c.hex} op={op} /> : null;
         })}

@@ -35,13 +35,12 @@ letters (repainted ivory) and drawn motifs, so no font file is needed.
 
 ## Petal Pop Drop 1 editor reel (PetalPopDrop1)
 
-21 s 9:16 reel of the Drop 1 catalog (`PetalPop_Drop1_PNG`) in Nas's "editor moves" style: the Petal Pop logo
+18 s 9:16 reel of the Drop 1 catalog (`PetalPop_Drop1_PNG`) in Nas's "editor moves" style: the Petal Pop logo
 appears too big and a cursor free-transforms it down, the cover gets a marquee, each colorway page slides in and an
-the cursor runs "select subject", the photo falls away and the model + full scarf grow into a sticker-edged cut out, an eyedropper picks its colour into a palette strip, then all five cut outs are selected and scaled
+an eyedropper picks its colour into a palette strip, then all five are selected and scaled
 into the DROP 1 pill, ending on Petal Pop alone, then NAFESA last on its own. SFX only (Nas's POP 3 pops, clicks, swishes).
 
 ```bash
-python3 scripts/drop1_cutouts.py                # public/drop1/cut + src/drop1/cutouts.json (needs rembg raws, see script)
 node scripts/drop1_layout.js                  # src/drop1/timeline.json: every move and sound event
 node audio/drop1_sfx.js                       # public/drop1/sfx.wav
 SCALE=0.4 node scripts/drop1_stills.mjs out/sb PetalPopDrop1 1.0 4.8 7.8   # storyboard stills
