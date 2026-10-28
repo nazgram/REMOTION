@@ -46,5 +46,14 @@ export const RemotionRoot: React.FC = () => (
       height={bts.H}
       defaultProps={{ withAudio: false }}
     />
+    <Composition
+      id="PetalPopBTSEn"
+      component={PetalPopBTS}
+      durationInFrames={bts.DURATION * bts.FPS}
+      fps={bts.FPS}
+      width={bts.W}
+      height={bts.H}
+      defaultProps={{ withAudio: false, lang: 'en' as const }}
+    />
   </>
 );

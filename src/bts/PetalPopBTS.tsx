@@ -13,6 +13,26 @@ loadFont({ family: mono, url: staticFile('bts/fonts/JetBrainsMono-Medium.ttf'), 
 
 const C = { berry: '#971D59', blush: '#F2A3BC', peach: '#FFC7B8', leaf: '#B3AE64', lavender: '#ADB4D6', ivory: '#F8EAD9', ink: '#2B1A22', clawd: '#D97757' };
 const DARK = '#1E1A20';
+
+// on-screen copy per language (Malay first cut, English second)
+const TXT_BY_LANG = {
+  ms: {
+    date: 'Sel 28 Okt  3:17', hook1: 'Video ni takde', hook2: 'SATU keyframe pun.', hook3: 'Semua code. Ni cara dia ↓',
+    brief: 'Animate 8 page catalog Drop 1, gaya editor moves, warna Petal Pop. 9:16.',
+    reply: 'Jom! Aku buat dalam Remotion: free transform, marquee, eyedropper, select all.',
+    c1: 'Brief kat Claude', c2: 'Code, bukan keyframe', c3: 'Preview & storyboard', c4: 'Render!',
+    move: 'gerak', stats: ['durasi', 'frame', 'keyframe'],
+  },
+  en: {
+    date: 'Tue Oct 28  3:17', hook1: 'This video has', hook2: 'ZERO keyframes.', hook3: "All code. Here's how ↓",
+    brief: 'Animate the 8-page Drop 1 catalog, editor-moves style, Petal Pop colours. 9:16.',
+    reply: 'On it! Building it in Remotion: free transform, marquee, eyedropper, select all.',
+    c1: 'Brief Claude', c2: 'Code, not keyframes', c3: 'Preview & storyboard', c4: 'Render!',
+    move: 'move', stats: ['length', 'frames', 'keyframes'],
+  },
+};
+type Lang = keyof typeof TXT_BY_LANG;
+type Copy = (typeof TXT_BY_LANG)['ms'];
 const { W, H, FPS, S } = L;
 
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
@@ -60,7 +80,7 @@ const Clawd: React.FC<{ x: number; y: number; size: number; t: number; mood?: 'i
 };
 
 // ---------- desktop pieces ----------
-const Desktop: React.FC<{ t: number }> = ({ t }) => (
+const Desktop: React.FC<{ t: number; tx: Copy }> = ({ t, tx }) => (
   <AbsoluteFill style={{ background: `linear-gradient(170deg, ${C.ivory} 0%, #F6DCD6 55%, ${C.blush} 130%)` }}>
     {[...Array(6)].map((_, i) => (
       <div key={i} style={{ position: 'absolute', left: (i * 397) % W - 120, top: 240 + ((i * 523) % 1300), width: 360, height: 360, borderRadius: '50%', background: [C.peach, C.lavender, C.blush][i % 3], opacity: 0.28, filter: 'blur(60px)', transform: `translateY(${Math.sin(t * 0.8 + i) * 20}px)` }} />
@@ -70,7 +90,7 @@ const Desktop: React.FC<{ t: number }> = ({ t }) => (
       <span style={{ fontWeight: 500 }}>File</span>
       <span style={{ fontWeight: 500 }}>Edit</span>
       <span style={{ fontWeight: 500 }}>View</span>
-      <span style={{ marginLeft: 'auto', fontWeight: 500 }}>Sel 28 Okt  3:17</span>
+      <span style={{ marginLeft: 'auto', fontWeight: 500 }}>{tx.date}</span>
     </div>
   </AbsoluteFill>
 );
@@ -157,7 +177,7 @@ const CodeLines: React.FC<{ t: number; a: number; b: number; size: number; lh: n
 };
 
 // ---------- scenes ----------
-const Hook: React.FC<{ t: number }> = ({ t }) => {
+const Hook: React.FC<{ t: number; tx: Copy }> = ({ t, tx }) => {
   const [a, b] = S.hook;
   const tear = lerp(t, 0.85, 1.35, 0, 1, Easing.out(Easing.back(1.4)));
   const topX = W - (W - 690) * tear, botX = W - (W - 250) * tear;
@@ -180,24 +200,22 @@ const Hook: React.FC<{ t: number }> = ({ t }) => {
       )}
       <Clawd x={botX + (topX - botX) * 0.22 + 70} y={1500} size={170} t={t} s={pop(t, 1.7)} mood="wave" />
       <div style={{ position: 'absolute', left: 0, right: 0, top: 170, padding: '40px 0 44px', background: 'rgba(25,8,16,.78)', textAlign: 'center', fontFamily: sans, transform: `translateX(${shake}px)`, opacity: lerp(t, 0, 0.12, 0, 1) }}>
-        <div style={{ fontSize: 78, fontWeight: 800, color: C.ivory, lineHeight: 1.1 }}>Video ni takde</div>
-        <div style={{ fontSize: 80, fontWeight: 900, color: C.blush, lineHeight: 1.15, transform: `scale(${pop(t, 0.45, 9)})` }}>SATU keyframe pun.</div>
-        <div style={{ fontSize: 40, fontWeight: 600, color: C.ivory, marginTop: 14, opacity: lerp(t, 1.45, 1.7, 0, 1) }}>Semua code. Ni cara dia ↓</div>
+        <div style={{ fontSize: 78, fontWeight: 800, color: C.ivory, lineHeight: 1.1 }}>{tx.hook1}</div>
+        <div style={{ fontSize: 80, fontWeight: 900, color: C.blush, lineHeight: 1.15, transform: `scale(${pop(t, 0.45, 9)})` }}>{tx.hook2}</div>
+        <div style={{ fontSize: 40, fontWeight: 600, color: C.ivory, marginTop: 14, opacity: lerp(t, 1.45, 1.7, 0, 1) }}>{tx.hook3}</div>
       </div>
     </AbsoluteFill>
   );
 };
 
-const BRIEF = 'Animate 8 page catalog Drop 1, gaya editor moves, warna Petal Pop. 9:16.';
-const REPLY = 'Jom! Aku buat dalam Remotion: free transform, marquee, eyedropper, select all.';
-const Chat: React.FC<{ t: number }> = ({ t }) => {
+const Chat: React.FC<{ t: number; tx: Copy }> = ({ t, tx }) => {
   const [a] = S.chat;
   const s = pop(t, a, 13);
   const dots = t > a + 1.75 && t < a + 2.25;
   return (
     <Win x={70} y={170} w={940} h={1120} title="Claude" s={s}>
       <div style={{ position: 'absolute', right: 40, top: 50, maxWidth: 680, background: C.blush, color: '#4A1530', borderRadius: '34px 34px 8px 34px', padding: '30px 36px', fontFamily: sans, fontSize: 40, fontWeight: 600, lineHeight: 1.35, opacity: t > a + 0.3 ? 1 : 0 }}>
-        {typed(BRIEF, t, a + 0.3, a + 1.6)}
+        {typed(tx.brief, t, a + 0.3, a + 1.6)}
       </div>
       <Clawd x={95} y={540} size={100} t={t} s={pop(t, a + 1.65)} mood={dots ? 'type' : 'idle'} />
       {dots && (
@@ -207,7 +225,7 @@ const Chat: React.FC<{ t: number }> = ({ t }) => {
       )}
       {t >= a + 2.25 && (
         <div style={{ position: 'absolute', left: 160, top: 420, maxWidth: 700, background: '#F3EEF1', color: C.ink, borderRadius: '34px 34px 34px 8px', padding: '30px 36px', fontFamily: sans, fontSize: 40, fontWeight: 500, lineHeight: 1.35 }}>
-          {typed(REPLY, t, a + 2.25, a + 3.3)}
+          {typed(tx.reply, t, a + 2.25, a + 3.3)}
         </div>
       )}
       <div style={{ position: 'absolute', left: 40, right: 40, bottom: 40, height: 96, borderRadius: 48, border: '3px solid #E6D9E0', display: 'flex', alignItems: 'center', padding: '0 36px', fontFamily: sans, fontSize: 34, color: '#B3A5AE' }}>Reply to Claude...</div>
@@ -215,7 +233,7 @@ const Chat: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
-const Code: React.FC<{ t: number }> = ({ t }) => {
+const Code: React.FC<{ t: number; tx: Copy }> = ({ t, tx }) => {
   const [a] = S.code;
   const s = pop(t, a, 13);
   const CH = 31 * 0.6, X0 = 30 + 31 * 1.9;
@@ -239,7 +257,7 @@ const Code: React.FC<{ t: number }> = ({ t }) => {
           <CodeLines t={t} a={a + 0.35} b={a + 4.6} size={31} lh={66} />
         </div>
         {hl(1.3, 1, 2, 7, 'pop!', 1)}
-        {hl(3.0, 5, 10, 12, 'gerak', 3)}
+        {hl(3.0, 5, 10, 12, tx.move, 3)}
         <div style={{ position: 'absolute', right: 30, bottom: 26, fontFamily: mono, fontSize: 24, color: '#6F6470' }}>0 keyframe · 100% code</div>
       </Win>
       <Clawd x={850} y={272} size={150} t={t} s={pop(t, a + 0.3)} mood="type" />
@@ -309,10 +327,10 @@ const Render: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
-const Payoff: React.FC<{ t: number }> = ({ t }) => {
+const Payoff: React.FC<{ t: number; tx: Copy }> = ({ t, tx }) => {
   const [a] = S.pay;
   const k = lerp(t, a, a + 0.5, 0, 1, Easing.out(Easing.cubic));
-  const stats: [string, string][] = [['18s', 'durasi'], ['540', 'frame'], ['0', 'keyframe']];
+  const stats: [string, string][] = [['18s', tx.stats[0]], ['540', tx.stats[1]], ['0', tx.stats[2]]];
   return (
     <AbsoluteFill style={{ opacity: k, transform: `scale(${0.8 + 0.2 * k})`, borderRadius: (1 - k) * 60, overflow: 'hidden' }}>
       <Sequence from={Math.round(a * FPS)} layout="none">
@@ -337,24 +355,26 @@ const Payoff: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
-export const PetalPopBTS: React.FC<{ withAudio?: boolean }> = ({ withAudio }) => {
+export const PetalPopBTS: React.FC<{ withAudio?: boolean; lang?: Lang }> = ({ withAudio, lang = 'ms' }) => {
   const t = useCurrentFrame() / FPS;
+  const tx = TXT_BY_LANG[lang];
+  const vo = lang === 'en' ? L.VO_EN : L.VO;
   const desk = t >= S.chat[0] - 0.3 && t < S.pay[0] + 0.6;
   const fadeOut = (k: keyof typeof S) => lerp(t, S[k][1] - 0.2, S[k][1], 1, 0);
   return (
     <AbsoluteFill style={{ background: C.ivory }}>
-      {desk && <Desktop t={t} />}
-      {inScene(t, 'chat') && <AbsoluteFill style={{ opacity: fadeOut('chat') }}><Chat t={t} /><Caption t={t} at={S.chat[0] + 0.4} n="1" text="Brief kat Claude" /></AbsoluteFill>}
-      {inScene(t, 'code') && <AbsoluteFill style={{ opacity: fadeOut('code') }}><Code t={t} /><Caption t={t} at={S.code[0] + 0.4} n="2" text="Code, bukan keyframe" /></AbsoluteFill>}
-      {inScene(t, 'prev') && <AbsoluteFill style={{ opacity: fadeOut('prev') }}><Preview t={t} /><Caption t={t} at={S.prev[0] + 0.4} n="3" text="Preview & storyboard" /></AbsoluteFill>}
-      {inScene(t, 'rend') && <AbsoluteFill><Render t={t} /><Caption t={t} at={S.rend[0] + 0.4} n="4" text="Render!" /></AbsoluteFill>}
-      {t >= S.pay[0] && <Payoff t={t} />}
-      {t < S.hook[1] && <Hook t={t} />}
+      {desk && <Desktop t={t} tx={tx} />}
+      {inScene(t, 'chat') && <AbsoluteFill style={{ opacity: fadeOut('chat') }}><Chat t={t} tx={tx} /><Caption t={t} at={S.chat[0] + 0.4} n="1" text={tx.c1} /></AbsoluteFill>}
+      {inScene(t, 'code') && <AbsoluteFill style={{ opacity: fadeOut('code') }}><Code t={t} tx={tx} /><Caption t={t} at={S.code[0] + 0.4} n="2" text={tx.c2} /></AbsoluteFill>}
+      {inScene(t, 'prev') && <AbsoluteFill style={{ opacity: fadeOut('prev') }}><Preview t={t} /><Caption t={t} at={S.prev[0] + 0.4} n="3" text={tx.c3} /></AbsoluteFill>}
+      {inScene(t, 'rend') && <AbsoluteFill><Render t={t} /><Caption t={t} at={S.rend[0] + 0.4} n="4" text={tx.c4} /></AbsoluteFill>}
+      {t >= S.pay[0] && <Payoff t={t} tx={tx} />}
+      {t < S.hook[1] && <Hook t={t} tx={tx} />}
       {withAudio && <Audio src={staticFile('bts/sfx.wav')} />}
       {withAudio &&
-        L.VO.map((v) => (
+        vo.map((v) => (
           <Sequence key={v.file} from={Math.round(v.at * FPS)} layout="none">
-            <Audio src={staticFile(`bts/vo/${v.file}`)} />
+            <Audio src={staticFile(`bts/${lang === 'en' ? 'vo_en' : 'vo'}/${v.file}`)} />
           </Sequence>
         ))}
     </AbsoluteFill>
