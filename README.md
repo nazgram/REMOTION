@@ -32,3 +32,18 @@ npx remotion render PetalPopIntro out/petal-pop-intro.mp4 --props='{"withAudio":
 
 The Petal Pop logo comes from Nas's `Petal Pop Typography.png` (Fabulosa, Adobe Fonts): the script splits it into
 letters (repainted ivory) and drawn motifs, so no font file is needed.
+
+## Petal Pop Drop 1 editor reel (PetalPopDrop1)
+
+18 s 9:16 reel of the Drop 1 catalog (`PetalPop_Drop1_PNG`) in Nas's "editor moves" style: the Petal Pop logo
+appears too big and a cursor free-transforms it down, the cover gets a marquee, each colorway page slides in and an
+an eyedropper picks its colour into a palette strip, then all five are selected and scaled
+into the DROP 1 pill, ending on Petal Pop alone, then NAFESA last on its own. SFX only (Nas's POP 3 pops, clicks, swishes).
+
+```bash
+node scripts/drop1_layout.js                  # src/drop1/timeline.json: every move and sound event
+node audio/drop1_sfx.js                       # public/drop1/sfx.wav
+SCALE=0.4 node scripts/drop1_stills.mjs out/sb PetalPopDrop1 1.0 4.8 7.8   # storyboard stills
+npx remotion render PetalPopDrop1 out/drop1.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
