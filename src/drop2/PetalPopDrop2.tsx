@@ -90,7 +90,7 @@ const TransformBox: React.FC<{ cx: number; cy: number; w: number; h: number; op:
     </g>
   );
 };
-const Marquee: React.FC<{ x0: number; y0: number; x1: number; y1: number; t: number; op: number; label?: string }> = ({ x0, y0, x1, y1, t, op, label }) => {
+const Marquee: React.FC<{ x0: number; y0: number; x1: number; y1: number; t: number; op: number; label?: string; labelAt?: number[] }> = ({ x0, y0, x1, y1, t, op, label, labelAt }) => {
   if (op <= 0) return null;
   const x = Math.min(x0, x1), y = Math.min(y0, y1), w = Math.abs(x1 - x0), h = Math.abs(y1 - y0);
   return (
@@ -98,7 +98,7 @@ const Marquee: React.FC<{ x0: number; y0: number; x1: number; y1: number; t: num
       <rect x={x} y={y} width={w} height={h} fill={UI} fillOpacity={0.07} />
       <rect x={x} y={y} width={w} height={h} stroke="#fff" strokeWidth={3} fill="none" />
       <rect x={x} y={y} width={w} height={h} stroke={INK} strokeWidth={3} fill="none" strokeDasharray="14 10" strokeDashoffset={-t * 60} />
-      {label && <Tip x={x1 + 16} y={y1 + 36} text={label} anchor="end" />}
+      {label && <Tip x={labelAt ? labelAt[0] : x1 + 16} y={labelAt ? labelAt[1] : y1 + 36} text={label} anchor="end" />}
     </g>
   );
 };
@@ -133,7 +133,7 @@ const PrintSwatch: React.FC<{ way: Way; size: number; id: string }> = ({ way, si
 );
 // a few big scarf flowers that pop around the page when its colour is picked
 const FLOWERS = UNITS.filter((u) => u.k === 'f' && u.p.length >= 5);
-const SPOTS = [[95, 470], [985, 420], [70, 830], [1010, 900], [110, 1230], [975, 1290], [300, 300], [800, 1380]];
+const SPOTS = [[48, 430], [1032, 390], [40, 820], [1040, 880], [52, 1230], [1028, 1290], [250, 318], [830, 312]];
 
 // ---------- logo (Nas's vector) ----------
 const Logo: React.FC<{ cx: number; cy: number; w: number; s?: number; op?: number }> = ({ cx, cy, w, s = 1, op = 1 }) => (
@@ -269,6 +269,15 @@ export const PetalPopDrop2: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
     <AbsoluteFill style={{ background: mix(bg, '#ffffff', toWhite), overflow: 'hidden' }}>
       <AbsoluteFill style={{ backgroundImage: `radial-gradient(rgba(79,143,90,.16) 2px, transparent 2.5px)`, backgroundSize: '44px 44px', opacity: 1 - toWhite }} />
 
+      {/* page pile */}
+      {pileOut > 0 &&
+        onPile.slice(-3).map((p, i, arr) => {
+          const c = carry(t, p.in, p.tilt);
+          const top = i === arr.length - 1;
+          const s = c.s * (top ? 1 : 0.985) * (0.4 + 0.6 * pileOut);
+          return <Card key={p.page} src={p.page} x={c.x} y={c.y} rot={c.rot} s={s} op={pileOut} shadow={top ? 1 : 0.5} />;
+        })}
+
       {/* scarf flowers popping around the page on each pick */}
       <svg width={W} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
         {CW.map((c, ci) => {
@@ -288,15 +297,6 @@ export const PetalPopDrop2: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
           });
         })}
       </svg>
-
-      {/* page pile */}
-      {pileOut > 0 &&
-        onPile.slice(-3).map((p, i, arr) => {
-          const c = carry(t, p.in, p.tilt);
-          const top = i === arr.length - 1;
-          const s = c.s * (top ? 1 : 0.985) * (0.4 + 0.6 * pileOut);
-          return <Card key={p.page} src={p.page} x={c.x} y={c.y} rot={c.rot} s={s} op={pileOut} shadow={top ? 1 : 0.5} />;
-        })}
 
       {/* pack row */}
       {t >= PACK.fan[0] && t < PACK.drag[1] + 0.02 && (
@@ -323,14 +323,10 @@ export const PetalPopDrop2: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
         const land = pop(t, c.click + 0.55, 9);
         const s = fly < 1 ? interpolate(fly, [0, 0.15, 1], [0.2, 1.25, 0.85]) : 0.85 + 0.15 * land;
         const out = lerp(t, END.toCenter[0], END.toCenter[1], 1, 0);
-        const chars = Math.floor(lerp(t, c.click + 0.55, c.click + 0.95, 0, c.name.length, Easing.linear));
         return (
           <div key={c.name} style={{ position: 'absolute', left: x - 60, top: y - 60, width: 120, opacity: out, transform: `scale(${s * (0.6 + 0.4 * out)})` }}>
             <div style={{ width: 120, height: 120, borderRadius: 60, border: '6px solid #fff', boxSizing: 'border-box', overflow: 'hidden', boxShadow: '0 8px 18px rgba(0,0,0,.25)', background: c.hex }}>
               <PrintSwatch way={c.way as Way} size={108} id={`sw${j}`} />
-            </div>
-            <div style={{ marginTop: 10, marginLeft: -40, width: 200, textAlign: 'center', fontFamily: font, fontWeight: 700, fontSize: 18, letterSpacing: 1.5, color: INK, whiteSpace: 'nowrap' }}>
-              {c.name.toUpperCase().slice(0, chars)}
             </div>
           </div>
         );
@@ -341,7 +337,7 @@ export const PetalPopDrop2: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
 
       {/* NAFESA back cover last */}
       {t >= END.back && (
-        <div style={{ position: 'absolute', left: 0, top: 900 - 0.458 * 1532, width: W, height: 1532, opacity: Math.min(1, back * 1.4), transform: `scale(${1.06 - 0.06 * back})` }}>
+        <div style={{ position: 'absolute', left: 0, top: 90, width: W, height: 1532, opacity: Math.min(1, back * 1.4), transform: `scale(${1.06 - 0.06 * back})` }}>
           <Img src={staticFile('drop2/page13.jpg')} style={{ width: '100%', height: '100%' }} />
         </div>
       )}
@@ -364,7 +360,7 @@ export const PetalPopDrop2: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
         <Marquee x0={CARD.x - 25} y0={CARD.y - 25}
           x1={lerp(t, COVER.marquee[0], COVER.marquee[1], CARD.x - 25, CARD.x + CARD.w + 25)} y1={lerp(t, COVER.marquee[0], COVER.marquee[1], CARD.y - 25, CARD.y + CARD.h + 25)}
           t={t} op={interpolate(t, [COVER.marquee[0], COVER.marquee[0] + 0.02, COVER.end - 0.1, COVER.end], [0, 1, 1, 0], clamp)}
-          label={t > COVER.marquee[1] ? 'COVER · DROP 2' : undefined} />
+          label={t > COVER.marquee[1] ? 'COVER · DROP 2' : undefined} labelAt={[CARD.x + CARD.w + 16, CARD.y - 50]} />
         {CW.map((c) => {
           const [px, py] = cardPt(c.pick);
           const op = interpolate(t, [c.click, c.click + 0.05, c.click + 0.7, c.click + 0.85], [0, 1, 1, 0], clamp);

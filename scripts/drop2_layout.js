@@ -5,9 +5,9 @@ const fs = require('fs');
 const r = (x) => Math.round(x * 1000) / 1000;
 
 const W = 1080, H = 1920, FPS = 30;
-// catalog pages are 1399x1985; the card is 1000 px tall under a small header, so pages stay inside the top 1521 px
+// catalog pages are 1399x1985; the card is 1300 px tall under a small header
 const PAGE = { w: 1399, h: 1985 };
-const CARD = { h: 1000, w: Math.round((1000 * 1399) / 1985), cy: 840 };
+const CARD = { h: 1300, w: Math.round((1300 * 1399) / 1985), cy: 985 }; // pictures may run past 1521 px, text may not
 CARD.x = Math.round((W - CARD.w) / 2);
 CARD.y = Math.round(CARD.cy - CARD.h / 2);
 const HEAD = { cy: 175, w: 300 };
