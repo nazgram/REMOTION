@@ -60,3 +60,21 @@ node audio/bts_sfx.js                           # public/bts/sfx.wav
 npx remotion render PetalPopBTS out/bts.mp4 --props='{"withAudio":true}' \
   --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
 ```
+
+## Petal Pop Drop 2 teaser 1 (PetalPopTeaser1)
+
+10 s 9:16 teaser built from Nas's own vectors in `PETAL POP 2/TEASER 1`: the five scarf colourways (Butter Bliss,
+Vanilla Sky, Expresso Poppy, Forest Bloom, Olive Spritz) share one artwork, so `pattern.json` stores the 1096 flowers
+and leaves once plus a 7-colour palette per colourway. Flowers pop in from the edges ("Petal Pop" in the logo's own
+letters), floral wipe to Vanilla Sky ("Blooming Soon"), flower irises through Expresso Poppy and Forest Bloom with the
+logo's DROP 2 pill, floral wipe to Olive Spritz that fills the scarf and zooms out to the whole square ("Stay Tuned"),
+the Petal Pop Drop 2 logo, then NAFESA on Expresso brown. SFX only. Words and logos stay inside the top 1521 px.
+
+```bash
+python3 scripts/teaser1_assets.py "<PETAL POP 2/TEASER 1 folder>"   # src/teaser1/pattern.json + logo.json, public/teaser1/nafesa.png
+node scripts/teaser1_layout.js                                    # src/teaser1/timeline.json
+node audio/teaser1_sfx.js                                         # public/teaser1/sfx.wav
+SCALE=0.4 node scripts/drop1_stills.mjs out/sb PetalPopTeaser1 1.6 4.7 7.8 8.6
+npx remotion render PetalPopTeaser1 out/teaser1.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
