@@ -10,14 +10,14 @@ let seed = 7;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
 // scenes: colourway, view (tile point C at screen (540, Y0), tile scale s), and the screen box kept clear for the words
-const TEXT_Y = 790; // vertical centre of every word / logo
+const TEXT_Y = 960; // frame centre // vertical centre of every word / logo
 const scenes = {
-  petal:   { way: 'Butter Bliss',   C: [1620, 1620], s: 0.8, clear: [120, 470, 960, 1110] },
-  bloom:   { way: 'Vanilla Sky',    C: [1350, 1500], s: 0.8, clear: [110, 540, 970, 1060] },
-  drop1:   { way: 'Expresso Poppy', C: [1900, 1700], s: 0.8, clear: [90, 680, 990, 900] },
-  drop2:   { way: 'Forest Bloom',   C: [1480, 1850], s: 0.8, clear: [90, 680, 990, 900] },
+  petal:   { way: 'Butter Bliss',   C: [1620, 1620], s: 0.8, clear: [540, TEXT_Y, 330] },
+  bloom:   { way: 'Vanilla Sky',    C: [1350, 1500], s: 0.8, clear: [540, TEXT_Y, 320] },
+  drop1:   { way: 'Expresso Poppy', C: [1900, 1700], s: 0.8, clear: [540, TEXT_Y, 300] },
+  drop2:   { way: 'Forest Bloom',   C: [1480, 1850], s: 0.8, clear: [540, TEXT_Y, 300] },
   tuned:   { way: 'Olive Spritz',   C: [1620, 1620], s: 0.8, clear: null },
-  logo:    { way: 'Butter Bliss',   C: [1700, 1400], s: 0.8, clear: [70, 395, 1010, 1185] },
+  logo:    { way: 'Butter Bliss',   C: [1700, 1400], s: 0.8, clear: [540, TEXT_Y, 420] },
 };
 const T = {
   wipe1: [1.85, 2.35],    // diagonal floral wipe Butter Bliss -> Vanilla Sky
@@ -28,10 +28,11 @@ const T = {
   shrink: [7.8, 8.12],   // scarf shrinks away, logo scales up
   outro: [9.0, 9.45],     // flowers + logo leave, NAFESA on Expresso brown
 };
-const SCARF = { size: 900, cy: 690 }; // full scarf square after the zoom
+const SCARF = { size: 760, cy: 880 }; // full scarf square after the zoom
 
 const screenOf = (sc, u) => [(u.x - sc.C[0]) * sc.s + W / 2, (u.y - sc.C[1]) * sc.s + H / 2];
-const inClear = (sc, x, y, r) => sc.clear && x + r > sc.clear[0] && x - r < sc.clear[2] && y + r > sc.clear[1] && y - r < sc.clear[3];
+// the words sit in a round opening in the flowers
+const inClear = (sc, x, y, r) => sc.clear && Math.hypot(x - sc.clear[0], y - sc.clear[1]) < sc.clear[2] + r;
 const visible = (x, y, r) => x + r > -40 && x - r < W + 40 && y + r > -40 && y - r < H + 40;
 
 function build(name, popOf) {
@@ -48,7 +49,7 @@ function build(name, popOf) {
 // 1. PETAL POP: flowers pop in from the four edges toward the centre (outermost first), sliding in from their nearest edge
 build('petal', (x, y, u) => {
   const dl = x, dr = W - x, dt = y, db = H - y, m = Math.min(dl, dr, dt, db);
-  const e = Math.min(1, m / 540);
+  const e = 1 - Math.min(1, Math.hypot(x - 540, y - TEXT_Y) / 1100); // outermost first, closing in as a circle
   const dir = m === dl ? [-1, 0] : m === dr ? [1, 0] : m === dt ? [0, -1] : [0, 1];
   return [0.08 + e * 0.95 + rnd() * 0.14, dir[0] * 90, dir[1] * 90, (rnd() - 0.5) * 70];
 });

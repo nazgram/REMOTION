@@ -110,32 +110,29 @@ const Wipe: React.FC<{ name: 'wipe1' | 'wipe2'; t: number; children: React.React
   );
 };
 
-// flower iris: a scarf flower grows from the middle and the new colourway is inside it, with a petal-coloured rim
+// flower iris: a soft round bloom (circle ringed by round petals) opens from the middle with the new colourway
+// inside it, led by a thin petal-coloured rim
+const PETALS = 10;
 const Iris: React.FC<{ at: number[]; t: number; way: Way; id: string; children: React.ReactNode }> = ({ at, t, way, id, children }) => {
-  const u = UNITS[TL.IRIS];
-  const p = ease(t, at[0], at[1], Easing.in(Easing.cubic));
-  const S = 0.2 + p * 62;
-  const rot = -40 + p * 110;
-  const tf = (k: number) => `translate(${W / 2} ${TEXT_Y}) rotate(${rot}) scale(${S * k}) translate(${-u.x} ${-u.y})`;
-  // clipPath children must be bare shapes (no <g>), so the transform goes on each one
-  const shape = (k: number) => (
+  const p = ease(t, at[0], at[1], Easing.inOut(Easing.cubic));
+  const R = p * 1450; // reaches past the frame corners (~1110 px from the centre)
+  const rot = p * 50;
+  const shape = (r: number) => (
     <>
-      {u.p.map(([d], i) => (
-        <path key={i} d={d} transform={tf(k)} />
-      ))}
-      <circle cx={u.x} cy={u.y} r={u.r * 0.45} transform={tf(k)} />
+      <circle cx={W / 2} cy={TEXT_Y} r={r} />
+      {Array.from({ length: PETALS }, (_, i) => {
+        const a = ((i / PETALS) * 360 + rot) * (Math.PI / 180);
+        return <circle key={i} cx={W / 2 + Math.cos(a) * r} cy={TEXT_Y + Math.sin(a) * r} r={r * 0.32} />;
+      })}
     </>
   );
   const pal = P.palettes[way].colors;
   return (
     <>
       <defs>
-        <clipPath id={id}>
-          {shape(1)}
-        </clipPath>
+        <clipPath id={id}>{shape(R)}</clipPath>
       </defs>
-      {p < 1 && <g fill={pal[2]}>{shape(1.18)}</g>}
-      {p < 1 && <g fill={pal[4]}>{shape(1.08)}</g>}
+      {p < 1 && <g fill={pal[2]}>{shape(R * 1.06 + 14)}</g>}
       <g clipPath={`url(#${id})`}>{children}</g>
     </>
   );
@@ -175,7 +172,7 @@ const Shape: React.FC<{ p: LogoPath; k?: number; sx?: number; sy?: number; fill?
 // "Pétal Pop": the logo's own letters, popping one by one
 const PetalWord: React.FC<{ t: number }> = ({ t }) => {
   const letters = LOGO.filter((p) => p.role.startsWith('letter'));
-  const sc = 1.12;
+  const sc = 0.78;
   return (
     <g transform={`translate(${W / 2} ${TEXT_Y}) scale(${sc}) translate(-455 -272)`}>
       {letters.map((p, i) => {
@@ -220,7 +217,7 @@ const DropPill: React.FC<{ t: number }> = ({ t }) => {
   const sq = 1 + (k - 1) * 0.45; // overshoot -> squash and stretch
   const [cx, cy] = centre(parts[0].box);
   return (
-    <g transform={`translate(${W / 2} ${TEXT_Y}) scale(${2.3 * k * pulse}) scale(${2 - sq} ${sq}) translate(${-cx} ${-cy})`}>
+    <g transform={`translate(${W / 2} ${TEXT_Y}) scale(${1.55 * k * pulse}) scale(${2 - sq} ${sq}) translate(${-cx} ${-cy})`}>
       {parts.map((p, i) => (
         <path key={i} d={p.d} fill={p.fill} />
       ))}
@@ -237,7 +234,7 @@ const Logo: React.FC<{ t: number }> = ({ t }) => {
   const parts = TL.logo.parts as Record<string, number>;
   const pill = LOGO.find((p) => p.role === 'pill')!;
   return (
-    <g opacity={op} transform={`translate(${W / 2} ${TEXT_Y}) scale(${0.98 * s}) translate(${-L.w / 2} ${-L.h / 2})`}>
+    <g opacity={op} transform={`translate(${W / 2} ${TEXT_Y}) scale(${0.72 * s}) translate(${-L.w / 2} ${-L.h / 2})`}>
       {LOGO.map((p, i) => {
         const at = parts[p.role];
         if (at === undefined) return <path key={i} d={p.d} fill={p.fill} />;
@@ -290,8 +287,8 @@ export const PetalPopTeaser1: React.FC<{ withAudio: boolean }> = ({ withAudio })
     body = (
       <>
         {bloomOn && <Scene name="bloom" t={t} />}
-        {bloomOn && <Words lines={TL.words.bloom.lines} t={t} at={TL.words.bloom.at} step={TL.words.bloom.step} y={TEXT_Y} size={200} color={INK} />}
-        {bloomOn && sparkles(t, TL.words.bloom.at + 0.1, [W / 2, TEXT_Y, 400, 250], ['#e69596', '#e8a77c', '#efb56f'], 8, 3)}
+        {bloomOn && <Words lines={TL.words.bloom.lines} t={t} at={TL.words.bloom.at} step={TL.words.bloom.step} y={TEXT_Y} size={135} color={INK} />}
+        {bloomOn && sparkles(t, TL.words.bloom.at + 0.1, [W / 2, TEXT_Y, 300, 190], ['#e69596', '#e8a77c', '#efb56f'], 8, 3)}
         {t > T.iris1[0] && (
           <Iris at={T.iris1} t={t} way="Expresso Poppy" id="iris1">
             <Scene name="drop1" t={t} />
@@ -312,8 +309,8 @@ export const PetalPopTeaser1: React.FC<{ withAudio: boolean }> = ({ withAudio })
         {t < T.wipe2[1] && <DropPill t={t} />}
         <Wipe name="wipe2" t={t}>
           <Scene name="tuned" t={t} view={tunedView} frame />
-          <Words lines={TL.words.tuned.lines} t={t} at={TL.words.tuned.at} step={TL.words.tuned.step} y={S.cy + S.size / 2 + 150} size={130} color={INK} />
-          {sparkles(t, TL.words.tuned.at + 0.1, [W / 2, S.cy + S.size / 2 + 150, 380, 90], ['#dba19d', '#af9cbb', '#efb866'], 7, 5)}
+          <Words lines={TL.words.tuned.lines} t={t} at={TL.words.tuned.at} step={TL.words.tuned.step} y={S.cy + S.size / 2 + 110} size={96} color={INK} />
+          {sparkles(t, TL.words.tuned.at + 0.1, [W / 2, S.cy + S.size / 2 + 110, 290, 70], ['#dba19d', '#af9cbb', '#efb866'], 7, 5)}
         </Wipe>
         <Logo t={t} />
       </>
@@ -324,8 +321,8 @@ export const PetalPopTeaser1: React.FC<{ withAudio: boolean }> = ({ withAudio })
         <Scene name="logo" t={t} />
         <rect width={W} height={H} fill={brown} opacity={outroBg} />
         <Logo t={t} />
-        {sparkles(t, TL.logo.parts.heart, [W / 2, TEXT_Y, 470, 360], ['#f8a5cb', '#98d4f1', '#77b27e'], 8, 9)}
-        {sparkles(t, 9.55, [W / 2, TEXT_Y, 330, 300], ['#fed7ab', '#f3dfcb'], 6, 11)}
+        {sparkles(t, TL.logo.parts.heart, [W / 2, TEXT_Y, 370, 300], ['#f8a5cb', '#98d4f1', '#77b27e'], 8, 9)}
+        {sparkles(t, 9.55, [W / 2, TEXT_Y, 260, 230], ['#fed7ab', '#f3dfcb'], 6, 11)}
       </>
     );
   }
@@ -347,7 +344,7 @@ export const PetalPopTeaser1: React.FC<{ withAudio: boolean }> = ({ withAudio })
         <AbsoluteFill style={{ alignItems: 'center' }}>
           <img
             src={staticFile('teaser1/nafesa.png')}
-            style={{ position: 'absolute', width: 560, left: W / 2 - 280, top: TEXT_Y - 195, opacity: naf, transform: `scale(${0.92 + 0.08 * naf})` }}
+            style={{ position: 'absolute', width: 420, left: W / 2 - 210, top: TEXT_Y - 146, opacity: naf, transform: `scale(${0.92 + 0.08 * naf})` }}
           />
         </AbsoluteFill>
       )}
