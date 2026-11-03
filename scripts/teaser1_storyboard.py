@@ -3,9 +3,9 @@
 import sys
 from PIL import Image, ImageDraw, ImageFont
 d_in, out, ver = sys.argv[1:4]
-secs = ['0.6', '1.6', '2.15', '3.3', '4.1', '4.2', '4.7', '5.6', '6.9', '7.8', '8.6', '9.9']
-cap = ['Bunga pop dari 4 tepi', '"Petal Pop" huruf pop', 'Floral wipe ke Vanilla Sky', '"Blooming Soon"', 'Iris bulat ke Expresso Poppy', 'Iris (sambungan)',
-       'DROP 2 bounce', 'Iris ke Forest Bloom', 'Olive Spritz: corak penuh', 'Zoom out: scarf + "Stay Tuned"', 'Logo Petal Pop Drop 2', 'NAFESA sign-off']
+secs = ['0.9', '2.3', '3.3', '4.9', '5.9', '6.9', '8.3', '9.3', '10.6', '11.6', '13.0', '14.8']
+cap = ['Bunga pop dari tepi (bulat)', '"Petal Pop" hold', 'Floral wipe ke Vanilla Sky', '"Blooming Soon" hold', 'Iris bulat ke Expresso Poppy', 'DROP 2 bounce',
+       'Forest Bloom, DROP 2 hold', 'Floral wipe ke Olive Spritz', 'Zoom out ke scarf penuh', '"Stay Tuned" hold', 'Logo Petal Pop Drop 2', 'NAFESA sign-off']
 ims = [Image.open(f'{d_in}/f_{s}.png') for s in secs]
 w, h = ims[0].size
 cols, pad, th = 6, 24, 70
@@ -15,7 +15,7 @@ R = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 21)
 W, H = cols * (w + pad) + pad, 110 + 2 * (h + th + pad)
 c = Image.new('RGB', (W, H), '#ffeac5')
 d = ImageDraw.Draw(c)
-d.text((pad, 28), f'PETAL POP DROP 2 — TEASER 1  ·  storyboard {ver}  ·  10s 9:16, SFX sahaja', font=B, fill='#042215')
+d.text((pad, 28), f'PETAL POP DROP 2 — TEASER 1  ·  storyboard {ver}  ·  15s 9:16, SFX sahaja', font=B, fill='#042215')
 for i, (s, im) in enumerate(zip(secs, ims)):
     x, y = pad + (i % cols) * (w + pad), 110 + (i // cols) * (h + th + pad)
     c.paste(im, (x, y))

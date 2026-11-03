@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const P = require('../src/teaser1/pattern.json');
 
-const W = 1080, H = 1920, FPS = 30, DURATION = 10;
+const W = 1080, H = 1920, FPS = 30, DURATION = 15;
 let seed = 7;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
@@ -20,13 +20,14 @@ const scenes = {
   logo:    { way: 'Butter Bliss',   C: [1700, 1400], s: 0.8, clear: [540, TEXT_Y, 420] },
 };
 const T = {
-  wipe1: [1.85, 2.35],    // diagonal floral wipe Butter Bliss -> Vanilla Sky
-  iris1: [3.95, 4.3],     // flower iris -> Expresso Poppy
-  iris2: [4.95, 5.3],     // flower iris -> Forest Bloom
-  wipe2: [5.9, 6.4],      // floral wipe top -> bottom -> Olive Spritz
-  zoom: [6.95, 7.6],      // zoom out: the whole Olive Spritz scarf as a square on Butter Bliss cream
-  shrink: [7.8, 8.12],   // scarf shrinks away, logo scales up
-  outro: [9.0, 9.45],     // flowers + logo leave, NAFESA on Expresso brown
+  wipe1: [2.9, 3.75],     // diagonal floral wipe Butter Bliss -> Vanilla Sky
+  iris1: [5.6, 6.3],      // round bloom iris -> Expresso Poppy
+  iris2: [7.3, 8.0],      // round bloom iris -> Forest Bloom
+  wipe2: [8.75, 9.6],     // floral wipe top -> bottom -> Olive Spritz
+  zoom: [10.1, 11.1],     // zoom out: the whole Olive Spritz scarf as a square on Butter Bliss cream
+  shrink: [12.0, 12.45],  // scarf shrinks away, logo scales up
+  outro: [13.75, 14.25],  // flowers + logo leave, NAFESA on Expresso brown
+  nafesa: [14.15, 14.7],  // NAFESA fades in, holds to the end
 };
 const SCARF = { size: 760, cy: 880 }; // full scarf square after the zoom
 
@@ -51,18 +52,18 @@ build('petal', (x, y, u) => {
   const dl = x, dr = W - x, dt = y, db = H - y, m = Math.min(dl, dr, dt, db);
   const e = 1 - Math.min(1, Math.hypot(x - 540, y - TEXT_Y) / 1100); // outermost first, closing in as a circle
   const dir = m === dl ? [-1, 0] : m === dr ? [1, 0] : m === dt ? [0, -1] : [0, 1];
-  return [0.08 + e * 0.95 + rnd() * 0.14, dir[0] * 90, dir[1] * 90, (rnd() - 0.5) * 70];
+  return [0.1 + e * 1.35 + rnd() * 0.16, dir[0] * 90, dir[1] * 90, (rnd() - 0.5) * 70];
 });
 // 2. BLOOMING SOON: flowers bloom outward from the middle with a twist
 build('bloom', (x, y) => {
   const dx = x - 540, dy = y - TEXT_Y, d = Math.hypot(dx, dy) || 1;
-  return [2.1 + Math.min(1, d / 1150) * 0.75 + rnd() * 0.08, (-dx / d) * 110, (-dy / d) * 110, -60 - rnd() * 60];
+  return [T.wipe1[0] + 0.4 + Math.min(1, d / 1150) * 1.1 + rnd() * 0.1, (-dx / d) * 110, (-dy / d) * 110, -60 - rnd() * 60];
 });
 // 3. DROP 2: two fast colourways, flowers pop in rings on the eighth notes
-for (const [name, t0] of [['drop1', T.iris1[0] + 0.12], ['drop2', T.iris2[0] + 0.12]]) {
+for (const [name, t0] of [['drop1', T.iris1[0] + 0.2], ['drop2', T.iris2[0] + 0.2]]) {
   build(name, (x, y) => {
     const ring = Math.floor(Math.hypot(x - 540, y - TEXT_Y) / 260);
-    return [t0 + ring * 0.0625 + rnd() * 0.04, 0, 0, (rnd() - 0.5) * 90];
+    return [t0 + ring * 0.1 + rnd() * 0.06, 0, 0, (rnd() - 0.5) * 90];
   });
 }
 // 4. STAY TUNED: the pattern spreads from the centre until the scarf is complete (every unit, so the zoom-out shows it all)
@@ -78,7 +79,7 @@ for (const [name, t0] of [['drop1', T.iris1[0] + 0.12], ['drop2', T.iris2[0] + 0
 // 5. LOGO: a frame of Butter Bliss flowers around the logo, top and bottom bands first
 build('logo', (x, y) => {
   const d = Math.min(1, Math.abs(y - TEXT_Y) / 900);
-  return [T.shrink[0] + 0.15 + (1 - d) * 0.35 + rnd() * 0.1, 0, 0, (rnd() - 0.5) * 80, 9.0 + (1 - d) * 0.05 + rnd() * 0.3];
+  return [T.shrink[0] + 0.2 + (1 - d) * 0.5 + rnd() * 0.12, 0, 0, (rnd() - 0.5) * 80, T.outro[0] + (1 - d) * 0.08 + rnd() * 0.35];
 });
 
 // the iris shape: a five-petal scarf flower
@@ -101,12 +102,14 @@ const wipes = {
 
 // words
 const words = {
-  petal: { at: 0.95, step: 0.07 },                                  // logo letters P e t a l P o p
-  bloom: { lines: ['Blooming', 'Soon'], at: 2.75, step: 0.16 },
-  drop:  { at: 4.5, pulse: T.iris2[0] + 0.05 },
-  tuned: { lines: ['Stay Tuned'], at: 7.35, step: 0.14 },
+  // at = first pop, out = gone (each word eases out over the 0.35 s before it, ahead of the transition)
+  petal: { at: 1.2, step: 0.11, out: T.wipe1[0] + 0.05 },          // logo letters P e t a l P o p
+  bloom: { lines: ['Blooming', 'Soon'], at: T.wipe1[1] + 0.25, step: 0.3, out: T.iris1[0] + 0.05 },
+  drop:  { at: T.iris1[1] + 0.15, pulse: T.iris2[0] + 0.1, out: T.wipe2[0] + 0.15 },
+  tuned: { lines: ['Stay Tuned'], at: T.zoom[1] - 0.1, step: 0.2, out: T.shrink[0] + 0.05 },
 };
-const logo = { at: T.shrink[1] - 0.06, parts: { flower: 8.35, leaf: 8.42, tulip: 8.5, stem: 8.5, heart: 8.6, pill: 8.4, drop: 8.4 } };
+const L0 = T.shrink[1];
+const logo = { at: L0 - 0.08, parts: { flower: L0 + 0.3, leaf: L0 + 0.4, tulip: L0 + 0.52, stem: L0 + 0.52, heart: L0 + 0.66, pill: L0 + 0.42, drop: L0 + 0.42 } };
 
 // SFX cues (seconds). Pops are bundled per frame so ~1000 flower pops stay a soft patter.
 const sfx = { pops: [], whoosh: [], bloop: [], sparkle: [], letters: [], drop: [], logo: [], nafesa: [] };
@@ -122,11 +125,11 @@ for (const u of scenes.tuned.units) {
 Object.entries(perFrame).forEach(([f, n]) => sfx.pops.push([Math.round((f / FPS) * 1000) / 1000, n]));
 sfx.whoosh.push(T.wipe1[0] - 0.05, T.iris1[0] - 0.12, T.iris2[0] - 0.12, T.wipe2[0] - 0.05, T.zoom[0], T.shrink[0], T.outro[0]);
 sfx.bloop.push(T.iris1[0] + 0.05, T.iris2[0] + 0.05);
-sfx.sparkle.push(words.bloom.at + 0.1, words.tuned.at + 0.1, logo.parts.heart, 9.55);
+sfx.sparkle.push(words.bloom.at + 0.1, words.tuned.at + 0.1, logo.parts.heart, T.nafesa[0] + 0.15);
 for (let i = 0; i < 8; i++) sfx.letters.push(words.petal.at + i * words.petal.step);
 sfx.drop.push(words.drop.at, words.drop.pulse);
 sfx.logo.push(logo.at, ...Object.values(logo.parts));
-sfx.nafesa.push(9.4);
+sfx.nafesa.push(T.nafesa[0]);
 
 const out = { W, H, FPS, DURATION, TEXT_Y, T, SCARF, IRIS, scenes, wipes, words, logo, sfx };
 fs.writeFileSync(path.join(__dirname, '../src/teaser1/timeline.json'), JSON.stringify(out));
