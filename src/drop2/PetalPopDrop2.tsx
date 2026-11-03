@@ -337,7 +337,7 @@ export const PetalPopDrop2: React.FC<{ withAudio?: boolean }> = ({ withAudio }) 
 
       {/* NAFESA back cover last */}
       {t >= END.back && (
-        <div style={{ position: 'absolute', left: 0, top: 90, width: W, height: 1532, opacity: Math.min(1, back * 1.4), transform: `scale(${1.06 - 0.06 * back})` }}>
+        <div style={{ position: 'absolute', left: 0, top: 960 - 0.458 * 1532, width: W, height: 1532, opacity: Math.min(1, back * 1.4), transform: `scale(${1.06 - 0.06 * back})` }}>
           <Img src={staticFile('drop2/page13.jpg')} style={{ width: '100%', height: '100%' }} />
         </div>
       )}
