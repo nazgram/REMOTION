@@ -1,0 +1,599 @@
+{
+ "W": 1080,
+ "H": 1920,
+ "FPS": 30,
+ "DURATION": 21,
+ "PAGE": {
+  "w": 1399,
+  "h": 1985
+ },
+ "CARD": {
+  "h": 1000,
+  "w": 705,
+  "cy": 840,
+  "x": 188,
+  "y": 340
+ },
+ "HEAD": {
+  "cy": 175,
+  "w": 300
+ },
+ "LOGO": {
+  "in": 0.15,
+  "grab": 0.8,
+  "dragEnd": 1.45,
+  "release": 1.52,
+  "toHeader": [
+   2,
+   2.45
+  ],
+  "startScale": 1.32
+ },
+ "CARRY": 0.55,
+ "COVER": {
+  "in": 2.35,
+  "drop": 2.9,
+  "marquee": [
+   3.25,
+   3.75
+  ],
+  "end": 4.35
+ },
+ "CW": [
+  {
+   "name": "Butter Bliss",
+   "page": "page03",
+   "way": "Butter Bliss",
+   "hex": "#FFEAC5",
+   "pick": [
+    600,
+    1300
+   ],
+   "tilt": -3,
+   "in": 4.35,
+   "drop": 4.9,
+   "click": 5.45
+  },
+  {
+   "name": "Expresso Poppy",
+   "page": "page05",
+   "way": "Expresso Poppy",
+   "hex": "#633B26",
+   "pick": [
+    1050,
+    1100
+   ],
+   "tilt": 2.5,
+   "in": 6.3,
+   "drop": 6.85,
+   "click": 7.4
+  },
+  {
+   "name": "Forest Bloom",
+   "page": "page07",
+   "way": "Forest Bloom",
+   "hex": "#000000",
+   "pick": [
+    720,
+    1150
+   ],
+   "tilt": -2,
+   "in": 8.25,
+   "drop": 8.8,
+   "click": 9.35
+  },
+  {
+   "name": "Olive Spritz",
+   "page": "page09",
+   "way": "Olive Spritz",
+   "hex": "#62634E",
+   "pick": [
+    800,
+    1300
+   ],
+   "tilt": 3,
+   "in": 10.2,
+   "drop": 10.75,
+   "click": 11.3
+  },
+  {
+   "name": "Vanilla Sky",
+   "page": "page11",
+   "way": "Vanilla Sky",
+   "hex": "#F2F2F3",
+   "pick": [
+    600,
+    1100
+   ],
+   "tilt": 0,
+   "in": 12.15,
+   "drop": 12.7,
+   "click": 13.25
+  }
+ ],
+ "PACK": {
+  "fan": [
+   14.1,
+   14.6
+  ],
+  "marquee": [
+   14.75,
+   15.15
+  ],
+  "grab": 15.25,
+  "drag": [
+   15.25,
+   15.75
+  ],
+  "pulse": 15.8
+ },
+ "END": {
+  "toCenter": [
+   16,
+   16.5
+  ],
+  "logoOut": [
+   18,
+   18.3
+  ],
+  "back": 18.35
+ },
+ "sfx": [
+  {
+   "at": 0.15,
+   "kind": "pop",
+   "gain": 1.1,
+   "pitch": 0.9
+  },
+  {
+   "at": 0.8,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 0.85,
+   "kind": "swish",
+   "gain": 0.8,
+   "pitch": 1
+  },
+  {
+   "at": 1.52,
+   "kind": "click",
+   "gain": 0.7,
+   "pitch": 1.2
+  },
+  {
+   "at": 2,
+   "kind": "swish",
+   "gain": 0.6,
+   "pitch": 1
+  },
+  {
+   "at": 2.35,
+   "kind": "click",
+   "gain": 0.8,
+   "pitch": 1
+  },
+  {
+   "at": 2.38,
+   "kind": "swish",
+   "gain": 0.75,
+   "pitch": 1
+  },
+  {
+   "at": 2.9,
+   "kind": "drop",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 4.35,
+   "kind": "click",
+   "gain": 0.8,
+   "pitch": 1
+  },
+  {
+   "at": 4.38,
+   "kind": "swish",
+   "gain": 0.75,
+   "pitch": 1
+  },
+  {
+   "at": 4.9,
+   "kind": "drop",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 6.3,
+   "kind": "click",
+   "gain": 0.8,
+   "pitch": 1
+  },
+  {
+   "at": 6.33,
+   "kind": "swish",
+   "gain": 0.75,
+   "pitch": 1
+  },
+  {
+   "at": 6.85,
+   "kind": "drop",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 8.25,
+   "kind": "click",
+   "gain": 0.8,
+   "pitch": 1
+  },
+  {
+   "at": 8.28,
+   "kind": "swish",
+   "gain": 0.75,
+   "pitch": 1
+  },
+  {
+   "at": 8.8,
+   "kind": "drop",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 10.2,
+   "kind": "click",
+   "gain": 0.8,
+   "pitch": 1
+  },
+  {
+   "at": 10.23,
+   "kind": "swish",
+   "gain": 0.75,
+   "pitch": 1
+  },
+  {
+   "at": 10.75,
+   "kind": "drop",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 12.15,
+   "kind": "click",
+   "gain": 0.8,
+   "pitch": 1
+  },
+  {
+   "at": 12.18,
+   "kind": "swish",
+   "gain": 0.75,
+   "pitch": 1
+  },
+  {
+   "at": 12.7,
+   "kind": "drop",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 3.25,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 3.28,
+   "kind": "swish",
+   "gain": 0.4,
+   "pitch": 1
+  },
+  {
+   "at": 3.75,
+   "kind": "click",
+   "gain": 0.7,
+   "pitch": 1.2
+  },
+  {
+   "at": 5.45,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1.1
+  },
+  {
+   "at": 5.5,
+   "kind": "sparkle",
+   "gain": 0.7,
+   "pitch": 1
+  },
+  {
+   "at": 6,
+   "kind": "pop",
+   "gain": 0.85,
+   "pitch": 1.05
+  },
+  {
+   "at": 5.57,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.25
+  },
+  {
+   "at": 5.64,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.33
+  },
+  {
+   "at": 5.71,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.41
+  },
+  {
+   "at": 5.78,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.49
+  },
+  {
+   "at": 7.4,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1.1
+  },
+  {
+   "at": 7.45,
+   "kind": "sparkle",
+   "gain": 0.7,
+   "pitch": 1.05
+  },
+  {
+   "at": 7.95,
+   "kind": "pop",
+   "gain": 0.85,
+   "pitch": 1.11
+  },
+  {
+   "at": 7.52,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.25
+  },
+  {
+   "at": 7.59,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.33
+  },
+  {
+   "at": 7.66,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.41
+  },
+  {
+   "at": 7.73,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.49
+  },
+  {
+   "at": 9.35,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1.1
+  },
+  {
+   "at": 9.4,
+   "kind": "sparkle",
+   "gain": 0.7,
+   "pitch": 1.1
+  },
+  {
+   "at": 9.9,
+   "kind": "pop",
+   "gain": 0.85,
+   "pitch": 1.17
+  },
+  {
+   "at": 9.47,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.25
+  },
+  {
+   "at": 9.54,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.33
+  },
+  {
+   "at": 9.61,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.41
+  },
+  {
+   "at": 9.68,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.49
+  },
+  {
+   "at": 11.3,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1.1
+  },
+  {
+   "at": 11.35,
+   "kind": "sparkle",
+   "gain": 0.7,
+   "pitch": 1.15
+  },
+  {
+   "at": 11.85,
+   "kind": "pop",
+   "gain": 0.85,
+   "pitch": 1.23
+  },
+  {
+   "at": 11.42,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.25
+  },
+  {
+   "at": 11.49,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.33
+  },
+  {
+   "at": 11.56,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.41
+  },
+  {
+   "at": 11.63,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.49
+  },
+  {
+   "at": 13.25,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1.1
+  },
+  {
+   "at": 13.3,
+   "kind": "sparkle",
+   "gain": 0.7,
+   "pitch": 1.2
+  },
+  {
+   "at": 13.8,
+   "kind": "pop",
+   "gain": 0.85,
+   "pitch": 1.29
+  },
+  {
+   "at": 13.37,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.25
+  },
+  {
+   "at": 13.44,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.33
+  },
+  {
+   "at": 13.51,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.41
+  },
+  {
+   "at": 13.58,
+   "kind": "pop",
+   "gain": 0.32,
+   "pitch": 1.49
+  },
+  {
+   "at": 14.1,
+   "kind": "swish",
+   "gain": 0.7,
+   "pitch": 1
+  },
+  {
+   "at": 14.18,
+   "kind": "pop",
+   "gain": 0.55,
+   "pitch": 1
+  },
+  {
+   "at": 14.25,
+   "kind": "pop",
+   "gain": 0.55,
+   "pitch": 1.06
+  },
+  {
+   "at": 14.32,
+   "kind": "pop",
+   "gain": 0.55,
+   "pitch": 1.12
+  },
+  {
+   "at": 14.39,
+   "kind": "pop",
+   "gain": 0.55,
+   "pitch": 1.18
+  },
+  {
+   "at": 14.46,
+   "kind": "pop",
+   "gain": 0.55,
+   "pitch": 1.24
+  },
+  {
+   "at": 14.75,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 14.78,
+   "kind": "swish",
+   "gain": 0.4,
+   "pitch": 1
+  },
+  {
+   "at": 15.15,
+   "kind": "click",
+   "gain": 0.7,
+   "pitch": 1.2
+  },
+  {
+   "at": 15.25,
+   "kind": "click",
+   "gain": 1,
+   "pitch": 1
+  },
+  {
+   "at": 15.3,
+   "kind": "swish",
+   "gain": 0.9,
+   "pitch": 1
+  },
+  {
+   "at": 15.8,
+   "kind": "pop",
+   "gain": 1.2,
+   "pitch": 0.85
+  },
+  {
+   "at": 16,
+   "kind": "swish",
+   "gain": 0.5,
+   "pitch": 1
+  },
+  {
+   "at": 18,
+   "kind": "pop",
+   "gain": 0.9,
+   "pitch": 0.8
+  },
+  {
+   "at": 18.35,
+   "kind": "shimmer",
+   "gain": 1,
+   "pitch": 1
+  }
+ ]
+}

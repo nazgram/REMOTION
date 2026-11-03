@@ -78,3 +78,18 @@ SCALE=0.4 node scripts/drop1_stills.mjs out/sb PetalPopTeaser1 1.6 4.7 7.8 8.6
 npx remotion render PetalPopTeaser1 out/teaser1.mp4 --props='{"withAudio":true}' \
   --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
 ```
+
+## Petal Pop Drop 2 catalog editor reel (PetalPopDrop2)
+
+21 s 9:16 upgrade of the Drop 1 editor reel for the Drop 2 catalog pages (`public/drop2`): the Petal Pop Drop 2
+logo (vector) is free-transformed down and parked in the header, the move cursor carries every page in and drops it on
+a pile, the eyedropper picks each scarf and a round swatch filled with that scarf's real print (from
+`src/teaser1/pattern.json`) flies to the palette strip while scarf flowers pop around the page, then select all ->
+scale into the DROP 2 pill, the logo alone, and the NAFESA back cover last. SFX only.
+
+```bash
+node scripts/drop2_layout.js   # src/drop2/timeline.json
+node audio/drop2_sfx.js        # public/drop2/sfx.wav
+npx remotion render PetalPopDrop2 out/drop2.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
