@@ -15,33 +15,41 @@ const fx = new Bus(N), keys = new Bus(N), verb = new Bus(N);
 const camAt = (t) => L.cam[Math.min(L.cam.length - 1, Math.max(0, Math.round(t * L.FPS)))];
 let seed = 60;
 for (const e of L.els) {
-  if (e.pass !== null && e.pass < L.END.washAt + 1) {
-    const big = e.kind === 'hero';
-    const c = camAt(e.pass);
-    const pan = Math.max(-0.85, Math.min(0.85, (e.x + e.vx * (e.pass - e.born) - c[1]) / 900));
-    const len = big ? 1.5 : 1.0;
-    const w = I.noiseSweep(len, big ? 2600 : 3400, big ? 380 : 900, { q: 0.8, pink: true, seed: seed++, shape: (x) => Math.pow(Math.sin(Math.PI * Math.min(1, x * 1.25)), 2) });
-    fx.addMono(w, e.pass - len * 0.45, big ? 0.34 : 0.16, pan);
-    verb.addMono(w, e.pass - len * 0.45, 0.06);
-  }
-  if (e.kind === 'blown' && e.born < L.END.washAt) {
-    for (let i = 0; i < 4; i++) fx.addMono(I.paperFwip(1.3 + i * 0.08, seed++), e.born + 0.6 + i * 0.55, 0.05, -0.6 + i * 0.4);
-  }
-  if (e.kind === 'hero' && e.born < L.END.washAt) {
-    const p = I.pop(1700, seed++);
-    fx.addMono(p, e.born + 0.25, 0.14, 0);
-    const mb = I.musicBox(m(['C6', 'D6', 'F6', 'G6', 'A6'][L.ways.indexOf(e.way)]), { decay: 1.0 });
-    keys.addMono(mb, e.born + 0.25, 0.07);
-    verb.addMono(mb, e.born + 0.25, 0.08);
-  }
+  if (e.pass === null || e.pass > L.END.washAt + 0.6) continue;
+  const big = e.kind === 'hero';
+  const c = camAt(e.pass);
+  const pan = Math.max(-0.85, Math.min(0.85, (e.x + e.vx * Math.max(0, e.pass - e.born) - c[1]) / 900));
+  const len = big ? 1.6 : 1.0;
+  const w = I.noiseSweep(len, big ? 2600 : 3400, big ? 360 : 900, { q: 0.8, pink: true, seed: seed++, shape: (x) => Math.pow(Math.sin(Math.PI * Math.min(1, x * 1.25)), 2) });
+  fx.addMono(w, e.pass - len * 0.45, big ? 0.34 : 0.15, pan);
+  verb.addMono(w, e.pass - len * 0.45, 0.06);
 }
+// every colourway change: a soft rising swell into the bloom and a glassy note as the new ground opens
+L.changes.forEach((c, i) => {
+  fx.addMono(I.noiseSweep(0.8, 500, 5200, { q: 1.1, pink: true, seed: 90 + i, shape: (x) => Math.pow(x, 2.2) * (1 - Math.pow(x, 12)) }), c - 0.75, 0.16);
+  const b = I.bell(m(['F6', 'G6', 'A6', 'C7'][i]) && [1396.9, 1568, 1760, 2093][i], 0.9, 1.8, 2.0);
+  fx.addMono(b, c - 0.05, 0.1, i % 2 ? 0.3 : -0.3);
+  verb.addMono(b, c - 0.05, 0.12);
+});
+// petals right by the lens: a quick soft flutter-whoosh as they cross
+for (const f of L.floats) {
+  if (!f.near || f.born > L.END.washAt) continue;
+  const tc = f.born + (L.W / 2 + 260) / f.sp;
+  fx.addMono(I.noiseSweep(0.5, 4500, 1800, { q: 1.2, pink: true, seed: seed++ }), tc - 0.25, 0.09, 0);
+  fx.addMono(I.paperFwip(1.4, seed++), tc - 0.05, 0.05, 0.2);
+}
+// the opening flower blooming in front of the lens
+fx.addMono(I.pop(1200, 3), 0.05, 0.22);
+keys.addMono(I.musicBox(m('C6'), { decay: 1.2 }), 0.08, 0.1);
+// the ring round the logo: one tiny pop + music-box note per flower as it settles, climbing
+const RING = ['C6', 'D6', 'F6', 'G6', 'A6', 'C7'].map(m);
+L.ring.forEach((r, i) => {
+  fx.addMono(I.pop(1800 + i * 90, 200 + i), r.at + 0.35, 0.08, Math.cos(r.a) * 0.6);
+  keys.addMono(I.musicBox(RING[i % RING.length], { decay: 0.8 }), r.at + 0.35, 0.05, Math.cos(r.a) * 0.6);
+});
 const E = L.END;
 fx.addMono(I.noiseSweep(E.washDur + 0.8, 4200, 400, { q: 0.7, pink: true, seed: 70 }), E.washAt, 0.22);
-['C5', 'F5', 'G5', 'A5', 'C6', 'F6'].forEach((n, k) => {
-  const x = I.musicBox(m(n), { decay: 1.5 });
-  keys.addMono(x, E.logoAt + k * (E.logoDur / 6), 0.17, (k - 2.5) * 0.12);
-  verb.addMono(x, E.logoAt + k * (E.logoDur / 6), 0.14);
-});
+fx.addMono(I.pop(900, 300), E.logoAt + 0.05, 0.2);
 fx.addMono(I.ting(m('A6')), E.logoAt + E.logoDur, 0.14);
 fx.addMono(I.bell(1396.9, 0.6, 2.0), E.logoAt + E.logoDur, 0.14);
 const nb = I.bell(698.5, 1.2, 1.6, 2.0);

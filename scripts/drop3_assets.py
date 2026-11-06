@@ -2,7 +2,7 @@
   python3 scripts/drop3_assets.py "<PETAL POP 3 folder>"
 The five Abstract Floral SVGs share one artwork (same paths); only the fills change. Hero motifs are picked by
 connected component on a 2x raster of Camellia, then each one is re-rasterized big (about 1100 px) for every
-colourway. Writes public/drop3/<way>/<motif>.png, public/drop3/logo.png, public/drop3/wash_*/NN.png and
+colourway. Writes public/drop3/<way>/<motif>.png, <way>/pattern.png, public/drop3/logo.png, paper.png and
 src/drop3/assets.json (motif sizes + colourway backgrounds)."""
 import json, os, re, subprocess, sys, tempfile
 import xml.etree.ElementTree as ET
@@ -83,30 +83,24 @@ logo.thumbnail((1600, 1600), Image.LANCZOS)
 logo.save(os.path.join(OUT, 'logo.png'), optimize=True)
 
 
-def wash(name, cx, cy, seed, n=36, w=540, h=960):
-    """watercolor bleed: a blotchy front grows from (cx, cy), soft wet edge, a few drips ahead of it"""
-    rng = np.random.default_rng(seed)
-    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
-    d = np.hypot((xx - cx * w) / w, (yy - cy * h) / w)
-    noise = np.zeros((h, w), np.float32)
-    for sc, amp in [(6, 0.5), (14, 0.28), (34, 0.14), (80, 0.07)]:
-        g = rng.random((sc * 2, sc)).astype(np.float32)
-        noise += amp * np.array(Image.fromarray(g).resize((w, h), Image.BICUBIC))
-    field = d + 0.45 * noise
-    lo, hi = field.min(), field.max()
-    os.makedirs(os.path.join(OUT, name), exist_ok=True)
-    for i in range(n):
-        p = i / (n - 1)
-        p = 1 - (1 - p) ** 2  # bleeds fast, then creeps into the corners
-        thr = lo + (hi - lo + 0.12) * p
-        a = np.clip((thr - field) / 0.08, 0, 1)
-        img = Image.fromarray((a * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(3))
-        rgba = Image.merge('RGBA', [Image.new('L', (w, h), 255)] * 3 + [img])
-        rgba.save(os.path.join(OUT, name, f'{i:02d}.png'), optimize=True)
+# the far wall: each colourway's whole artwork (no background), seen softly behind everything
+raster([dict(svg=os.path.join(TMP, n + '.svg'), vb=[0, 0, 3240, 3240], W=2200, H=2200, out=os.path.join(OUT, n, 'pattern.png')) for n in WAYS])
 
-
-wash('wash_a', 0.15, 0.2, 3)
-wash('wash_b', 0.85, 0.8, 7)
-wash('wash_c', 0.5, 0.5, 11)
+# watercolor paper: soft blotches + fine grain + a few fibres, mid grey, laid over the frame in overlay mode
+rng = np.random.default_rng(21)
+PW, PH = 1080, 1920
+def blot(sc, amp):
+    g = rng.random((PH // sc + 2, PW // sc + 2)).astype(np.float32)
+    return amp * (np.array(Image.fromarray(g).resize((PW, PH), Image.BICUBIC)) - 0.5)
+tex = 0.5 + blot(240, 0.10) + blot(60, 0.06) + blot(12, 0.04) + (rng.random((PH, PW)).astype(np.float32) - 0.5) * 0.10
+fib = Image.new('L', (PW, PH), 0)
+from PIL import ImageDraw
+dr = ImageDraw.Draw(fib)
+for _ in range(500):
+    x, y = rng.random() * PW, rng.random() * PH
+    ang, ln = rng.random() * 6.28, 8 + rng.random() * 30
+    dr.line([x, y, x + np.cos(ang) * ln, y + np.sin(ang) * ln], fill=int(40 + rng.random() * 60), width=1)
+tex -= np.array(fib.filter(ImageFilter.GaussianBlur(0.6)), np.float32) / 255 * 0.25
+Image.fromarray((np.clip(tex, 0, 1) * 255).astype(np.uint8)).save(os.path.join(OUT, 'paper.png'), optimize=True)
 json.dump(dict(ways=WAYS, bg=bgs, motifs=meta), open(os.path.join(ROOT, 'src/drop3/assets.json'), 'w'), indent=1)
 print('ok', bgs)
