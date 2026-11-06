@@ -21,6 +21,7 @@ TMP = tempfile.mkdtemp()
 MOTIFS = dict(L1=424, L2=723, L3=178, L4=1066, L5=1252, L6=209, F1=1802, F2=13, F3=25, F4=315, F5=323,
               V1=516, V2=248, S1=14, S2=106, P1=100)
 BIG = 1100  # longest side of a motif PNG
+XL = ('F1', 'F4')  # the frame-covering flowers of the colourway changes, also drawn at 2600 px
 
 
 def raster(jobs):
@@ -61,6 +62,8 @@ for k, cid in MOTIFS.items():
     for n in WAYS:
         os.makedirs(os.path.join(OUT, n), exist_ok=True)
         jobs.append(dict(svg=os.path.join(TMP, n + '.svg'), vb=vb, W=W, H=H, out=os.path.join(OUT, n, k + '.png')))
+        if k in XL:
+            jobs.append(dict(svg=os.path.join(TMP, n + '.svg'), vb=vb, W=round(W * 2600 / BIG), H=round(H * 2600 / BIG), out=os.path.join(OUT, n, k + '_xl.png')))
 raster(jobs)
 for k, mt in meta.items():
     ref = None
@@ -75,6 +78,17 @@ for k, mt in meta.items():
             ref = ndimage.binary_dilation(l2 == keep, iterations=2)
         im[..., 3] = im[..., 3] * ref
         Image.fromarray(im).save(f, optimize=True)
+        if k in XL:  # same mask, scaled up
+            fx = os.path.join(OUT, n, k + '_xl.png')
+            big = np.array(Image.open(fx))
+            mk = np.array(Image.fromarray((ref * 255).astype(np.uint8)).resize(big.shape[1::-1], Image.BILINEAR)) / 255
+            big[..., 3] = (big[..., 3] * mk).astype(np.uint8)
+            Image.fromarray(big).save(fx, optimize=True)
+    if k in XL:  # the biggest solid disc inside the flower: where it must sit to cover the frame
+        solid = ndimage.binary_fill_holes(np.array(Image.open(os.path.join(OUT, WAYS[0], k + '.png')))[..., 3] > 200)
+        dt = ndimage.distance_transform_edt(solid)
+        cy, cx = np.unravel_index(dt.argmax(), dt.shape)
+        mt['core'] = [round(cx / mt['w'], 4), round(cy / mt['h'], 4), round(dt.max() / mt['w'], 4)]
     del mt['seed']
 
 logo = Image.open(SRC + 'Logo Petal Pop 3.png')

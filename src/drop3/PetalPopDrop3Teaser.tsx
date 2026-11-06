@@ -8,7 +8,6 @@ import T from './timeline.json';
 // into the wash, petals spiral in round the Drop 3 logo, NAFESA closes. Watercolor paper over all. SFX only.
 type El = (typeof T.els)[number];
 type Float = (typeof T.floats)[number];
-type Ring = (typeof T.ring)[number];
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const easeInOut = (x: number) => x * x * (3 - 2 * x);
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3);
@@ -24,13 +23,8 @@ const mix = (c1: string, c2: string, k: number) => {
 const img = (way: string, m: string) => staticFile(`drop3/${way}/${m}.png`);
 type Cam = { z: number; x: number; y: number };
 
-// which colourway is showing, and how far the change into it has got: the next ground opens out from the
-// centre behind the hero flower as it flies through the lens (a soft-edged bloom, no muddy cross-fade)
-const wayState = (t: number) => {
-  const i = T.changes.filter((c) => t >= c - 0.3).length;
-  const k = i === 0 ? 1 : easeOut(Math.min(1, (t - (T.changes[i - 1] - 0.3)) / 0.6));
-  return { i, prev: Math.max(0, i - 1), k };
-};
+// which colourway is showing: a clean switch at each cover flower's peak
+const wayIndex = (t: number) => T.changes.filter((c) => t >= c).length;
 
 const WallLayer: React.FC<{ n: number; t: number; cam: Cam; mask?: string }> = ({ n, t, cam, mask }) => {
   const way = T.ways[n];
@@ -54,16 +48,32 @@ const WallLayer: React.FC<{ n: number; t: number; cam: Cam; mask?: string }> = (
   );
 };
 
-const Wall: React.FC<{ t: number; cam: Cam }> = ({ t, cam }) => {
-  const { i, prev, k } = wayState(t);
-  if (k >= 1) return <WallLayer n={i} t={t} cam={cam} />;
-  const r = k * 1250;
-  const mask = `radial-gradient(circle at 50% 48%, #000 ${r}px, transparent ${r + 160}px)`;
+const Wall: React.FC<{ t: number; cam: Cam }> = ({ t, cam }) => <WallLayer n={wayIndex(t)} t={t} cam={cam} />;
+
+// a giant flower of the incoming colourway crossing the frame on the wind; at its peak its solid heart covers
+// every pixel, and the switch happens behind it
+const CoverFlower: React.FC<{ c: (typeof T.covers)[number]; t: number }> = ({ c, t }) => {
+  const u = (t - (c.peak - T.COVER_DUR / 2)) / T.COVER_DUR;
+  if (u < 0 || u > 1) return null;
+  const S = 7.4 * (0.3 + 0.7 * Math.pow(Math.sin(Math.PI * u), 6)); // size, in multiples of 1100 px: swells to cover only at its peak
+  const w = 1100 * S, h = w * c.ar;
+  const ax = interpolate(u, [0, 1], [-1500, T.W + 1500]);
+  const ay = T.H / 2 + Math.sin(Math.PI * u) * -60 + (u - 0.5) * 240;
+  const [cx, cy] = c.core;
   return (
-    <>
-      <WallLayer n={prev} t={t} cam={cam} />
-      <WallLayer n={i} t={t} cam={cam} mask={mask} />
-    </>
+    <Img
+      src={staticFile(`drop3/${c.way}/${c.m}_xl.png`)}
+      style={{
+        position: 'absolute',
+        left: ax - cx * w,
+        top: ay - cy * h,
+        width: w,
+        height: h,
+        transformOrigin: `${cx * 100}% ${cy * 100}%`,
+        transform: `rotate(${-14 + 28 * u}deg)`,
+        filter: `blur(${2 + Math.abs(u - 0.5) * 4}px) drop-shadow(0px 30px 40px rgba(60, 30, 20, 0.2))`,
+      }}
+    />
   );
 };
 
@@ -159,30 +169,31 @@ const Logo: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
-// twelve small flowers, one from every colourway in turn, spiral in and settle in a ring round the logo
-const RingFlower: React.FC<{ r: Ring; t: number }> = ({ r, t }) => {
+// the logo's frame: flowers in three size levels gathered in two opposite corners, the big ones half off the
+// frame and soft, drifting in from their corner and settling with a sway
+const FrameFlower: React.FC<{ f: (typeof T.frame)[number]; t: number }> = ({ f, t }) => {
   const E = T.END;
-  const life = t - r.at;
+  const life = t - f.at;
   if (life < 0) return null;
-  const s = spring({ frame: life * T.FPS, fps: T.FPS, config: { damping: 14, mass: 0.8, stiffness: 70 } });
+  const s = spring({ frame: life * T.FPS, fps: T.FPS, config: { damping: 15, mass: 0.9, stiffness: 60 } });
   const out = interpolate(t, [E.logoOut - 0.1, E.logoOut + 0.6], [0, 1], { ...clamp, easing: easeInOut });
-  const a = r.a - (1 - s) * 2.6 + Math.sin(t * 0.8 + r.phase) * 0.03 + out * 0.6;
-  const rad = r.r * (1 + (1 - s) * 1.4) * (1 + out * 0.8) * (0.82 + 0.18) ;
-  const x = T.W / 2 + Math.cos(a) * rad;
-  const y = T.H / 2 + Math.sin(a) * rad * 1.15;
-  const h = r.h * (0.4 + 0.6 * s);
+  const push = (1 - s) * 420 + out * 380; // in from (and back out to) its own corner
+  const x = f.x - f.side * push * 0.8;
+  const y = f.y - f.side * push;
+  const sway = Math.sin(t * 1.1 + f.phase) * (f.level === 0 ? 3 : 7);
+  const blur = f.level === 0 ? 5 : f.level === 1 ? 1 : 0;
   return (
     <Img
-      src={img(r.way, r.m)}
+      src={staticFile(`drop3/${f.way}/${f.m}.png`)}
       style={{
         position: 'absolute',
-        left: x - h / 2,
-        top: y - h / 2,
-        width: h,
-        height: h,
-        objectFit: 'contain',
-        opacity: Math.min(1, life / 0.3) * (1 - out),
-        transform: `rotate(${r.spin * (1 - s) * 4 + Math.sin(t * 1.3 + r.phase) * 12}deg)`,
+        left: x - f.w / 2,
+        top: y - f.h / 2,
+        width: f.w,
+        height: f.h,
+        opacity: Math.min(1, life / 0.35) * (1 - out),
+        filter: `${blur ? `blur(${blur}px) ` : ''}drop-shadow(0px 16px 20px rgba(70, 35, 25, 0.16))`,
+        transform: `rotate(${f.rot + sway + (1 - s) * 40}deg) scale(${(f.flip ? -1 : 1) * (0.7 + 0.3 * s)}, ${0.7 + 0.3 * s})`,
       }}
     />
   );
@@ -220,7 +231,7 @@ export const PetalPopDrop3Teaser: React.FC<{ withAudio: boolean }> = ({ withAudi
   const [cz, cx, cy, roll] = T.cam[Math.min(T.cam.length - 1, frame)];
   const cam = { z: cz, x: cx, y: cy };
   const E = T.END;
-  const g = interpolate(t, [E.washAt, E.washAt + E.washDur], [0, 1], { ...clamp, easing: easeInOut });
+  const g = t < E.washAt ? 0 : 0.85 + 0.15 * Math.min(1, (t - E.washAt) / E.washDur); // cut to the wash behind the last cover
   const els = [...T.els].sort((a, b) => b.z - a.z); // far first
   const floats = [...T.floats].sort((a, b) => b.d - a.d);
   return (
@@ -240,8 +251,11 @@ export const PetalPopDrop3Teaser: React.FC<{ withAudio: boolean }> = ({ withAudi
           <Floater key={f.id} f={f} t={t} cam={cam} />
         ))}
       </AbsoluteFill>
-      {T.ring.map((r) => (
-        <RingFlower key={r.id} r={r} t={t} />
+      {T.covers.map((c) => (
+        <CoverFlower key={c.id} c={c} t={t} />
+      ))}
+      {T.frame.map((f) => (
+        <FrameFlower key={f.id} f={f} t={t} />
       ))}
       <Logo t={t} />
       <Nafesa t={t} />

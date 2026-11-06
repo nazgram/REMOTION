@@ -24,12 +24,18 @@ for (const e of L.els) {
   fx.addMono(w, e.pass - len * 0.45, big ? 0.34 : 0.15, pan);
   verb.addMono(w, e.pass - len * 0.45, 0.06);
 }
-// every colourway change: a soft rising swell into the bloom and a glassy note as the new ground opens
-L.changes.forEach((c, i) => {
-  fx.addMono(I.noiseSweep(0.8, 500, 5200, { q: 1.1, pink: true, seed: 90 + i, shape: (x) => Math.pow(x, 2.2) * (1 - Math.pow(x, 12)) }), c - 0.75, 0.16);
-  const b = I.bell(m(['F6', 'G6', 'A6', 'C7'][i]) && [1396.9, 1568, 1760, 2093][i], 0.9, 1.8, 2.0);
-  fx.addMono(b, c - 0.05, 0.1, i % 2 ? 0.3 : -0.3);
-  verb.addMono(b, c - 0.05, 0.12);
+// every cover flower: a big soft whoosh panned left to right as it crosses, a low air thump at its peak (the cut)
+// and a glassy note as the new colourway shows
+L.covers.forEach((c, i) => {
+  const d = L.COVER_DUR;
+  const w = I.noiseSweep(d + 0.2, 900, 3000, { q: 0.7, pink: true, seed: 90 + i, shape: (x) => Math.pow(Math.sin(Math.PI * x), 1.6) });
+  [-0.7, -0.2, 0.3, 0.75].forEach((pan, j) => fx.addMono(w.subarray(Math.round(j * w.length / 4), Math.round((j + 1) * w.length / 4)), c.peak - d / 2 - 0.1 + j * (d + 0.2) / 4, 0.3, pan));
+  fx.addMono(I.thud(70, 0.16, 120 + i), c.peak, 0.22);
+  if (i < L.changes.length) {
+    const b = I.bell([1396.9, 1568, 1760, 2093][i], 0.9, 1.8, 2.0);
+    fx.addMono(b, c.peak + 0.05, 0.08, 0.3);
+    verb.addMono(b, c.peak + 0.05, 0.1);
+  }
 });
 // petals right by the lens: a quick soft flutter-whoosh as they cross
 for (const f of L.floats) {
@@ -41,11 +47,10 @@ for (const f of L.floats) {
 // the opening flower blooming in front of the lens
 fx.addMono(I.pop(1200, 3), 0.05, 0.22);
 keys.addMono(I.musicBox(m('C6'), { decay: 1.2 }), 0.08, 0.1);
-// the ring round the logo: one tiny pop + music-box note per flower as it settles, climbing
-const RING = ['C6', 'D6', 'F6', 'G6', 'A6', 'C7'].map(m);
-L.ring.forEach((r, i) => {
-  fx.addMono(I.pop(1800 + i * 90, 200 + i), r.at + 0.35, 0.08, Math.cos(r.a) * 0.6);
-  keys.addMono(I.musicBox(RING[i % RING.length], { decay: 0.8 }), r.at + 0.35, 0.05, Math.cos(r.a) * 0.6);
+// the logo's corner flowers settling: soft pops, smaller flowers higher
+L.frame.forEach((f, i) => {
+  fx.addMono(I.pop(1100 + f.level * 500, 200 + i), f.at + 0.3, f.level === 0 ? 0.1 : 0.06, f.side > 0 ? -0.5 : 0.5);
+  if (f.level === 2) keys.addMono(I.musicBox(m(['C6', 'F6', 'A6'][i % 3]), { decay: 0.8 }), f.at + 0.3, 0.05, f.side > 0 ? -0.5 : 0.5);
 });
 const E = L.END;
 fx.addMono(I.noiseSweep(E.washDur + 0.8, 4200, 400, { q: 0.7, pink: true, seed: 70 }), E.washAt, 0.22);
