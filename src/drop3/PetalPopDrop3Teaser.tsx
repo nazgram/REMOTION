@@ -32,7 +32,7 @@ const WallLayer: React.FC<{ n: number; t: number; cam: Cam; mask?: string }> = (
   return (
     <AbsoluteFill style={{ backgroundColor: T.bg[n], WebkitMaskImage: mask, maskImage: mask }}>
       <Img
-        src={img(way, 'pattern')}
+        src={img(way, 'pattern_soft')}
         style={{
           position: 'absolute',
           width: 2300,
@@ -40,8 +40,6 @@ const WallLayer: React.FC<{ n: number; t: number; cam: Cam; mask?: string }> = (
           left: T.W / 2 - 1150 - cam.x * 0.12,
           top: T.H / 2 - 1150 - cam.y * 0.12,
           transform: `scale(${zoom}) rotate(${t * 0.6}deg)`,
-          opacity: way === 'Petunia' ? 0.32 : 0.2,
-          filter: 'blur(3px)',
         }}
       />
     </AbsoluteFill>
