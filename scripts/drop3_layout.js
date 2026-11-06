@@ -53,23 +53,35 @@ const SCENES = [
   { way: 'Lavender', tpl: 'giants', mirror: true, wash: 'wash_c' },
   { way: 'Marigold', tpl: 'diagonal', mirror: true, wash: 'wash_a' },
 ];
-const WASH_DUR = 1.4; // the bleed lands on the bar line 0.4 s in
+// one ground, one take: nothing cuts. At each change the old motifs are brushed away one by one, top to bottom,
+// while the next colourway's motifs are painted in over the same spots with the same dry brush.
+const OUT_DUR = 0.8, IN_DUR = 1.0, WASH_DUR = 1.6;
 const scenes = SCENES.map((s, i) => {
   const start = i === 0 ? 0 : i * 4 - 0.4;
+  const order = TEMPLATES[s.tpl].map((e, k) => k).sort((a, b) => TEMPLATES[s.tpl][a][2] - TEMPLATES[s.tpl][b][2]);
   const els = TEMPLATES[s.tpl].map(([m, x, y, h, rot, entrance, at, oy = 50], k) => {
+    if (entrance === 'paint') at = 0.15 + order.indexOf(k) * 0.12; // painted in top to bottom
+    // brush direction for this motif: alternate left-to-right / right-to-left so the strokes cross
+    const dir = (i + k) % 2 ? -1 : 1;
     const a = A.motifs[m];
     const mx = s.mirror ? W - x : x;
     return {
       id: `${i}-${k}`, m, x: mx, y, h, w: Math.round((h * a.w) / a.h), rot: s.mirror ? -rot : rot,
-      flip: s.mirror, entrance, at: +(start + at).toFixed(2), oy, phase: +((i * 7 + k * 2.3) % 6.28).toFixed(2),
+      flip: s.mirror, entrance, at: +(start + at).toFixed(2), oy, phase: +((i * 7 + k * 2.3) % 6.28).toFixed(2), dir,
+      order: order.indexOf(k),
     };
   });
-  return { ...s, bg: s.way === 'Petunia' ? '#120e0d' : A.bg[s.way], start, els };
+  return { ...s, bg: s.way === 'Petunia' ? '#f4ded0' : A.bg[s.way], start, els };
+});
+// when each motif is brushed away: at the next change (top to bottom), or never for the last colourway
+scenes.forEach((s, i) => {
+  const next = scenes[i + 1];
+  s.els.forEach((e) => (e.out = next ? +(next.start + e.order * 0.09).toFixed(2) : null));
 });
 const END = { washAt: 19.2, washDur: 1.2, logoAt: 20.0, logoDur: 1.3, logoOut: 23.2, nafAt: 23.6 };
 const DURATION = 25.5;
 fs.writeFileSync(
   path.join(__dirname, '../src/drop3/timeline.json'),
-  JSON.stringify({ W, H, FPS, BPM, DURATION, WASH_DUR, WASH_FRAMES: 36, END, scenes }, null, 1),
+  JSON.stringify({ W, H, FPS, BPM, DURATION, WASH_DUR, OUT_DUR, IN_DUR, END, scenes }, null, 1),
 );
 console.log('scenes', scenes.map((s) => `${s.way}@${s.start}`).join(' '));

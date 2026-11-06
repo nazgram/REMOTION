@@ -5,7 +5,7 @@ import T from './timeline.json';
 // in a breeze, a watercolor bleed paints each next colourway over the last, then the last garden washes out to
 // a soft blur and the Drop 3 logo writes itself in from the left. NAFESA closes.
 type Scene = (typeof T.scenes)[number];
-type El = Scene['els'][number];
+type El = Scene['els'][number] & { out: number | null };
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 const easeInOut = (x: number) => x * x * (3 - 2 * x);
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3);
@@ -14,11 +14,39 @@ const outBack = (x: number) => {
   return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2);
 };
 
+// the dry-brush mask (opaque left, streaky edge, transparent right) slid across a motif in its own frame:
+// k = 0 nothing shown, k = 1 all shown; dir -1 paints right to left
+const brush = (k: number): React.CSSProperties => {
+  const pos = (1 - Math.min(1, Math.max(0, k))) * 100;
+  const url = `url(${staticFile('drop3/brush.png')})`;
+  return {
+    WebkitMaskImage: url,
+    maskImage: url,
+    WebkitMaskSize: '300% 100%',
+    maskSize: '300% 100%',
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+    WebkitMaskPosition: `${pos}% 0%`,
+    maskPosition: `${pos}% 0%`,
+  };
+};
+// a masked wrapper; for dir -1 the mask is mirrored and the content mirrored back, so it reads the right way
+const Brushed: React.FC<{ k: number; dir: number; children: React.ReactNode }> = ({ k, dir, children }) =>
+  k >= 1 ? (
+    <>{children}</>
+  ) : (
+    <div style={{ position: 'absolute', inset: 0, transform: dir < 0 ? 'scaleX(-1)' : undefined, ...brush(k) }}>
+      <div style={{ position: 'absolute', inset: 0, transform: dir < 0 ? 'scaleX(-1)' : undefined }}>{children}</div>
+    </div>
+  );
+
 const Motif: React.FC<{ e: El; way: string; t: number }> = ({ e, way, t }) => {
   const local = t - e.at;
   if (local < 0) return null;
+  const sinceOut = e.out === null ? -1 : t - e.out;
+  if (sinceOut > T.OUT_DUR + 1.6) return null;
   const f = local * T.FPS;
-  let scale = 1, dy = 0, drot = 0, opacity = 1;
+  let scale = 1, dy = 0, drot = 0, opacity = 1, paint = 1;
   if (e.entrance === 'grow') {
     const g = outBack(Math.min(1, local / 1.2));
     scale = Math.max(0, g);
@@ -33,15 +61,19 @@ const Motif: React.FC<{ e: El; way: string; t: number }> = ({ e, way, t }) => {
     scale = spring({ frame: f, fps: T.FPS, config: { damping: 9, mass: 0.55, stiffness: 150 } });
     drot = (1 - scale) * -30;
   } else {
-    // paint: arrives with the wash, settling from slightly large
-    scale = 1.07 - 0.07 * easeOut(Math.min(1, local / (T.WASH_DUR + 0.4)));
+    // paint: brushed in across the motif, growing a touch as the stroke passes
+    paint = easeOut(Math.min(1, local / T.IN_DUR));
+    scale = 0.94 + 0.06 * paint;
   }
+  // going: brushed away the other way, leaving a pale wet stain that fades
+  const gone = sinceOut < 0 ? 0 : Math.min(1, sinceOut / T.OUT_DUR);
+  const stain = sinceOut < 0 ? 0 : interpolate(sinceOut, [0, 0.3, T.OUT_DUR + 1.6], [0, 0.3, 0], clamp);
   const settle = Math.min(1, local / 1.4);
   const sway = Math.sin(t * Math.PI * 2 * 0.3 + e.phase) * 2.2 * settle;
   const bob = Math.sin(t * Math.PI * 2 * 0.22 + e.phase * 1.7) * 6 * settle;
+  const src = staticFile(`drop3/${way}/${e.m}.png`);
   return (
-    <Img
-      src={staticFile(`drop3/${way}/${e.m}.png`)}
+    <div
       style={{
         position: 'absolute',
         left: e.x - e.w / 2,
@@ -52,41 +84,28 @@ const Motif: React.FC<{ e: El; way: string; t: number }> = ({ e, way, t }) => {
         transformOrigin: e.entrance === 'grow' ? `50% ${e.oy}%` : '50% 50%',
         transform: `rotate(${e.rot + drot + sway}deg) scale(${scale * (e.flip ? -1 : 1)}, ${scale})`,
       }}
-    />
+    >
+      {stain > 0 && (
+        <Img
+          src={src}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: stain, filter: 'blur(14px) saturate(0.7)' }}
+        />
+      )}
+      {gone < 1 && (
+        <Brushed k={1 - gone} dir={-e.dir}>
+          <Brushed k={paint} dir={e.dir}>
+            <Img src={src} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+          </Brushed>
+        </Brushed>
+      )}
+    </div>
   );
 };
 
-const washSrc = (name: string, p: number) =>
-  `url(${staticFile(`drop3/${name}/${String(Math.round(p * (T.WASH_FRAMES - 1))).padStart(2, '0')}.png`)})`;
-
-const SceneLayer: React.FC<{ s: Scene; t: number; mask?: string; filter?: string; opacity?: number }> = ({
-  s,
-  t,
-  mask,
-  filter,
-  opacity = 1,
-}) => {
-  // a slow push-in while the scene holds
-  const zoom = 1 + 0.06 * interpolate(t, [s.start, s.start + 6], [0, 1], clamp);
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: s.bg,
-        WebkitMaskImage: mask,
-        maskImage: mask,
-        WebkitMaskSize: '100% 100%',
-        maskSize: '100% 100%',
-        filter,
-        opacity,
-      }}
-    >
-      <AbsoluteFill style={{ transform: `scale(${zoom})` }}>
-        {s.els.map((e) => (
-          <Motif key={e.id} e={e} way={s.way} t={t} />
-        ))}
-      </AbsoluteFill>
-    </AbsoluteFill>
-  );
+const mix = (c1: string, c2: string, k: number) => {
+  const h = (c: string) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  const [a, b] = [h(c1), h(c2)];
+  return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`;
 };
 
 const Logo: React.FC<{ t: number }> = ({ t }) => {
@@ -146,27 +165,28 @@ export const PetalPopDrop3Teaser: React.FC<{ withAudio: boolean }> = ({ withAudi
   const S = T.scenes;
   const i = S.filter((s) => t >= s.start).length - 1;
   const cur = S[i];
-  const p = i > 0 ? (t - cur.start) / T.WASH_DUR : 1;
+  // one ground the whole way: it only drifts in tint as the colourways change
+  const p = i > 0 ? easeInOut(Math.min(1, (t - cur.start) / T.WASH_DUR)) : 1;
+  const ground = i > 0 ? mix(S[i - 1].bg, cur.bg, p) : cur.bg;
   const E = T.END;
   // the end: the last garden softens, pales and blurs into a watercolor ground for the logo
   const g = interpolate(t, [E.washAt, E.washAt + E.washDur], [0, 1], { ...clamp, easing: easeInOut });
-  const endFilter = g > 0 ? `blur(${g * 26}px) saturate(${1 - g * 0.35}) brightness(${1 + g * 0.06})` : undefined;
+  // one continuous camera: a slow push-in with a hand-held float that never resets at a change
+  const zoom = 1 + 0.1 * interpolate(t, [0, E.washAt + E.washDur], [0, 1], clamp);
+  const camX = Math.sin(t * 0.33) * 14 + Math.sin(t * 0.71 + 1) * 5;
+  const camY = Math.sin(t * 0.27 + 2) * 12 - t * 1.2;
+  const live = S.filter((s, k) => k === i || k === i - 1);
   return (
-    <AbsoluteFill style={{ backgroundColor: S[S.length - 1].bg, overflow: 'hidden' }}>
-      {p < 1 && (
-        <SceneLayer
-          s={S[i - 1]}
-          t={t}
-          filter={`blur(${easeInOut(Math.min(1, p)) * 6}px) brightness(${1 + 0.05 * p})`}
-        />
-      )}
-      <SceneLayer
-        s={cur}
-        t={t}
-        mask={p < 1 ? washSrc(cur.wash as string, Math.max(0, p)) : undefined}
-        filter={endFilter}
-        opacity={1 - g * 0.62}
-      />
+    <AbsoluteFill style={{ backgroundColor: ground, overflow: 'hidden' }}>
+      <AbsoluteFill
+        style={{
+          transform: `translate(${camX}px, ${camY}px) scale(${zoom})`,
+          filter: g > 0 ? `blur(${g * 26}px) saturate(${1 - g * 0.35}) brightness(${1 + g * 0.06})` : undefined,
+          opacity: 1 - g * 0.62,
+        }}
+      >
+        {live.map((s) => s.els.map((e) => <Motif key={e.id} e={e as El} way={s.way} t={t} />))}
+      </AbsoluteFill>
       <Logo t={t} />
       <Nafesa t={t} />
       {withAudio && <Audio src={staticFile('drop3/music.wav')} />}
