@@ -1,32 +1,33 @@
 // Timeline for PetalPopDrop3Teaser1 (Petal Pop Drop 3, teaser 1, in the Drop 1 / Drop 2 teaser style: the real
 // print full frame, flowers that pop, words in an opening, logo, NAFESA last) with its own moves:
-// a garden that grows up from the bottom, hanging-scarf strips, a leaf fan, a tile flip, a scarf that flips and
-// folds into a triangle, corner clusters round the logo, strips rising into NAFESA.
+// a garden that grows up from the bottom, soft flower-bloom transitions made of the print itself, a scarf that turns and
+// folds into a triangle, corner clusters round the logo, blooms melting into NAFESA.
 //   node scripts/drop3t_layout.js  ->  src/drop3t/timeline.json
-// 1080x1920 @30fps, 16 s. Text and logos stay inside the top 1521 px (TikTok UI).
+// 1080x1920 @30fps, 17 s. Text and logos stay inside the top 1521 px (TikTok UI).
 const fs = require('fs');
 const path = require('path');
 const P = require('../src/drop3t/pattern.json');
 const V = require('../src/drop3t/views.json');
 
-const W = 1080, H = 1920, FPS = 30, DURATION = 16;
+const W = 1080, H = 1920, FPS = 30, DURATION = 17.5;
 const TEXT_Y = 900;
 let seed = 23;
 const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const r3 = (v) => Math.round(v * 1000) / 1000;
 
 const T = {
-  strips: [2.85, 3.85],    // Buttercup -> Camellia: six hanging-scarf strips drop in, left to right
-  window: [4.0, 5.45],     // the four-petal opening for "Coming Soon" (opens, closes)
-  fan: [5.55, 6.35],       // Camellia -> Petunia: six leaf blades fan open from the centre
-  tiles: [7.45, 8.35],     // Petunia -> Lavender: the frame flips over tile by tile from the centre
-  zoom: [9.35, 10.3],      // Lavender pulls out to the whole square scarf
-  flip: [10.35, 10.85],    // the scarf flips over: Marigold on the other side
-  fold: [11.0, 11.65],     // folded corner to corner into a triangle, turned point down
-  logo: [12.75, 13.15],    // triangle away, logo builds, corner clusters grow
-  rise: [14.3, 14.9],      // strips rise in Camellia magenta
-  nafesa: [14.85, 15.4],   // NAFESA
+  b1: 2.7,                 // Buttercup -> Camellia: Camellia flowers bloom up from the bottom, then settle into the print
+  window: [4.3, 5.7],      // the four-petal opening for "Coming Soon" (opens, closes)
+  b2: 5.75,                // Camellia -> Petunia: blooms open out from the centre
+  b3: 8.2,                 // Petunia -> Lavender: blooms drift in from the top-right corner
+  zoom: [9.9, 10.8],       // Lavender pulls out to the whole square scarf
+  flip: [10.9, 11.6],      // the scarf turns over: Marigold on the other side
+  fold: [11.75, 12.45],    // folded corner to corner into a triangle, turned point down
+  logo: [13.5, 14.1],      // triangle lifts away softly, logo builds, corner clusters grow
+  b4: 15.2,                // Camellia blooms from the centre cover the logo and melt into magenta
+  nafesa: [16.2, 16.75],   // NAFESA, once the blooms have melted
 };
+const BLOOM = { grow: 0.45, spread: 0.55, hold: 0.62, settle: 0.55, cover: 2.1, maskLag: 0.3 };
 const SCARF = { size: 760, cy: 860 };
 
 const screenOf = (C, s, u) => [(u.x - C[0]) * s + W / 2, (u.y - C[1]) * s + H / 2];
@@ -67,40 +68,52 @@ for (const [cx, cy, sx, sy] of [[0, 0, 1, 1], [W, H, -1, -1]]) {
   }
 }
 
-// hanging-scarf strips (in) and rising strips (out to NAFESA)
-const strips = Array.from({ length: 6 }, (_, i) => ({ x: i * 180, at: r3(T.strips[0] + i * 0.08 + (i % 2) * 0.03), swing: r3((rnd() - 0.5) * 6) }));
-const rise = Array.from({ length: 6 }, (_, i) => ({ x: i * 180, at: r3(T.rise[0] + Math.abs(i - 2.5) * 0.07) }));
-
-// tile flip: 6 x 11 tiles, from the centre outward
-const tiles = [];
-for (let r = 0; r < 11; r++)
-  for (let c = 0; c < 6; c++) {
-    const x = c * 180, y = r * 180 - 30;
-    const d = Math.hypot(x + 90 - W / 2, y + 90 - TEXT_Y) / 1100;
-    tiles.push({ x, y, at: r3(T.tiles[0] + d * 0.5 + rnd() * 0.04) });
-  }
+// flower transitions: the incoming colourway's own units, at their real places in the incoming view, bloom
+// up to BLOOM.cover times their size in a wave from an origin (covering the old scene), the new scene fades in
+// behind them through a soft round mask, then every bloom shrinks back into its place in the print
+function bloom(at, way, origin, landTo = 1) {
+  const C = V.views[way], s = V.S;
+  const items = [];
+  let dmax = 0;
+  for (const [cx, cy] of [[0, 0], [W, 0], [0, H], [W, H]]) dmax = Math.max(dmax, Math.hypot(cx - origin[0], cy - origin[1]));
+  P.units.forEach((u, i) => {
+    const [x, y] = screenOf(C, s, u), r = u.r * s;
+    if (!visible(x, y, r * BLOOM.cover)) return;
+    const d = Math.hypot(x - origin[0], y - origin[1]);
+    items.push([i, r3((d / dmax) * BLOOM.spread + rnd() * 0.06), Math.round((rnd() - 0.5) * 80)]);
+  });
+  return { at, way, origin, dmax: Math.round(dmax), land: landTo, units: items };
+}
+const blooms = {
+  b1: bloom(T.b1, 'Camellia', [W / 2, H + 500]),
+  b2: bloom(T.b2, 'Petunia', [W / 2, TEXT_Y]),
+  b3: bloom(T.b3, 'Lavender', [W + 150, -200]),
+  b4: bloom(T.b4, 'Camellia', [W / 2, TEXT_Y], 0),
+};
 
 const words = {
-  petal: { at: 1.25, step: 0.09, out: T.strips[0] + 0.25 },
+  petal: { at: 1.25, step: 0.09, out: T.b1 + 0.3 },
   soon: { lines: ['Coming', 'Soon'], at: T.window[0] + 0.3, step: 0.18, out: T.window[1] },
-  drop: { at: T.fan[1] + 0.1, letters: 0.5, wiggle: T.tiles[1] + 0.15, out: T.zoom[0] + 0.05 },
+  drop: { at: T.b2 + 1.15, letters: 0.5, wiggle: T.b3 + 1.25, out: T.zoom[0] + 0.05 },
   date: { lines: ['15 November'], at: T.fold[1] + 0.05, out: T.logo[0] },
 };
 const L0 = T.logo[0] + 0.15;
-const logo = { at: L0, parts: { flower: L0 + 0.45, leaf: L0 + 0.62, tulip: L0 + 0.7, stem: L0 + 0.7, heart: L0 + 0.85, pill: L0 + 0.55, drop: L0 + 0.6 }, out: T.rise[0] + 0.1 };
+const logo = { at: L0, parts: { flower: L0 + 0.45, leaf: L0 + 0.62, tulip: L0 + 0.7, stem: L0 + 0.7, heart: L0 + 0.85, pill: L0 + 0.55, drop: L0 + 0.6 }, out: T.b4 + 0.25 };
 
 // SFX cues
-const sfx = { pops: [], whoosh: [], swish: [], flips: [], letters: [], drop: [], fold: [], logo: [], corners: [], nafesa: [], sparkle: [] };
+const sfx = { pops: [], whoosh: [], blooms: [], letters: [], drop: [], fold: [], logo: [], corners: [], nafesa: [], sparkle: [] };
 const perFrame = {};
 for (const u of garden.units) { const f = Math.round(u[1] * FPS); perFrame[f] = (perFrame[f] || 0) + 1; }
 Object.entries(perFrame).forEach(([f, n]) => sfx.pops.push([r3(f / FPS), n]));
 const cf = {};
 for (const u of corners.units) { const f = Math.round(u[4] * FPS); cf[f] = (cf[f] || 0) + 1; }
 Object.entries(cf).forEach(([f, n]) => sfx.corners.push([r3(f / FPS), n]));
-sfx.swish.push(...strips.map((s) => s.at));
-sfx.whoosh.push(T.fan[0], T.zoom[0], T.flip[0], T.rise[0]);
-const tf = new Set(tiles.map((t) => Math.round(t.at * 15) / 15));
-sfx.flips.push(...[...tf].sort((a, b) => a - b).map(r3));
+for (const b of Object.values(blooms)) {
+  const bf = {};
+  for (const u of b.units) { const f = Math.round((b.at + u[1]) * FPS); bf[f] = (bf[f] || 0) + 1; }
+  sfx.blooms.push(Object.entries(bf).map(([f, n]) => [r3(f / FPS), n]));
+}
+sfx.whoosh.push(T.b1, T.b2, T.b3, T.zoom[0], T.flip[0], T.b4);
 for (let i = 0; i < 8; i++) sfx.letters.push(r3(words.petal.at + i * words.petal.step));
 sfx.letters.push(words.soon.at, r3(words.soon.at + words.soon.step));
 sfx.drop.push(words.drop.at, r3(words.drop.at + words.drop.letters), words.drop.wiggle);
@@ -109,6 +122,6 @@ sfx.logo.push(...Object.values(logo.parts).map(r3));
 sfx.nafesa.push(T.nafesa[0]);
 sfx.sparkle.push(r3(T.window[0] + 0.1), r3(logo.parts.heart), r3(T.nafesa[0] + 0.2));
 
-const out = { W, H, FPS, DURATION, TEXT_Y, T, SCARF, WIN, garden, corners, strips, rise, tiles, words, logo, sfx };
+const out = { W, H, FPS, DURATION, TEXT_Y, T, BLOOM, SCARF, WIN, garden, corners, blooms, words, logo, sfx };
 fs.writeFileSync(path.join(__dirname, '../src/drop3t/timeline.json'), JSON.stringify(out));
-console.log('garden', garden.units.length, 'corners', corners.units.length, 'tiles', tiles.length);
+console.log('garden', garden.units.length, 'corners', corners.units.length, Object.fromEntries(Object.entries(blooms).map(([k, b]) => [k, b.units.length])));

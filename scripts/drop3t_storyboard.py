@@ -3,13 +3,13 @@ import sys
 from PIL import Image, ImageDraw, ImageFont
 D, OUT, VER = sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else 'v1'
 SHOTS = [
-    ('0.6', 'kebun tumbuh dari bawah'), ('1.2', 'bunga naik ke atas'), ('2.2', 'Petal Pop naik dari garis'),
-    ('3.2', 'jalur tudung turun (Camellia)'), ('3.55', 'jalur mendarat, berayun'), ('4.9', 'bukaan 4 kelopak: Coming Soon'),
-    ('5.85', 'kipas daun buka ke Petunia'), ('6.7', 'pil DROP 3 meregang'), ('7.0', 'huruf DROP 3 jatuh'),
-    ('7.85', 'petak flip dari tengah'), ('8.15', 'flip ke Lavender'), ('9.0', 'Lavender, 3 bergoyang'),
-    ('9.9', 'zoom out jadi tudung petak'), ('10.5', 'tudung flip...'), ('10.8', '...belakang Marigold'),
-    ('11.3', 'lipat bucu ke bucu'), ('12.2', 'segi tiga + 15 November'), ('13.25', 'huruf logo jatuh'),
-    ('14.0', 'logo + bunga sudut 3 saiz'), ('14.55', 'jalur magenta naik'), ('15.5', 'NAFESA last'),
+    ('0.6', 'kebun tumbuh dari bawah'), ('2.2', 'Petal Pop naik dari garis'), ('3.0', 'Camellia mekar dari bawah'),
+    ('3.35', 'bunga mekar tutup skrin'), ('3.75', 'kecut balik jadi print'), ('4.9', '4 kelopak: Coming Soon'),
+    ('6.05', 'Petunia mekar dari tengah'), ('6.45', 'tutup lembut'), ('7.1', 'jadi print Petunia + DROP 3'),
+    ('8.5', 'Lavender dari bucu kanan'), ('8.85', 'tutup lembut'), ('9.6', 'Lavender, 3 bergoyang'),
+    ('10.4', 'zoom out jadi tudung petak'), ('11.35', 'tudung pusing ke Marigold'), ('12.1', 'lipat bucu ke bucu'),
+    ('12.9', 'segi tiga + 15 November'), ('14.4', 'logo + bunga sudut 3 saiz'), ('15.5', 'Camellia mekar dari tengah'),
+    ('16.0', 'bunga cair jadi magenta'), ('16.4', 'NAFESA muncul'), ('17.2', 'NAFESA last'),
 ]
 TW, TH, COLS = 240, 427, 7
 F = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
@@ -17,7 +17,7 @@ fb, fs = ImageFont.truetype(F.replace('.ttf', '-Bold.ttf'), 20), ImageFont.truet
 rows = (len(SHOTS) + COLS - 1) // COLS
 sheet = Image.new('RGB', (COLS * (TW + 18) + 18, 90 + rows * (TH + 74)), '#f6efe9')
 d = ImageDraw.Draw(sheet)
-d.text((18, 24), f'Petal Pop Drop 3 · Teaser 1 · storyboard {VER} · gaya Drop 1 & 2, motion baru (16s, 9:16, SFX sahaja)', font=ImageFont.truetype(F.replace('.ttf', '-Bold.ttf'), 28), fill='#5a2c3f')
+d.text((18, 24), f'Petal Pop Drop 3 · Teaser 1 · storyboard {VER} · transition bunga mekar yang lembut (17.5s, 9:16, SFX sahaja)', font=ImageFont.truetype(F.replace('.ttf', '-Bold.ttf'), 28), fill='#5a2c3f')
 for i, (t, cap) in enumerate(SHOTS):
     x, y = 18 + (i % COLS) * (TW + 18), 90 + (i // COLS) * (TH + 74)
     im = Image.open(f'{D}/f_{t}.png').convert('RGB').resize((TW, TH), Image.LANCZOS)

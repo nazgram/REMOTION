@@ -1,5 +1,5 @@
-// SFX for PetalPopDrop3Teaser1 (no music): soft pops as the garden grows (bundled per frame), a cloth swish per
-// hanging-scarf strip, letter pops, a rising whoosh into the leaf fan, wooden ticks for the tile flip, a bouncy
+// SFX for PetalPopDrop3Teaser1 (no music): soft pops as the garden grows (bundled per frame), a soft swell and a
+// gentle patter for each flower-bloom transition, letter pops, a bouncy
 // DROP 3, a fabric flap + fold for the scarf, the logo motifs landing, the corner clusters, a shimmer under NAFESA.
 //   node audio/drop3t_sfx.js   ->  public/drop3t/sfx.wav
 const fs = require('fs');
@@ -32,15 +32,22 @@ for (const [at, n] of S.pops) {
   verb.addMono(p, at, 0.03);
   k++;
 }
-// hanging-scarf strips: a cloth swish each, panned left to right, a soft tap as each lands
-S.swish.forEach((at, i) => {
-  fx.addMono(I.paperFwip(0.8 + i * 0.05, 40 + i), at + 0.05, 0.22, -0.6 + i * 0.24);
-  fx.addMono(I.thud(140, 0.05, 50 + i), at + 0.42, 0.18, -0.6 + i * 0.24);
+// flower transitions: a soft airy swell, a gentle patter of pops as the blooms open (every other busy frame),
+// and a low breathy settle as they sink back into the print
+S.blooms.forEach((list, bi) => {
+  const t0 = list[0][0];
+  fx.addMono(air(1.2, 300, 3000, 100 + bi, 1.2), t0 - 0.1, 0.12, bi % 2 ? 0.25 : -0.25);
+  let q = 0;
+  for (const [at, n] of list) {
+    if (q++ % 2) continue;
+    const p = loadWav(POPS[q % 3], 1.15 + (q % 6) * 0.03);
+    fx.addMono(p, at, Math.min(0.2, 0.05 + n * 0.012), ((q % 7) - 3) * 0.12);
+    verb.addMono(p, at, 0.05);
+  }
+  fx.addMono(air(0.8, 2400, 500, 120 + bi, 1), t0 + L.BLOOM.hold, 0.08);
 });
-// whooshes: leaf fan, pull-out, flip, rising strips
-S.whoosh.forEach((at, i) => fx.addMono(air(0.6, 500, 4800, 60 + i), at - 0.15, 0.22, i % 2 ? 0.2 : -0.2));
-// tile flip: light wooden ticks
-S.flips.forEach((at, i) => { const w = I.woodTick ? I.woodTick(1.1 + (i % 4) * 0.08, 70 + i) : I.rim(1.2 + (i % 4) * 0.1, 70 + i); fx.addMono(w, at + 0.17, 0.14, ((i % 5) - 2) * 0.2); });
+// whooshes: pull-out, turn over
+S.whoosh.slice(3, 5).forEach((at, i) => fx.addMono(air(0.7, 500, 4200, 60 + i), at - 0.15, 0.18, i % 2 ? 0.2 : -0.2));
 // letters
 S.letters.forEach((at, i) => { const p = loadWav(POPS[i % 3], 1 + i * 0.045); fx.addMono(p, at, 0.5, ((i % 8) - 3.5) * 0.08); verb.addMono(p, at, 0.1); });
 // DROP 3: stretch (boing), letters land, the 3 wiggles

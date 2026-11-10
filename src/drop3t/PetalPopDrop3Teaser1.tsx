@@ -1,7 +1,8 @@
-// Petal Pop Drop 3, teaser 1 (16 s, 9:16), in the house style of the Drop 1 and Drop 2 teasers (the real print
+// Petal Pop Drop 3, teaser 1 (17 s, 9:16), in the house style of the Drop 1 and Drop 2 teasers (the real print
 // full frame, flowers that pop, words in an opening, the logo, NAFESA last) but with its own moves:
-// a garden growing up out of the bottom, hanging-scarf strips, a leaf fan, a tile flip, a scarf that flips over and
-// folds into a triangle, corner clusters round the logo, magenta strips rising into NAFESA.
+// a garden growing up out of the bottom, soft flower-bloom transitions made of the print itself (the incoming
+// colourway's flowers bloom over the frame and settle back into the print), a scarf that turns over and folds into a
+// triangle, corner clusters round the logo, blooms melting into the NAFESA card.
 // Vectors (src/drop3t/pattern.json) for everything that pops; the 1x scarf + a 2x crop per scene (public/drop3t)
 // once a scene is built. Timeline and SFX cues: src/drop3t/timeline.json (scripts/drop3t_layout.js).
 import React from 'react';
@@ -69,8 +70,9 @@ const Layer: React.FC<{ clip?: string; transform?: string; origin?: string; chil
 
 // slow push while a scene holds, so it never sits still
 const sceneS = (t: number, a: number, b: number) => V.S * (1 + 0.05 * ease(t, a, b, Easing.inOut(Easing.sin)));
-const camV = (t: number) => viewOf('Camellia', sceneS(t, 3.0, 6.4));
-const petV = (t: number) => viewOf('Petunia', sceneS(t, 5.6, 8.4));
+const camV = (t: number) => viewOf('Camellia', sceneS(t, T.b1, T.b2 + 1.6));
+const petV = (t: number) => viewOf('Petunia', sceneS(t, T.b2, T.b3 + 1.6));
+const lavV = (t: number) => viewOf('Lavender', V.S * (1 + 0.03 * ease(t, T.b3, T.zoom[0], Easing.inOut(Easing.sin))));
 
 // ---------- the four-petal opening ----------
 const quatrefoil = (cx: number, cy: number, R: number, rot: number) => {
@@ -247,33 +249,46 @@ const Garden: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
-const Strips: React.FC<{ t: number; way: string; v: View }> = ({ t, way, v }) => (
-  <>
-    {TL.strips.map((s, i) => {
-      if (t < s.at) return null;
-      const e = ease(t, s.at, s.at + 0.55, Easing.out(Easing.back(1.25)));
-      const dy = -H * 1.05 * (1 - e);
-      const sw = s.swing * Math.sin((t - s.at) * 9) * Math.exp(-(t - s.at) * 3.5);
-      const shade = 0.22 * (1 - ease(t, s.at + 0.3, s.at + 0.8));
-      return (
-        <Layer key={i} clip={`inset(0px ${W - s.x - 180}px 0px ${s.x}px)`} transform={`translateY(${dy}px) rotate(${sw}deg)`} origin={`${s.x + 90}px 0px`}>
-          <Scarf way={way} v={v} />
-          <div style={{ position: 'absolute', left: s.x + 160, top: 0, width: 20, height: H, background: `linear-gradient(90deg, rgba(0,0,0,0), rgba(40,10,20,${shade}))` }} />
-        </Layer>
-      );
-    })}
-  </>
-);
-
-const FAN = 6;
-const fanPath = (p: number) => {
-  const R = 2600, cx = W / 2, cy = TEXT_Y, rot = -40 + p * 100, span = p * (360 / FAN + 4);
-  let d = '';
-  for (let i = 0; i < FAN; i++) {
-    const a0 = ((i * 360) / FAN + rot) * (Math.PI / 180), a1 = a0 + span * (Math.PI / 180);
-    d += `M${cx} ${cy} L${cx + Math.cos(a0) * R} ${cy + Math.sin(a0) * R} A${R} ${R} 0 0 1 ${cx + Math.cos(a1) * R} ${cy + Math.sin(a1) * R} Z `;
-  }
-  return { d, rot, span };
+// ---------- flower transitions ----------
+// The incoming colourway's own units, at their real places in the incoming view, bloom up to BLOOM.cover times
+// their size in a wave from an origin and cover the old scene; the new scene fades in behind them through a soft
+// round mask; then every bloom shrinks back into its own place in the print (or away, for the NAFESA card).
+const B = TL.BLOOM;
+const BEND = B.hold + B.spread * 0.6 + 0.06 + B.settle + 0.03; // seconds from a bloom's start until it is gone
+type BloomName = keyof typeof TL.blooms;
+const Bloom: React.FC<{ name: BloomName; t: number; v: View; children: React.ReactNode }> = ({ name, t, v, children }) => {
+  const b = TL.blooms[name];
+  const way = b.way as Way;
+  const [ox, oy] = b.origin;
+  const R = ease(t, b.at + B.maskLag, b.at + B.maskLag + B.spread + 0.15, Easing.inOut(Easing.sin)) * (b.dmax + 260);
+  const mask = `radial-gradient(circle at ${ox}px ${oy}px, #000 ${Math.max(0, R - 240)}px, rgba(0,0,0,0) ${R}px)`;
+  return (
+    <>
+      {R > 0 && (
+        <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, overflow: 'hidden', WebkitMaskImage: mask, maskImage: mask }}>{children}</div>
+      )}
+      <svg width={W} height={H} style={{ position: 'absolute' }}>
+        <g transform={`translate(${W / 2} ${v.y0}) scale(${v.s}) translate(${-v.cx} ${-v.cy})`}>
+          {b.units.map(([i, delay, rot]) => {
+            const t0 = b.at + delay;
+            if (t < t0) return null;
+            const grow = ease(t, t0, t0 + B.grow, Easing.out(Easing.cubic));
+            const st = b.at + B.hold + delay * 0.6;
+            const settle = ease(t, st, st + B.settle, Easing.inOut(Easing.sin));
+            if (settle >= 1) return null;
+            const k = B.cover * grow + (b.land - B.cover) * settle;
+            if (k <= 0.001) return null;
+            const op = Math.min(1, (t - t0) / 0.14) * (b.land === 0 ? 1 - settle : 1);
+            return (
+              <g key={i} opacity={op}>
+                <UnitG u={UNITS[i]} way={way} k={k} rot={rot * (1 - grow) + rot * 0.25 * Math.sin(settle * Math.PI)} />
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+    </>
+  );
 };
 
 // ---------- the scarf: zoom out, flip over, fold into a triangle ----------
@@ -284,7 +299,7 @@ const ScarfFold: React.FC<{ t: number }> = ({ t }) => {
   const k0 = S.size / TILE;
   const f = ease(t, T.flip[0], T.flip[1], Easing.inOut(Easing.sin));
   const fold = ease(t, T.fold[0], T.fold[1], Easing.inOut(Easing.cubic));
-  const away = ease(t, T.logo[0], T.logo[1], Easing.in(Easing.cubic));
+  const away = ease(t, T.logo[0], T.logo[1], Easing.inOut(Easing.sin));
   const lc = (V.views as Record<string, number[]>).Lavender;
   // camera: pull out from the Lavender view to the whole scarf, then the fold lifts and enlarges it
   const s = interpolate(z, [0, 1], [lavS, k0], { easing: (x) => 1 - Math.pow(1 - x, 2.2) }) * (1 - 0.12 * fold) * (1 - 0.75 * away);
@@ -345,15 +360,16 @@ export const PetalPopDrop3Teaser1: React.FC<{ withAudio: boolean }> = ({ withAud
   const layers: React.ReactNode[] = [];
   const over: React.ReactNode[] = []; // SVG on top
 
-  if (t < T.strips[1] + 0.3) {
-    // 1. garden grows, "Pétal Pop" rises in its opening; strips of Camellia drop over it
+  const black = <div style={{ position: 'absolute', inset: 0, background: '#000' }} />;
+  if (t < T.b1 + BEND) {
+    // 1. garden grows, "Pétal Pop" rises in its opening; Camellia blooms up from the bottom
     layers.push(<Garden key="g" t={t} />);
     over.push(<PetalWord key="pw" t={t} />);
-    layers.push(<Strips key="st" t={t} way="Camellia" v={camV(t)} />);
-  } else if (t < T.fan[1]) {
-    // 2. Camellia, the four-petal opening with "Coming Soon"; the leaf fan opens on Petunia
+    if (t >= T.b1) layers.push(<Bloom key="b1" name="b1" t={t} v={camV(t)}><Scarf way="Camellia" v={camV(t)} /></Bloom>);
+  } else if (t < T.b2 + BEND) {
+    // 2. Camellia, the four-petal opening with "Coming Soon"; Petunia blooms open out from the centre
     layers.push(<Layer key="cam"><Scarf way="Camellia" v={camV(t)} /></Layer>);
-    const wo = pop(t, T.window[0], 12) * (1 - ease(t, T.window[1] - 0.3, T.window[1], Easing.in(Easing.back(1.4))));
+    const wo = pop(t, T.window[0], 14) * (1 - ease(t, T.window[1] - 0.4, T.window[1], Easing.inOut(Easing.sin)));
     if (wo > 0.001) {
       const R = WIN.R * wo, rot = (1 - Math.min(1, wo)) * -60;
       over.push(
@@ -365,59 +381,29 @@ export const PetalPopDrop3Teaser1: React.FC<{ withAudio: boolean }> = ({ withAud
       over.push(<Lines key="soon" id="soon" lines={TL.words.soon.lines} t={t} at={TL.words.soon.at} step={TL.words.soon.step} out={TL.words.soon.out - 0.05} y={TEXT_Y} size={118} color={INK} />);
       over.push(<g key="sp1">{sparkles(t, TL.words.soon.at + 0.15, [WIN.x, WIN.y, 340, 330], ['#c53b73', '#f3b12f', '#dd7045'], 8, 3)}</g>);
     }
-    if (t > T.fan[0]) {
-      const p = ease(t, T.fan[0], T.fan[1], Easing.inOut(Easing.sin));
-      const fp = fanPath(p);
-      layers.push(<Layer key="fan" clip={`path('${fp.d}')`}><div style={{ position: 'absolute', inset: 0, background: '#000' }} /><Scarf way="Petunia" v={petV(t)} /></Layer>);
-      if (p < 1)
-        over.push(
-          <g key="vein" stroke={(V.accent as Record<string, string>).Petunia} strokeWidth={10} strokeLinecap="round">
-            {Array.from({ length: FAN }, (_, i) => {
-              const a = ((i * 360) / FAN + fp.rot + fp.span) * (Math.PI / 180);
-              return <line key={i} x1={W / 2} y1={TEXT_Y} x2={W / 2 + Math.cos(a) * 2400} y2={TEXT_Y + Math.sin(a) * 2400} />;
-            })}
-          </g>,
-        );
-    }
+    if (t >= T.b2) layers.push(<Bloom key="b2" name="b2" t={t} v={petV(t)}>{black}<Scarf way="Petunia" v={petV(t)} /></Bloom>);
   } else if (t < T.zoom[0]) {
-    // 3. Petunia + DROP 3; the frame flips over tile by tile to Lavender
-    const last = Math.max(...TL.tiles.map((x) => x.at)) + 0.36;
-    const lavV = viewOf('Lavender', V.S * (1 + 0.03 * ease(t, T.tiles[0], T.zoom[0])));
-    if (t < last) layers.push(<Layer key="pet"><div style={{ position: 'absolute', inset: 0, background: '#000' }} /><Scarf way="Petunia" v={petV(t)} /></Layer>);
-    else layers.push(<Layer key="lav"><Scarf way="Lavender" v={lavV} /></Layer>);
-    if (t > T.tiles[0] && t < last) {
-      layers.push(<div key="gap" style={{ position: 'absolute', inset: 0 }} />);
-      TL.tiles.forEach((tl, i) => {
-        if (t < tl.at) return;
-        const p = Math.min(1, (t - tl.at) / 0.36);
-        const sx = Math.cos(p * Math.PI);
-        const clip = `inset(${tl.y}px ${W - tl.x - 180}px ${H - tl.y - 180}px ${tl.x}px)`;
-        layers.push(<div key={`gp${i}`} style={{ position: 'absolute', left: tl.x, top: tl.y, width: 180, height: 180, background: '#1b1414' }} />);
-        layers.push(
-          <Layer key={`t${i}`} clip={clip} transform={`scaleX(${Math.abs(sx) || 0.001})`} origin={`${tl.x + 90}px 0px`}>
-            {sx > 0 ? <><div style={{ position: 'absolute', inset: 0, background: '#000' }} /><Scarf way="Petunia" v={petV(t)} /></> : <Scarf way="Lavender" v={lavV} />}
-            <div style={{ position: 'absolute', left: tl.x, top: tl.y, width: 180, height: 180, background: '#000', opacity: 0.35 * (1 - Math.abs(sx)) }} />
-          </Layer>,
-        );
-      });
-    }
+    // 3. Petunia + DROP 3; Lavender blooms drift in from the top-right corner
+    if (t < T.b3 + BEND) {
+      layers.push(<Layer key="pet">{black}<Scarf way="Petunia" v={petV(t)} /></Layer>);
+      if (t >= T.b3) layers.push(<Bloom key="b3" name="b3" t={t} v={lavV(t)}><Scarf way="Lavender" v={lavV(t)} /></Bloom>);
+    } else layers.push(<Layer key="lav"><Scarf way="Lavender" v={lavV(t)} /></Layer>);
   } else if (t < T.logo[1] + 0.05) {
     // 4. the scarf pulls out, flips to Marigold, folds into a triangle; "15 November"
     layers.push(<div key="bg" style={{ position: 'absolute', inset: 0, background: CREAM }} />);
     layers.push(<ScarfFold key="sf" t={t} />);
     over.push(<Lines key="date" id="date" lines={TL.words.date.lines} t={t} at={TL.words.date.at} step={0.2} out={TL.words.date.out} y={1235} size={104} color={INK} />);
   }
-  // DROP 3 pill rides over the fan, the Petunia hold, the tile flip and the start of the pull-out
+  // DROP 3 pill rides over the Petunia hold, the Lavender blooms and the start of the pull-out
   if (t > TL.words.drop.at && t < TL.words.drop.out + 0.05) over.push(<DropPill key="pill" t={t} />);
 
-  if (t >= T.logo[0]) {
-    // 5. logo on cream, corner clusters in three sizes; then magenta strips rise into NAFESA
+  if (t >= T.logo[0] && t < T.b4 + BEND) {
+    // 5. logo on cream, corner clusters in three sizes; Camellia blooms from the centre melt it into magenta
     if (t >= T.logo[1] + 0.05) layers.push(<div key="bg2" style={{ position: 'absolute', inset: 0, background: CREAM }} />);
-    const outK = ease(t, TL.logo.out, TL.logo.out + 0.4);
     layers.push(
       <svg key="corners" width={W} height={H} style={{ position: 'absolute' }}>
         {TL.corners.units.map(([i, x, y, s, at, rot], j) => {
-          const k = pop(t, at, 10) * (1 - outK);
+          const k = pop(t, at, 12);
           if (k <= 0.001) return null;
           const u = UNITS[i];
           const sway = Math.sin(t * 1.6 + j) * 3;
@@ -429,10 +415,15 @@ export const PetalPopDrop3Teaser1: React.FC<{ withAudio: boolean }> = ({ withAud
         })}
       </svg>,
     );
-    over.push(<Logo key="logo" t={t} />);
-    over.push(<g key="sp2">{sparkles(t, TL.logo.parts.heart, [W / 2, TEXT_Y, 400, 300], ['#f8a5cb', '#98d4f1', '#77b27e'], 8, 9)}</g>);
+    layers.push(
+      <svg key="logo" width={W} height={H} style={{ position: 'absolute' }}>
+        <Logo t={t} />
+        {sparkles(t, TL.logo.parts.heart, [W / 2, TEXT_Y, 400, 300], ['#f8a5cb', '#98d4f1', '#77b27e'], 8, 9)}
+      </svg>,
+    );
+    if (t >= T.b4) layers.push(<Bloom key="b4" name="b4" t={t} v={camV(t)}><div style={{ position: 'absolute', inset: 0, background: MAGENTA }} /></Bloom>);
   }
-  const rising = t >= T.rise[0] - 0.05;
+  const magenta = t >= T.b4 + BEND;
 
   const naf = pop(t, T.nafesa[0], 12);
   return (
@@ -441,13 +432,14 @@ export const PetalPopDrop3Teaser1: React.FC<{ withAudio: boolean }> = ({ withAud
       <svg width={W} height={H} style={{ position: 'absolute' }}>
         {over}
       </svg>
-      {rising && (
+      {magenta && (
         <svg width={W} height={H} style={{ position: 'absolute' }}>
-          {TL.rise.map((r, i) => {
-            const e = ease(t, r.at, r.at + 0.5, Easing.out(Easing.cubic));
-            return <rect key={i} x={r.x - 1} y={H * (1 - e)} width={182} height={H} fill={MAGENTA} />;
-          })}
-          {naf > 0 && sparkles(t, T.nafesa[0] + 0.2, [W / 2, TEXT_Y, 290, 220], ['#fde0d3', '#f3b12f'], 6, 11)}
+          <rect width={W} height={H} fill={MAGENTA} />
+        </svg>
+      )}
+      {naf > 0 && (
+        <svg width={W} height={H} style={{ position: 'absolute' }}>
+          {sparkles(t, T.nafesa[0] + 0.2, [W / 2, TEXT_Y, 290, 220], ['#fde0d3', '#f3b12f'], 6, 11)}
         </svg>
       )}
       {naf > 0.001 && (
