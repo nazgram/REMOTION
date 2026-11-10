@@ -12,6 +12,8 @@ import LG from '../drop3t/logo.json';
 
 const font = 'Montserrat';
 loadFont({ family: font, url: staticFile('intro/fonts/Montserrat.ttf'), weight: '100 900' });
+const TITLE = 'Transcity'; // the catalog's title face (Nas's file, letters only: the counter stays in Montserrat)
+loadFont({ family: TITLE, url: staticFile('drop3f/fonts/Transcity.otf') });
 
 const { W, H, CARD, OPEN, COVER, CW, END } = L;
 const IVORY = '#fbf5ea';
@@ -93,17 +95,17 @@ const Sheen: React.FC<{ t: number; id: string; strength?: number }> = ({ t, id, 
 // colour name tag sewn on the silk
 const NameTag: React.FC<{ name: string; idx: number; k: number }> = ({ name, idx, k }) => {
   if (k <= 0.001) return null;
-  const w = name.length * 56 + 150, h = 184, cx = W / 2, cy = 820;
+  const w = name.length * 60 + 170, h = 200, cx = W / 2, cy = 820;
   return (
     <g transform={`translate(${cx} ${cy}) scale(${k}) rotate(${(1 - Math.min(1, k)) * -8})`}>
-      <rect x={-w / 2 + 6} y={-h / 2 + 10} width={w} height={h} rx={92} fill="#000" opacity={0.18} />
-      <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={92} fill={IVORY} />
-      <rect x={-w / 2 + 12} y={-h / 2 + 12} width={w - 24} height={h - 24} rx={80} fill="none" stroke={ACCENT[name]} strokeWidth={3} strokeDasharray="10 9" />
-      <text x={0} y={-26} textAnchor="middle" fontFamily={font} fontWeight={600} fontSize={28} letterSpacing={6} fill={ACCENT[name]}>
+      <rect x={-w / 2 + 6} y={-h / 2 + 10} width={w} height={h} rx={100} fill="#000" opacity={0.18} />
+      <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={100} fill={IVORY} />
+      <rect x={-w / 2 + 12} y={-h / 2 + 12} width={w - 24} height={h - 24} rx={88} fill="none" stroke={ACCENT[name]} strokeWidth={3} strokeDasharray="10 9" />
+      <text x={0} y={-38} textAnchor="middle" fontFamily={font} fontWeight={600} fontSize={28} letterSpacing={6} fill={ACCENT[name]}>
         {`0${idx + 1} / 05`}
       </text>
-      <text x={0} y={46} textAnchor="middle" fontFamily={font} fontWeight={800} fontSize={72} letterSpacing={9} fill={INK}>
-        {name.toUpperCase()}
+      <text x={0} y={50} textAnchor="middle" fontFamily={TITLE} fontSize={100} fill={ACCENT[name]}>
+        {name}
       </text>
     </g>
   );
