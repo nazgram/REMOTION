@@ -30,7 +30,18 @@ for (const c of CW) {
   t += STEP;
 }
 const END = { ribbons: r(t), tagIn: r(t + 0.75), fall: r(t + 2.6), back: r(t + 2.75) };
-const DURATION = Math.ceil((END.back + 2.4) * 2) / 2;
+// NAFESA end card: the back cover's flowers replaced by Nas's motifs, one cluster per colourway, popping in one by one
+// [motif file, x, y, size, rotation]; the leaf spray lands first, then its flowers
+const CLUSTERS = [
+  { way: 'Buttercup', m: [['L2', 95, 330, 560, 150], ['F1', 270, 420, 320, 10], ['F2', 105, 640, 200, -20]] },
+  { way: 'Camellia', m: [['L1', 1000, 230, 600, -35], ['F1', 850, 330, 330, -12], ['F5', 1040, 540, 210, 25]] },
+  { way: 'Lavender', m: [['L3', 1070, 1060, 520, -95], ['F1', 925, 1185, 290, 18], ['F3', 1035, 1360, 190, -15]] },
+  { way: 'Marigold', m: [['L2', 30, 1250, 580, 65], ['F1', 190, 1140, 300, -8], ['F3', 95, 1460, 200, 30]] },
+  { way: 'Petunia', m: [['L1', 760, 1820, 600, 195], ['F1', 545, 1715, 330, 12], ['F5', 320, 1845, 220, -25], ['F2', 905, 1640, 210, 35]] },
+];
+const BLOOMS = [];
+CLUSTERS.forEach((c, j) => c.m.forEach(([f, x, y, size, rot], k) => BLOOMS.push({ way: c.way, f, x, y, size, rot, at: r(END.back + 0.45 + j * 0.32 + k * 0.1) })));
+const DURATION = Math.ceil((Math.max(...BLOOMS.map((b) => b.at)) + 1.4) * 2) / 2;
 
 const sfx = [];
 const ev = (at, kind, gain = 1, pitch = 1) => sfx.push({ at: r(at), kind, gain, pitch });
@@ -49,6 +60,7 @@ for (let j = 0; j < 5; j++) ev(END.ribbons + j * 0.08, 'cloth', 0.45, 1.1 + j * 
 ev(END.tagIn + 0.35, 'drop', 0.9); ev(END.tagIn + 0.38, 'pop', 1.1, 0.85);
 ev(END.fall, 'swish', 0.9);
 ev(END.back, 'shimmer', 1);
+BLOOMS.forEach((b, i) => ev(b.at, 'pop', b.f[0] === 'L' ? 0.7 : 0.5, 0.9 + (i % 5) * 0.07));
 
-fs.writeFileSync(__dirname + '/../src/drop3f/timeline.json', JSON.stringify({ W, H, FPS, DURATION, PAGE, CARD, OPEN, COVER, CW, STEP, END, sfx }, null, 1));
+fs.writeFileSync(__dirname + '/../src/drop3f/timeline.json', JSON.stringify({ W, H, FPS, DURATION, PAGE, CARD, OPEN, COVER, CW, STEP, END, BLOOMS, sfx }, null, 1));
 console.log('DURATION', DURATION, 'events', sfx.length);

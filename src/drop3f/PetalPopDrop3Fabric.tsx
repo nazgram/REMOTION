@@ -262,12 +262,24 @@ export const PetalPopDrop3Fabric: React.FC<{ withAudio?: boolean }> = ({ withAud
     }
   });
   if (t >= END.ribbons + 0.9) {
-    const back = pop(t, END.back - 0.2, 14);
+    // NAFESA end card: the back cover's logo on white, Nas's motifs pop in around it, one colourway cluster at a time
+    const lk = pop(t, END.back - 0.15, 14);
     under = (
       <AbsoluteFill style={{ background: '#fff' }}>
-        <div style={{ position: 'absolute', left: 0, top: 960 - 766, width: W, height: 1532, transform: `scale(${1.08 - 0.08 * back})` }}>
-          <Img src={staticFile('drop3f/page13.jpg')} style={{ width: '100%', height: '100%' }} />
-        </div>
+        <Img src={staticFile('drop3f/nafesa_logo.png')}
+          style={{ position: 'absolute', left: 370, top: 749, width: 339, height: 293, opacity: Math.min(1, lk * 1.5), transform: `scale(${0.85 + 0.15 * lk})` }} />
+        {L.BLOOMS.map((b, i) => {
+          const k = pop(t, b.at, 9, 190);
+          if (k <= 0.001) return null;
+          const lt = t - b.at;
+          const sway = Math.sin(lt * 1.8 + i) * 3;
+          const src = `drop3/${b.way}/${b.f}${b.f === 'F1' || b.f === 'F4' ? '_xl' : ''}.png`;
+          return (
+            <Img key={i} src={staticFile(src)}
+              style={{ position: 'absolute', left: b.x - b.size / 2, top: b.y - b.size / 2, width: b.size, height: b.size, objectFit: 'contain',
+                transform: `rotate(${b.rot + sway + (1 - Math.min(1, k)) * -40}deg) scale(${k})` }} />
+          );
+        })}
       </AbsoluteFill>
     );
   }
