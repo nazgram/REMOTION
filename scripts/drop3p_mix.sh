@@ -1,5 +1,5 @@
 #!/bin/sh
-# song (April Rain Rhythm from 0:08, cut in public/drop3p/song2.wav) + SFX -> public/drop3p/mix2.wav, fade out at the end
+# song (April Rain Rhythm from 0:09, cut in public/drop3p/song2.wav) + SFX -> public/drop3p/mix2.wav, fade out at the end
 cd "$(dirname "$0")/.."
 D=$(node -p "require('./src/drop3p/timeline.json').DURATION")
 F=$(node -p "require('./src/drop3p/timeline.json').DURATION - 0.8")

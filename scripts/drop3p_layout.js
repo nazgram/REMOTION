@@ -11,9 +11,9 @@ const path = require('path');
 const P = require('../src/drop3t/pattern.json');
 const META = require('../public/drop3p/meta.json');
 
-const W = 1080, H = 1920, FPS = 30, DURATION = 24.6;
-// song: April Rain Rhythm - Funky Groove Town, from 0:08 (103.2 BPM, a beat on 0:08)
-const BPM = 103.2, BEAT = 60 / BPM, T0 = 0.0;
+const W = 1080, H = 1920, FPS = 30, DURATION = 24.8;
+// song: April Rain Rhythm - Funky Groove Town, from 0:09 (103.2 BPM, beats fall on 0:08 + n beats)
+const BPM = 103.2, BEAT = 60 / BPM, T0 = 2 * (60 / 103.2) - 1;
 const bt = (b) => T0 + b * BEAT;
 const r3 = (v) => Math.round(v * 1000) / 1000;
 let seed = 23;
@@ -26,7 +26,7 @@ const PAGE = { w: 900, h: 1640, y: 140 }, SEG = 1240, SB = 6.5; // page size, pa
 const BG = { Buttercup: '#e8b561', Camellia: '#c53b73', Petunia: '#3a1418', Lavender: '#9579a5', Marigold: '#cc8069', End: '#ffe8c7' };
 
 // ---- camera: strip x at the screen centre as a function of the beat; eases a little as a page centres ----
-const HOLD_FROM = 4.5 * 6.5, HOLD_TO = 33.5, WOB = 0.6, OFF_FROM = 26; // WOB: how much the camera slows on each page
+const HOLD_FROM = 4.5 * 6.5, HOLD_TO = 33.5, WOB = 0.3, OFF_FROM = 26; // WOB: how much the camera slows on each page
 const ulin = (b) => b / SB - (WOB * Math.sin((2 * Math.PI * b) / SB)) / (2 * Math.PI);
 function u(b) {
   if (b <= HOLD_FROM) return ulin(b);

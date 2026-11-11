@@ -321,13 +321,10 @@ export const PetalPopDrop3Photo: React.FC<{ withAudio: boolean }> = ({ withAudio
   const frame = useCurrentFrame();
   const t = frame / FPS;
   const cx = camX(t);
-  const bph = ((t - T0) / BEAT) % 1;
-  const pulse = t > T0 && t < END.z0 ? 1 + 0.01 * Math.exp(-bph * 7) : 1;
-  const sway = Math.sin(t * 1.3) * 7 * (1 - ease(t, END.z0 - 0.8, END.z0));
   const gx = (frame * 37) % 97, gy = (frame * 53) % 89;
   return (
     <AbsoluteFill style={{ backgroundColor: bgAt(t), overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, transformOrigin: `${W / 2}px ${H / 2}px`, transform: `scale(${pulse}) translate(0px, ${sway}px)` }}>
+      <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H,  }}>
         <div style={{ position: 'absolute', left: 0, top: 0, transform: `translate(${W / 2 - cx}px, 0px)` }}>
           <Strip t={t} cx={cx} />
         </div>
