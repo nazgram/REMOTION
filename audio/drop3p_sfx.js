@@ -39,6 +39,10 @@ S.flowers.forEach((at, i) => fx.addMono(loadWav(POPS[(i + 2) % 3], 1.0 + (i % 3)
 // end page grows to fill: a whoosh; corner flowers: a light patter
 S.whoosh.forEach((at, i) => fx.addMono(air(0.7, 600, 4200, 32 + i, 1), at - 0.1, 0.2));
 S.corners.forEach((at, i) => { if (i % 3) return; fx.addMono(loadWav(POPS[i % 3], 1.2 + (i % 4) * 0.05), at, 0.12, i % 2 ? 0.45 : -0.45); });
+// Camellia blooms melt the end card into magenta: a soft airy swell, a patter, a breathy settle
+fx.addMono(air(1.2, 300, 3000, 140, 1.2), S.bloom - 0.1, 0.14);
+for (let q = 0; q < 8; q++) { const p = loadWav(POPS[q % 3], 1.15 + q * 0.03); fx.addMono(p, S.bloom + 0.05 + q * 0.07, 0.12, ((q % 5) - 2) * 0.2); verb.addMono(p, S.bloom + 0.05 + q * 0.07, 0.05); }
+fx.addMono(air(0.8, 2400, 500, 141, 1), S.bloom + 0.62, 0.08);
 // logo motifs
 S.logo.forEach((at, i) => { const p = loadWav(POPS[i % 3], 1.1 + i * 0.06); fx.addMono(p, at, 0.3, i % 2 ? 0.25 : -0.25); verb.addMono(p, at, 0.08); });
 // date, NAFESA

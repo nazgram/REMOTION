@@ -13,6 +13,8 @@ import P from '../drop3t/pattern.json';
 import L from '../drop3t/logo.json';
 import META from '../../public/drop3p/meta.json';
 import TL from './timeline.json';
+import T7 from '../drop3t/timeline.json';
+import V from '../drop3t/views.json';
 
 const SERIF = 'DM Serif Display';
 loadFont({ family: SERIF, url: staticFile('fonts/dm-serif-display-latin-400-normal.woff2') });
@@ -20,7 +22,7 @@ loadFont({ family: SERIF, url: staticFile('fonts/dm-serif-display-latin-400-norm
 type Unit = { x: number; y: number; r: number; p: [string, number][] };
 type Way = keyof typeof P.palettes;
 const UNITS = P.units as unknown as Unit[];
-const { W, H, FPS, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, PAR, END } = TL;
+const { W, H, FPS, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, CS, KS, END } = TL;
 const BG = TL.BG as Record<string, string>;
 const INK = '#042215';
 const CREAM = BG.End;
@@ -54,27 +56,26 @@ const bgAt = (t: number) => {
 };
 
 // ---------- pieces ----------
-const Flower: React.FC<{ unit: number; way: Way; size: number; shadow?: boolean }> = ({ unit, way, size, shadow = true }) => {
-  const un = UNITS[unit];
+const UnitG: React.FC<{ u: Unit; way: Way }> = ({ u, way }) => {
   const pal = P.palettes[way].colors;
-  const vb = un.r * 2.2;
-  return (
-    <svg width={size} height={size} viewBox={`${un.x - vb / 2} ${un.y - vb / 2} ${vb} ${vb}`} style={{ overflow: 'visible', filter: shadow ? 'drop-shadow(0 8px 12px rgba(0,0,0,0.22))' : undefined }}>
-      {un.p.map(([d, c], i) => <path key={i} d={d} fill={pal[c]} />)}
-    </svg>
-  );
+  return <>{u.p.map(([d, c], i) => <path key={i} d={d} fill={pal[c]} />)}</>;
 };
-type Fl = { u: number; way: string; x: number; y: number; size: number; rot: number; at?: number; ph: number };
-const FlowerAt: React.FC<{ f: Fl; t: number; shadow?: boolean }> = ({ f, t, shadow }) => {
-  const k = f.at === undefined ? 1 : pop(t, f.at, 10);
-  if (k <= 0.001) return null;
-  const rot = f.rot + (1 - Math.min(1, k)) * -90 + Math.sin(t * 1.5 + f.ph) * 6;
-  return (
-    <div style={{ position: 'absolute', left: f.x - f.size / 2, top: f.y - f.size / 2, width: f.size, height: f.size, transform: `rotate(${rot}deg) scale(${k})` }}>
-      <Flower unit={f.u} way={f.way as Way} size={f.size} shadow={shadow} />
-    </div>
-  );
-};
+// a cluster of the print (units at their print positions, scaled), popping in one by one and swaying
+const Cluster: React.FC<{ units: number[][]; way: Way; t: number }> = ({ units, way, t }) => (
+  <svg width={PAGE.w} height={PAGE.h} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible', filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.18))' }}>
+    {units.map(([i, x, y, at, rot, ph]) => {
+      const k = pop(t, at, 10);
+      if (k <= 0.001) return null;
+      const un = UNITS[i];
+      const sway = Math.sin(t * 1.6 + ph) * 5 + rot * (1 - Math.min(1, k));
+      return (
+        <g key={i} transform={`translate(${x} ${y}) rotate(${sway}) scale(${CS * KS * k}) translate(${-un.x} ${-un.y})`}>
+          <UnitG u={un} way={way} />
+        </g>
+      );
+    })}
+  </svg>
+);
 
 type Stk = { name: string; x: number; y: number; w: number; h: number; rot: number; at: number; ph: number };
 const Sticker: React.FC<{ s: Stk; t: number }> = ({ s, t }) => {
@@ -123,7 +124,7 @@ const Glint: React.FC<{ x: number; y: number; t: number; at: number; size: numbe
 
 // page photo sits 926 x 1640 (cover of the 960 x 1700 asset), centred in the 900-wide page
 const PH_W = Math.round((960 * PAGE.h) / 1700), PH_X = -(PH_W - PAGE.w) / 2, PH_S = PAGE.h / 1700;
-type Pg = { way: string; i: number; X: number; pop: number; cards: Cd[]; stk: Stk[]; flowers: Fl[]; tag: { x: number; y: number; w: number; at: number } };
+type Pg = { way: string; i: number; X: number; pop: number; cards: Cd[]; stk: Stk[]; clusters: number[][][]; tag: { x: number; y: number; w: number; at: number } };
 const PAGES = TL.pages as unknown as Pg[];
 const FRAME = '0 0 0 16px #fffdf9, 0 26px 50px rgba(0,0,0,0.38)';
 
@@ -165,6 +166,7 @@ const Strip: React.FC<{ t: number; cx: number }> = ({ t, cx }) => {
         const tk = pop(t, p.tag.at, 11);
         return (
           <div key={'d' + p.i} style={{ position: 'absolute', left: p.X, top: PAGE.y, width: PAGE.w, height: PAGE.h }}>
+            {p.clusters.map((c, j) => <Cluster key={'cl' + j} units={c} way={p.way as Way} t={t} />)}
             {p.cards.map((c, j) => <Card key={j} c={c} t={t} way={p.way} />)}
             {tk > 0.001 && (
               <div style={{ position: 'absolute', left: p.tag.x, top: p.tag.y, width: p.tag.w, height: 72, borderRadius: 36, background: '#fffdf9', boxShadow: '0 10px 18px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, transform: `rotate(-3deg) scale(${tk})`, transformOrigin: '0 50%' }}>
@@ -173,7 +175,6 @@ const Strip: React.FC<{ t: number; cx: number }> = ({ t, cx }) => {
               </div>
             )}
             {p.stk.map((s, j) => <Sticker key={j} s={s} t={t} />)}
-            {p.flowers.map((f, j) => <FlowerAt key={j} f={f} t={t} />)}
           </div>
         );
       })}
@@ -185,10 +186,10 @@ const Strip: React.FC<{ t: number; cx: number }> = ({ t, cx }) => {
 type LogoPath = { d: string; fill: string; role: string; box: number[] };
 const LOGO = L.paths as LogoPath[];
 const centre = (b: number[]) => [b[0] + b[2] / 2, b[1] + b[3] / 2];
-const LOGO_Y = 760, LOGO_S = 0.68;
+const LOGO_Y = 900, LOGO_S = 0.8; // as in the v7 teaser
 const Logo: React.FC<{ t: number }> = ({ t }) => {
   const a = TL.logo.at;
-  const op = ease(t, a - 0.05, a + 0.2);
+  const op = ease(t, a - 0.05, a + 0.2) * (1 - ease(t, TL.logo.out, TL.logo.out + 0.3));
   if (op <= 0) return null;
   const s = interpolate(ease(t, a, a + 1.2, Easing.out(Easing.cubic)), [0, 1], [0.92, 1]);
   const parts = TL.logo.parts as Record<string, number>;
@@ -217,7 +218,7 @@ const Logo: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 const DateText: React.FC<{ t: number }> = ({ t }) => {
-  const at = END.date, size = 104, y = 1080;
+  const at = END.date, size = 104, y = 1235;
   const k = ease(t, at, at + 0.55, Easing.out(Easing.back(1.6)));
   if (k <= 0) return null;
   return (
@@ -234,20 +235,82 @@ const EndCard: React.FC<{ t: number; cx: number }> = ({ t, cx }) => {
   const x0 = END.x - cx + W / 2;
   const left = interpolate(z, [0, 1], [x0, 0]), top = interpolate(z, [0, 1], [PAGE.y, 0]);
   const w = interpolate(z, [0, 1], [PAGE.w, W]), h = interpolate(z, [0, 1], [PAGE.h, H]);
-  const naf = pop(t, END.nafesa, 12);
   const sc = Math.max(w / W, h / H);
   return (
     <div style={{ position: 'absolute', left, top, width: w, height: h, background: CREAM, overflow: 'hidden', boxShadow: `0 0 0 ${16 * (1 - z)}px #fffdf9, 0 26px 50px rgba(0,0,0,${0.38 * (1 - z)})` }}>
       <div style={{ position: 'absolute', left: (w - W * sc) / 2, top: (h - H * sc) / 2, width: W, height: H, transformOrigin: '0 0', transform: `scale(${sc})` }}>
-        {(TL.corners as unknown as Fl[]).map((f, j) => <FlowerAt key={j} f={f} t={t} shadow={false} />)}
+        <svg width={W} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
+          {(TL.corners as unknown as number[][]).map(([i, x, y, s, at, rot], j) => {
+            const k = pop(t, at, 12);
+            if (k <= 0.001) return null;
+            const un = UNITS[i];
+            const sw = Math.sin(t * 1.6 + j) * 3;
+            return (
+              <g key={j} transform={`translate(${x} ${y}) rotate(${rot * (1 - Math.min(1, k)) + sw}) scale(${s * k}) translate(${-un.x} ${-un.y})`}>
+                <UnitG u={un} way="Buttercup" />
+              </g>
+            );
+          })}
+        </svg>
         <Logo t={t} />
-        <Glint x={W / 2 + 330} y={LOGO_Y - 200} t={t} at={TL.logo.parts.heart} size={30} color="#f8a5cb" />
-        <Glint x={W / 2 - 360} y={LOGO_Y + 120} t={t} at={TL.logo.parts.heart + 0.12} size={22} color="#98d4f1" />
+        {[[400, -230, '#f8a5cb', 30], [-420, 130, '#98d4f1', 24], [380, 200, '#77b27e', 20], [-330, -260, '#f8a5cb', 18]].map(([dx, dy, c, sz], i) => (
+          <Glint key={i} x={W / 2 + (dx as number)} y={LOGO_Y + (dy as number)} t={t} at={TL.logo.parts.heart + i * 0.08} size={sz as number} color={c as string} />
+        ))}
         <DateText t={t} />
-        {naf > 0.001 && <Img src={staticFile('drop3p/nafesa_ink.png')} style={{ position: 'absolute', width: 380, left: W / 2 - 190, top: 1225, opacity: Math.min(1, naf * 1.4), transform: `scale(${0.85 + 0.15 * naf})` }} />}
-        <Glint x={W / 2 + 200} y={1300} t={t} at={END.nafesa + 0.2} size={24} color="#f3b12f" />
       </div>
     </div>
+  );
+};
+
+// ---------- Camellia blooms from the centre and melt the end card into magenta (the v7 teaser's b4) ----------
+const MAGENTA = (V.accent as Record<string, string>).Camellia;
+const B7 = T7.BLOOM;
+const BV = { cx: (V.views as Record<string, number[]>).Camellia[0], cy: (V.views as Record<string, number[]>).Camellia[1], s: V.S * 1.05, y0: H / 2 };
+const Bloom: React.FC<{ t: number }> = ({ t }) => {
+  const b = T7.blooms.b4, at = END.bloom;
+  const way = b.way as Way;
+  const pal = P.palettes[way].colors;
+  const [ox, oy] = b.origin;
+  const R = ease(t, at + B7.maskLag, at + B7.maskLag + B7.spread + 0.15, Easing.inOut(Easing.sin)) * (b.dmax + 260);
+  const mask = `radial-gradient(circle at ${ox}px ${oy}px, #000 ${Math.max(0, R - 240)}px, rgba(0,0,0,0) ${R}px)`;
+  return (
+    <>
+      {R > 0 && <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, background: MAGENTA, WebkitMaskImage: mask, maskImage: mask }} />}
+      <svg width={W} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
+        <g transform={`translate(${W / 2} ${BV.y0}) scale(${BV.s}) translate(${-BV.cx} ${-BV.cy})`}>
+          {(b.units as number[][]).map(([i, delay, rot]) => {
+            const t0 = at + delay;
+            if (t < t0) return null;
+            const grow = ease(t, t0, t0 + B7.grow, Easing.out(Easing.cubic));
+            const st = at + B7.hold + delay * 0.6;
+            const settle = ease(t, st, st + B7.settle, Easing.inOut(Easing.sin));
+            if (settle >= 1) return null;
+            const k = B7.cover * grow + (b.land - B7.cover) * settle;
+            if (k <= 0.001) return null;
+            const op = Math.min(1, (t - t0) / 0.14) * (b.land === 0 ? 1 - settle : 1);
+            const un = UNITS[i];
+            const r = rot * (1 - grow) + rot * 0.25 * Math.sin(settle * Math.PI);
+            return (
+              <g key={i} opacity={op} transform={`translate(${un.x} ${un.y}) rotate(${r}) scale(${k}) translate(${-un.x} ${-un.y})`}>
+                {un.p.map(([d, c], q) => <path key={q} d={d} fill={pal[c]} />)}
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+    </>
+  );
+};
+const Nafesa: React.FC<{ t: number }> = ({ t }) => {
+  const naf = pop(t, END.nafesa, 12);
+  if (naf <= 0.001) return null;
+  return (
+    <>
+      {[[300, -40, '#fde0d3', 26], [-310, 60, '#f3b12f', 22], [240, 150, '#fde0d3', 18], [-250, -120, '#f3b12f', 16]].map(([dx, dy, c, sz], i) => (
+        <Glint key={i} x={W / 2 + (dx as number)} y={LOGO_Y + (dy as number)} t={t} at={END.nafesa + 0.2 + i * 0.07} size={sz as number} color={c as string} />
+      ))}
+      <Img src={staticFile('drop3/nafesa.png')} style={{ position: 'absolute', width: 440, left: W / 2 - 220, top: LOGO_Y - 150, opacity: Math.min(1, naf * 1.4), transform: `scale(${0.85 + 0.15 * naf})` }} />
+    </>
   );
 };
 
@@ -263,18 +326,14 @@ export const PetalPopDrop3Photo: React.FC<{ withAudio: boolean }> = ({ withAudio
   return (
     <AbsoluteFill style={{ backgroundColor: bgAt(t), overflow: 'hidden' }}>
       <div style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, transformOrigin: `${W / 2}px ${H / 2}px`, transform: `scale(${pulse}) translate(0px, ${sway}px)` }}>
-        {/* flowers behind, on a slower layer */}
-        <div style={{ position: 'absolute', left: 0, top: 0, transform: `translate(${W / 2 - cx * PAR}px, 0px)` }}>
-          {(TL.bgFlowers as unknown as Fl[]).map((f, j) => {
-            const sx = f.x - cx * PAR + W / 2;
-            return sx > -400 && sx < W + 400 ? <FlowerAt key={j} f={f} t={t} /> : null;
-          })}
-        </div>
         <div style={{ position: 'absolute', left: 0, top: 0, transform: `translate(${W / 2 - cx}px, 0px)` }}>
           <Strip t={t} cx={cx} />
         </div>
       </div>
-      {END.x - cx + W / 2 < W + 100 && <EndCard t={t} cx={cx} />}
+      {END.x - cx + W / 2 < W + 100 && t < END.magenta + 0.05 && <EndCard t={t} cx={cx} />}
+      {t >= END.bloom && t < END.magenta + 0.05 && <Bloom t={t} />}
+      {t >= END.magenta && <div style={{ position: 'absolute', inset: 0, background: MAGENTA }} />}
+      <Nafesa t={t} />
       <Img src={staticFile('drop3p/grain.png')} style={{ position: 'absolute', left: -gx, top: -gy, width: W + 200, height: H + 200, opacity: 0.07, mixBlendMode: 'overlay' }} />
       {withAudio && <Audio src={staticFile('drop3p/mix.wav')} />}
     </AbsoluteFill>

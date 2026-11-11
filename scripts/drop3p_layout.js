@@ -47,6 +47,25 @@ function enters(xs, margin = 140) {
 // ---- flowers: the print's four-petal flower heads only ----
 const FLOWERS = P.units.map((un, i) => [i, un]).filter(([, un]) => un.r >= 22 && un.r <= 41 && un.p.length >= 9).map(([i]) => i);
 const flower = () => pick(FLOWERS);
+// ---- print clusters (like the teaser's edge flowers): the print's own arrangement of leaves, flower heads and dots
+//      inside a wavy band that straddles a page edge; no stalk branches (r >= 95) ----
+const CS = 1.6, KS = 1.35; // print scale, extra growth of each unit
+function band(way, [x0, y0, x1, y1], tEnter) {
+  const len = Math.hypot(x1 - x0, y1 - y0), ux = (x1 - x0) / len, uy = (y1 - y0) / len;
+  const Cc = [700 + rnd() * 1840, 700 + rnd() * 1840], ph = rnd() * 6.28;
+  const out = [];
+  P.units.forEach((un, i) => {
+    if (un.r >= 95) return;
+    const x = (un.x - Cc[0]) * CS + (x0 + x1) / 2, y = (un.y - Cc[1]) * CS + (y0 + y1) / 2;
+    const a = (x - x0) * ux + (y - y0) * uy, d = Math.abs((x - x0) * -uy + (y - y0) * ux); // along / across the edge
+    if (a < -60 || a > len + 60) return;
+    const taper = Math.sin(Math.PI * Math.min(1, Math.max(0, (a + 60) / (len + 120))));
+    const depth = (190 + 80 * Math.sin(a / 160 + ph)) * Math.sqrt(taper);
+    if (d > depth) return;
+    out.push([i, r3(x), r3(y), r3(tEnter + (a / len) * 0.7 + (d / 250) * 0.25 + rnd() * 0.12), Math.round((rnd() - 0.5) * 60), r3(rnd() * 6.28)]);
+  });
+  return out;
+}
 // ---- stickers: two pink ones per page ----
 const STK = ['bow2', 'bow3', 'bow4', 'butterfly1', 'butterfly2', 'butterfly3', 'heartg1', 'heartg2', 'strawberry', 'camera1', 'cherry', 'heartl1', 'bowg1', 'butterfly4'];
 let sbag = STK.slice().sort(() => rnd() - 0.5);
@@ -55,15 +74,15 @@ const stkSize = (name, target) => { const [w, h] = META.stk[name]; const s = tar
 // ---- per-page layouts (page-local: origin = the page's top-left) ----
 const LAYOUT = [
   { cards: [{ k: 'pol', img: 'cardA', x: 720, y: 40, w: 500, h: 620, rot: 3 }, { k: 'pol', img: 'cardB', x: 690, y: 830, w: 470, h: 590, rot: -2.5 }],
-    flowers: [[40, 70, 300], [600, 1610, 360]], tagY: 1290 },
+    bands: [[0, 200, 0, 1100], [0, 1640, 700, 1640]], tagY: 1290 },
   { cards: [{ k: 'pol', img: 'cardB', x: 790, y: -40, w: 380, h: 470, rot: -5 }, { k: 'ig', img: 'cell', x: 700, y: 560, w: 560, h: 450, rot: 0 }],
-    flowers: [[870, 1200, 330], [60, 1520, 300]], tagY: 1290 },
+    bands: [[0, 0, 650, 0], [0, 950, 0, 1640]], tagY: 1290 },
   { cards: [{ k: 'pol', img: 'cardA', x: 680, y: 250, w: 480, h: 600, rot: -4 }, { k: 'pol', img: 'cardB', x: 760, y: 990, w: 440, h: 550, rot: 5 }],
-    flowers: [[820, 110, 300], [70, 1590, 340]], tagY: 1290 },
+    bands: [[100, 0, 900, 0], [0, 1640, 600, 1640]], tagY: 1290 },
   { cards: [{ k: 'ig', img: 'cell', x: 690, y: 140, w: 560, h: 450, rot: 2 }, { k: 'pol', img: 'cardB', x: 760, y: 830, w: 440, h: 550, rot: -3 }],
-    flowers: [[60, 80, 320], [900, 1520, 350]], tagY: 1290 },
+    bands: [[0, 0, 0, 800], [200, 1640, 900, 1640]], tagY: 1290 },
   { cards: [{ k: 'pol', img: 'cardA', x: 700, y: 110, w: 500, h: 620, rot: -3 }, { k: 'pol', img: 'cardB', x: 720, y: 900, w: 460, h: 575, rot: 4 }],
-    flowers: [[50, 1560, 340], [870, 50, 300]], tagY: 1290 },
+    bands: [[0, 0, 650, 0], [0, 1050, 0, 1640]], tagY: 1290 },
 ];
 
 const pages = WAYS.map((way, i) => {
@@ -83,45 +102,29 @@ const pages = WAYS.map((way, i) => {
     const x = j === 0 ? c.x + c.w - 30 : c.x + 30, y = j === 0 ? c.y + 30 : c.y + c.h - 30;
     return { k: 'stk', name, x: r3(x), y: r3(y), w, h, rot: Math.round((rnd() - 0.5) * 40), at: r3(c.at + BEAT * 0.5), ph: r3(rnd() * 6.28) };
   });
-  const flowers = L.flowers.map(([x, y, size], j) => ({ k: 'flower', u: flower(), way, x, y, size: Math.round(size * 1.2), rot: Math.round(rnd() * 360), at: r3(i === 0 ? bt(1.5 + j) : quant(enters(X + x, 100))), ph: r3(rnd() * 6.28) }));
+  const clusters = L.bands.map((b, j) => band(way, b, i === 0 ? bt(0.2 + j * 1.2) : quant(enters(X + Math.min(b[0], b[2]) + 80, 40))));
   const tag = { k: 'tag', x: L.tagY ? 50 : 0, y: L.tagY, w: 330, at: r3(pop + BEAT) };
-  return { way, i, X, pop, cards, stk, flowers, tag };
+  return { way, i, X, pop, cards, stk, clusters, tag };
 });
 
-// background flowers on a slower layer (parallax 0.75): along the top and bottom edges and in the gaps
-const PAR = 0.75;
-const bgFlowers = [];
-for (let x = -300, j = 0; x < 5 * SEG * PAR + 1200; x += 210 + rnd() * 120, j++) {
-  const top = j % 2 === 0;
-  const xs = x; // in parallax space
-  const stripX = xs / PAR; // which page stretch it sits over (for its colours)
-  const wi = Math.max(0, Math.min(4, Math.floor((stripX + 200) / SEG)));
-  bgFlowers.push({ u: flower(), way: WAYS[wi], x: r3(xs), y: Math.round(top ? 40 + rnd() * 110 : H - 30 - rnd() * 120), size: Math.round(380 + rnd() * 200), rot: Math.round(rnd() * 360), ph: r3(rnd() * 6.28) });
-}
-
-// ---------- end card ----------
+// ---------- end card: the same as the v7 teaser's (src/drop3t/timeline.json), shifted by D ----------
+// logo + corner clusters in three sizes on cream, Camellia blooms from the centre melt it into magenta, NAFESA last.
+// Here the cream page at the end of the strip grows to fill the screen while the logo builds.
+const T7 = require('../src/drop3t/timeline.json');
 const END_X = 5 * SEG;
-const Z0 = bt(24.2), Z1 = bt(25.6); const CF = bt(21.4); // corner flowers start as the end page comes in // the cream page grows to fill the screen
-const corners = [];
-const CWAYS = ['Buttercup', 'Camellia', 'Lavender', 'Marigold'];
-for (const [cx, cy] of [[0, 0], [W, 0], [0, H], [W, H]]) {
-  const n = 7;
-  for (let j = 0; j < n; j++) {
-    const ang = (j / (n - 1)) * (Math.PI / 2), d = 90 + rnd() * 300;
-    const sx = cx === 0 ? 1 : -1, sy = cy === 0 ? 1 : -1;
-    const x = cx + sx * Math.cos(ang) * d, y = cy + sy * Math.sin(ang) * d * 1.15;
-    corners.push({ u: flower(), way: pick(CWAYS), x: r3(x), y: r3(y), size: Math.round(380 - d * 0.55 + rnd() * 60), rot: Math.round(rnd() * 360), at: r3(CF + (d / 400) * 0.8 + rnd() * 0.25), ph: r3(rnd() * 6.28) });
-  }
-}
-const END = { x: END_X, z0: r3(Z0), z1: r3(Z1), date: r3(bt(27.4)), nafesa: r3(bt(29.2)) };
-const L0 = bt(22.8);
-const logo = { at: r3(L0), parts: { flower: L0 + 0.45, leaf: L0 + 0.62, tulip: L0 + 0.7, stem: L0 + 0.7, heart: L0 + 0.85, pill: L0 + 0.55, drop: L0 + 0.6 } };
+const Z0 = bt(23.4), Z1 = bt(24.8);
+const D = 11.4 - T7.logo.at;
+const sh = (v) => r3(v + D);
+const corners = T7.corners.units.map(([i, x, y, s, at, rot]) => [i, x, y, s, r3(sh(at) - 1.0), rot]); // earlier: they grow in as the page arrives
+const logo = { at: sh(T7.logo.at), parts: Object.fromEntries(Object.entries(T7.logo.parts).map(([k, v]) => [k, sh(v)])), out: sh(T7.logo.out) };
+const B7 = T7.BLOOM, BEND = B7.hold + B7.spread * 0.6 + 0.06 + B7.settle + 0.03;
+const END = { x: END_X, z0: r3(Z0), z1: r3(Z1), D: r3(D), date: r3(logo.at + 0.55), bloom: sh(T7.blooms.b4.at), magenta: r3(sh(T7.blooms.b4.at) + BEND), nafesa: sh(T7.T.nafesa[0]) };
 
 // ---------- sfx cues ----------
-const sfx = { cards: [], stk: [], flowers: [], cutouts: [], whoosh: [r3(Z0 - 0.05)], logo: Object.values(logo.parts).map(r3), corners: corners.map((c) => c.at).sort((a, b) => a - b), date: END.date, nafesa: END.nafesa };
-pages.forEach((p) => { p.cards.forEach((c) => sfx.cards.push(c.at)); p.stk.forEach((s) => sfx.stk.push(s.at)); p.flowers.forEach((f) => sfx.flowers.push(f.at)); sfx.cutouts.push(p.pop); });
+const sfx = { cards: [], stk: [], flowers: [], cutouts: [], whoosh: [r3(Z0 - 0.05)], logo: Object.values(logo.parts).map(r3), corners: corners.map((c) => c[4]).sort((a, b) => a - b), date: END.date, bloom: END.bloom, nafesa: END.nafesa };
+pages.forEach((p) => { p.cards.forEach((c) => sfx.cards.push(c.at)); p.stk.forEach((s) => sfx.stk.push(s.at)); p.clusters.forEach((c) => c.forEach((u, j) => { if (j % 4 === 0) sfx.flowers.push(u[3]); })); sfx.cutouts.push(p.pop); });
 
-const out = { W, H, FPS, DURATION, BPM, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, PAR, BG, WAYS, pages, bgFlowers, corners, END, logo, sfx };
+const out = { W, H, FPS, DURATION, BPM, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, CS, KS, BG, WAYS, pages, corners, END, logo, sfx };
 fs.writeFileSync(path.join(__dirname, '../src/drop3p/timeline.json'), JSON.stringify(out));
-console.log('flowers', FLOWERS.length, 'bg flowers', bgFlowers.length, 'corners', corners.length,
+console.log('flowers', FLOWERS.length, 'clusters', pages.map((p) => p.clusters.map((c) => c.length)), 'corners', corners.length,
   'pops', pages.map((p) => r3(p.pop)), 'cards', pages.map((p) => p.cards.map((c) => c.at)), 'end', END);
