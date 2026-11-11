@@ -18,6 +18,8 @@ import V from '../drop3t/views.json';
 
 const SERIF = 'DM Serif Display';
 loadFont({ family: SERIF, url: staticFile('fonts/dm-serif-display-latin-400-normal.woff2') });
+const SANS = 'Poppins';
+loadFont({ family: SANS, url: staticFile('fonts/poppins-latin-500-normal.woff2'), weight: '500' });
 
 type Unit = { x: number; y: number; r: number; p: [string, number][] };
 type Way = keyof typeof P.palettes;
@@ -218,14 +220,14 @@ const Logo: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 const DateText: React.FC<{ t: number }> = ({ t }) => {
-  const at = END.date, size = 104, y = 1235;
+  const at = END.date, size = 60, y = 1240;
   const k = ease(t, at, at + 0.55, Easing.out(Easing.back(1.6)));
   if (k <= 0) return null;
   return (
     <svg width={W} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
       <defs><clipPath id="dateclip"><rect x={0} y={y - size * 0.75} width={W} height={size * 1.25} /></clipPath></defs>
       <g clipPath="url(#dateclip)">
-        <text x={W / 2} y={y + (1 - k) * size * 1.1} textAnchor="middle" dominantBaseline="central" fontFamily={SERIF} fontSize={size} letterSpacing={(1 - Math.min(1, k)) * 30} fill={INK}>15 November</text>
+        <text x={W / 2} y={y + (1 - k) * size * 1.1} textAnchor="middle" dominantBaseline="central" fontFamily={SANS} fontWeight={500} fontSize={size} letterSpacing={2 + (1 - Math.min(1, k)) * 24} fill={INK}>15 November 2026</text>
       </g>
     </svg>
   );
