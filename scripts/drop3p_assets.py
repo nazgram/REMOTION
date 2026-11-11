@@ -23,6 +23,8 @@ PHOTOS = {
     'Lavender': ('a0e7eac9', 'cd16252e'),
     'Marigold': ('b1088f1f', 'c5df9fbe'),
 }
+ACC = {'Buttercup': '#e889b3', 'Camellia': '#c53b73', 'Petunia': '#ad8a76', 'Lavender': '#b0688f', 'Marigold': '#eeb1c9'}  # outline round the cut-out
+CUTS_ONLY = '--cuts-only' in sys.argv
 MODE = {'a0e7eac9': 'human', 'cd16252e': 'human'}  # no props added from the general model (plate / chair behind)
 PW, PH = 960, 1700           # page
 CW, CH = 540, 384            # grid cell
@@ -69,21 +71,29 @@ def crop_to(im, m, box, size):
     return a, np.array(b).astype(float) / 255
 
 
-def torn(photo, alpha, r=19, amp=7):
-    """die-cut with a torn white border: the person's pixels over a ragged white silhouette"""
+def torn(photo, alpha, r=19, amp=7, accent=None, ring=6, jag=2.2):
+    """die-cut with a torn white border: the person's pixels over a ragged white silhouette;
+       with accent, a thin coloured line runs round the outside of the white"""
     pa = alpha > 0.5
     dist = ndi.distance_transform_edt(~pa)
     noise = ndi.gaussian_filter(rng.standard_normal(dist.shape), 9)
     noise /= np.abs(noise).max()
-    noise2 = ndi.gaussian_filter(rng.standard_normal(dist.shape), 2.5)
+    noise2 = ndi.gaussian_filter(rng.standard_normal(dist.shape), 1.3 if accent else 2.5)
     noise2 /= np.abs(noise2).max()
-    radius = r + amp * noise + 2.2 * noise2
+    radius = r + amp * noise + jag * noise2
     border = np.clip((radius - dist) * 1.6 + 0.5, 0, 1)
     pa_s = ndi.gaussian_filter(alpha, 0.9)
     p = np.array(photo).astype(float)
     white = np.array([255, 252, 249.])
-    rgb = p * pa_s[..., None] + white * (1 - pa_s[..., None])
-    a = np.maximum(border, pa_s)
+    if accent is not None:
+        outer = np.clip((radius + ring - dist) * 1.6 + 0.5, 0, 1)
+        acc = np.array([int(accent[i:i + 2], 16) for i in (1, 3, 5)], float)
+        base = acc[None, None] * (1 - border[..., None]) + white * border[..., None]
+        rgb = p * pa_s[..., None] + base * (1 - pa_s[..., None])
+        a = np.maximum(outer, pa_s)
+    else:
+        rgb = p * pa_s[..., None] + white * (1 - pa_s[..., None])
+        a = np.maximum(border, pa_s)
     return Image.fromarray(np.dstack([rgb, a * 255]).astype(np.uint8), 'RGBA')
 
 
@@ -113,7 +123,11 @@ for way, (a, b) in PHOTOS.items():
                 raise SystemExit('primary photo must be portrait')
             ph, pm = crop_to(im, m, box, (PW, PH))
             ph.save(f'{OUT}/page_{way}.jpg', quality=92)
-            torn(ph, pm).save(f'{OUT}/cut_{way}.png', optimize=True)
+            cut = torn(ph, pm, r=7, amp=4, accent=ACC[way], ring=6, jag=3.2)
+            cut.save(f'{OUT}/cut_{way}.png', optimize=True)
+            info['cutbox'] = list(cut.getchannel('A').point(lambda v: 255 if v > 128 else 0).getbbox())
+            if CUTS_ONLY:
+                break
             # scarf detail card (4:5) from the chest of the same photo
             ch = bh * 0.30; cw = ch * 0.8
             cy = y0 + bh * 0.50
@@ -133,8 +147,16 @@ for way, (a, b) in PHOTOS.items():
         info[role]['cell'] = cell_i
         cell_i += 1
         del im, m
+    if CUTS_ONLY:
+        old = json.load(open(OUT + '/meta.json'))
+        old['ways'][way]['cutbox'] = info['cutbox']
+        json.dump(old, open(OUT + '/meta.json', 'w'))
+        print(way, 'cut done', info['cutbox'], flush=True)
+        continue
     meta['ways'][way] = info
     print(way, 'done', flush=True)
+if CUTS_ONLY:
+    raise SystemExit(0)
 
 # ---------- stickers: cut by hand-picked boxes (x0,y0,x1,y1 in a 1333-wide view of the sheet) ----------
 BOX = {
