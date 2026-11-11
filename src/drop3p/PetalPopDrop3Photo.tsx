@@ -22,7 +22,7 @@ loadFont({ family: SERIF, url: staticFile('fonts/dm-serif-display-latin-400-norm
 type Unit = { x: number; y: number; r: number; p: [string, number][] };
 type Way = keyof typeof P.palettes;
 const UNITS = P.units as unknown as Unit[];
-const { W, H, FPS, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, CS, KS, END } = TL;
+const { W, H, FPS, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, OFF_FROM, CS, KS, END } = TL;
 const BG = TL.BG as Record<string, string>;
 const INK = '#042215';
 const CREAM = BG.End;
@@ -45,7 +45,7 @@ function u(b: number) {
   return h00 * ulin(HOLD_FROM) + h10 * T * m0 + h01 * 5;
 }
 const smooth = (a: number, b: number, x: number) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
-const camX = (t: number) => { const b = (t - T0) / BEAT; return u(b) * SEG + PAGE.w / 2 + 70 * (1 - smooth(19, HOLD_TO, b)); };
+const camX = (t: number) => { const b = (t - T0) / BEAT; return u(b) * SEG + PAGE.w / 2 + 70 * (1 - smooth(OFF_FROM, HOLD_TO, b)); };
 
 // background colour follows the page under the screen centre, blending across the gaps
 const bgAt = (t: number) => {
@@ -335,7 +335,7 @@ export const PetalPopDrop3Photo: React.FC<{ withAudio: boolean }> = ({ withAudio
       {t >= END.magenta && <div style={{ position: 'absolute', inset: 0, background: MAGENTA }} />}
       <Nafesa t={t} />
       <Img src={staticFile('drop3p/grain.png')} style={{ position: 'absolute', left: -gx, top: -gy, width: W + 200, height: H + 200, opacity: 0.07, mixBlendMode: 'overlay' }} />
-      {withAudio && <Audio src={staticFile('drop3p/mix.wav')} />}
+      {withAudio && <Audio src={staticFile('drop3p/mix2.wav')} />}
     </AbsoluteFill>
   );
 };

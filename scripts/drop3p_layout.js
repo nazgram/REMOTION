@@ -11,8 +11,9 @@ const path = require('path');
 const P = require('../src/drop3t/pattern.json');
 const META = require('../public/drop3p/meta.json');
 
-const W = 1080, H = 1920, FPS = 30, DURATION = 16.1;
-const BPM = 123.05, BEAT = 60 / BPM, T0 = 0.07;
+const W = 1080, H = 1920, FPS = 30, DURATION = 24.6;
+// song: April Rain Rhythm - Funky Groove Town, from 0:08 (103.2 BPM, a beat on 0:08)
+const BPM = 103.2, BEAT = 60 / BPM, T0 = 0.0;
 const bt = (b) => T0 + b * BEAT;
 const r3 = (v) => Math.round(v * 1000) / 1000;
 let seed = 23;
@@ -20,12 +21,12 @@ const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const pick = (a) => a[Math.floor(rnd() * a.length)];
 
 const WAYS = ['Buttercup', 'Camellia', 'Petunia', 'Lavender', 'Marigold'];
-const PAGE = { w: 900, h: 1640, y: 140 }, SEG = 1240, SB = 4.8; // page size, page pitch, beats per page
+const PAGE = { w: 900, h: 1640, y: 140 }, SEG = 1240, SB = 6.5; // page size, page pitch, beats per page
 // background colour of each stretch of the strip (from each colourway's own palette), then the cream end page
 const BG = { Buttercup: '#e8b561', Camellia: '#c53b73', Petunia: '#3a1418', Lavender: '#9579a5', Marigold: '#cc8069', End: '#ffe8c7' };
 
 // ---- camera: strip x at the screen centre as a function of the beat; eases a little as a page centres ----
-const HOLD_FROM = 21.6, HOLD_TO = 24.8, WOB = 0.14;
+const HOLD_FROM = 4.5 * 6.5, HOLD_TO = 33.5, WOB = 0.6, OFF_FROM = 26; // WOB: how much the camera slows on each page
 const ulin = (b) => b / SB - (WOB * Math.sin((2 * Math.PI * b) / SB)) / (2 * Math.PI);
 function u(b) {
   if (b <= HOLD_FROM) return ulin(b);
@@ -36,7 +37,7 @@ function u(b) {
   return h00 * ulin(HOLD_FROM) + h10 * T * m0 + h01 * 5;
 }
 const smooth = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
-const camX = (t) => { const b = (t - T0) / BEAT; return u(b) * SEG + PAGE.w / 2 + 70 * (1 - smooth(19, HOLD_TO, b)); };
+const camX = (t) => { const b = (t - T0) / BEAT; return u(b) * SEG + PAGE.w / 2 + 70 * (1 - smooth(OFF_FROM, HOLD_TO, b)); };
 const quant = (t, q = 2) => bt(Math.ceil(((t - T0) / BEAT) * q - 1e-6) / q);
 // first time a strip x is left of the screen's right edge minus a margin
 function enters(xs, margin = 140) {
@@ -112,19 +113,20 @@ const pages = WAYS.map((way, i) => {
 // Here the cream page at the end of the strip grows to fill the screen while the logo builds.
 const T7 = require('../src/drop3t/timeline.json');
 const END_X = 5 * SEG;
-const Z0 = bt(23.4), Z1 = bt(24.8);
-const D = 11.4 - T7.logo.at;
+const Z0 = bt(31.5), Z1 = bt(33.2);
+const D = 18.9 - T7.logo.at, HOLD = 1.0; // HOLD: extra time on the logo before the Camellia bloom
+const sh2 = (v) => r3(v + D + HOLD);
 const sh = (v) => r3(v + D);
-const corners = T7.corners.units.map(([i, x, y, s, at, rot]) => [i, x, y, s, r3(sh(at) - 1.0), rot]); // earlier: they grow in as the page arrives
-const logo = { at: sh(T7.logo.at), parts: Object.fromEntries(Object.entries(T7.logo.parts).map(([k, v]) => [k, sh(v)])), out: sh(T7.logo.out) };
+const corners = T7.corners.units.map(([i, x, y, s, at, rot]) => [i, x, y, s, r3(sh(at) - 2.2), rot]); // earlier: they grow in as the page arrives
+const logo = { at: sh(T7.logo.at), parts: Object.fromEntries(Object.entries(T7.logo.parts).map(([k, v]) => [k, sh(v)])), out: sh2(T7.logo.out) };
 const B7 = T7.BLOOM, BEND = B7.hold + B7.spread * 0.6 + 0.06 + B7.settle + 0.03;
-const END = { x: END_X, z0: r3(Z0), z1: r3(Z1), D: r3(D), date: r3(logo.at + 0.55), bloom: sh(T7.blooms.b4.at), magenta: r3(sh(T7.blooms.b4.at) + BEND), nafesa: sh(T7.T.nafesa[0]) };
+const END = { x: END_X, z0: r3(Z0), z1: r3(Z1), D: r3(D), date: r3(logo.at + 0.55), bloom: sh2(T7.blooms.b4.at), magenta: r3(sh2(T7.blooms.b4.at) + BEND), nafesa: sh2(T7.T.nafesa[0]) };
 
 // ---------- sfx cues ----------
 const sfx = { cards: [], stk: [], flowers: [], cutouts: [], whoosh: [r3(Z0 - 0.05)], logo: Object.values(logo.parts).map(r3), corners: corners.map((c) => c[4]).sort((a, b) => a - b), date: END.date, bloom: END.bloom, nafesa: END.nafesa };
 pages.forEach((p) => { p.cards.forEach((c) => sfx.cards.push(c.at)); p.stk.forEach((s) => sfx.stk.push(s.at)); p.clusters.forEach((c) => c.forEach((u, j) => { if (j % 4 === 0) sfx.flowers.push(u[3]); })); sfx.cutouts.push(p.pop); });
 
-const out = { W, H, FPS, DURATION, BPM, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, CS, KS, BG, WAYS, pages, corners, END, logo, sfx };
+const out = { W, H, FPS, DURATION, BPM, BEAT, T0, PAGE, SEG, SB, HOLD_FROM, HOLD_TO, WOB, OFF_FROM, CS, KS, BG, WAYS, pages, corners, END, logo, sfx };
 fs.writeFileSync(path.join(__dirname, '../src/drop3p/timeline.json'), JSON.stringify(out));
 console.log('flowers', FLOWERS.length, 'clusters', pages.map((p) => p.clusters.map((c) => c.length)), 'corners', corners.length,
   'pops', pages.map((p) => r3(p.pop)), 'cards', pages.map((p) => p.cards.map((c) => c.at)), 'end', END);
