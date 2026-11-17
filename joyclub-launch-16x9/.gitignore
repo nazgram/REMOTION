@@ -1,0 +1,6 @@
+node_modules
+out
+public/raw
+public/kain
+public/*.m4a
+public/*.otf
