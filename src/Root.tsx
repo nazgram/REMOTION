@@ -19,6 +19,10 @@ import { PetalPopDrop3Teaser30 } from './drop3t/PetalPopDrop3Teaser30';
 import drop3t30 from './drop3t/timeline30.json';
 import { PetalPopDrop3Photo } from './drop3p/PetalPopDrop3Photo';
 import drop3p from './drop3p/timeline.json';
+import { JoyClubDots } from './joyclub/JoyClubDots';
+import joyclub from './joyclub/timeline.json';
+import { JoyClubDotsV2 } from './joyclub/JoyClubDotsV2';
+import joyclubV2 from './joyclub/v2.json';
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -119,6 +123,24 @@ export const RemotionRoot: React.FC = () => (
       fps={drop3p.FPS}
       width={drop3p.W}
       height={drop3p.H}
+      defaultProps={{ withAudio: false }}
+    />
+  <Composition
+      id="JoyClubDots"
+      component={JoyClubDots}
+      durationInFrames={joyclub.DURATION * joyclub.FPS}
+      fps={joyclub.FPS}
+      width={joyclub.W}
+      height={joyclub.H}
+      defaultProps={{ withAudio: false }}
+    />
+  <Composition
+      id="JoyClubDotsV2"
+      component={JoyClubDotsV2}
+      durationInFrames={joyclubV2.DURATION * joyclubV2.FPS}
+      fps={joyclubV2.FPS}
+      width={joyclubV2.W}
+      height={joyclubV2.H}
       defaultProps={{ withAudio: false }}
     />
   </>

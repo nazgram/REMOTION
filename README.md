@@ -93,3 +93,32 @@ node audio/drop2_sfx.js        # public/drop2/sfx.wav
 npx remotion render PetalPopDrop2 out/drop2.mp4 --props='{"withAudio":true}' \
   --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
 ```
+
+## Joy Club polka dot teaser (JoyClubDots)
+
+18 s 9:16 teaser of the NAFESA Joy Club polka dot print, built from Nas's own SVGs (hand-drawn dot shapes kept as
+paths, corner NAFESA wordmark dropped). Five colourways in a chain where each giant dot becomes the next background:
+White Sky blue → Sky blue Red → Red Sky blue → Sage Taupe → Silver Brownie. Dots pop on (centre, bottom, wave,
+sparkle, spiral), breathe and bounce, gather into one giant dot that swells over the screen. No text, no logo, SFX only.
+
+```bash
+node scripts/joyclub_assets.js "<JOY CLUB folder>"   # src/joyclub/shapes.json: 36 dot shapes + 5 palettes
+node scripts/joyclub_layout.js                       # src/joyclub/timeline.json
+node audio/joyclub_sfx.js                            # public/joyclub/sfx.wav
+SCALE=0.4 node scripts/drop1_stills.mjs out/jc JoyClubDots 0.6 2.0 2.9 3.4 4.4 7.6 12.9 17.0
+npx remotion render JoyClubDots out/joyclub.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
+
+### V2 (JoyClubDotsV2)
+
+"Playful luxury 2.5D" cut from Nas's V2 brief: three depth layers (soft tiny bg, sharp mixed-size mid, blurred
+oversized fg) with parallax, rack focus, spring bounce, squash & stretch, motion stretch only on fast moves. Brief order
+White Sky blue → Red Sky blue → Sage Taupe → Sky blue Red → Silver Brownie; macro intro, gravity shift, layered focus,
+wave bounce, calm settle, with a fly-in, a wipe, a gather and a zoom-in as transitions. SFX only.
+
+```bash
+node scripts/joyclub_v2_layout.js    # src/joyclub/v2.json
+node audio/joyclub_v2_sfx.js         # public/joyclub/sfx_v2.wav
+npx remotion render JoyClubDotsV2 out/joyclub-v2.mp4 --props='{"withAudio":true}' --browser-executable=...
+```
