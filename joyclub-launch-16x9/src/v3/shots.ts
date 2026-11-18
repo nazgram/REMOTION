@@ -17,7 +17,7 @@ export const SHOTS: Record<DesignId, DesignShots> = {
 };
 
 // Klimaks: satu panel setiap design, ikut ORDER.
-export const CLIMAX: Shot[] = [v(102, 0.3, 2.4), v(9, 0.3, 2.4), v(34, 0.3, 2.4), v(72, 0.3, 2.4), v(61, 0.3, 2.4)];
+export const CLIMAX: Shot[] = [v(102, 0.3, 2.4), v(9, 0.3, 2.4), v(32, 0.3, 2.4), v(72, 0.3, 2.4), v(61, 0.3, 2.4)];
 
 export const validateShots = (shots = SHOTS, climax = CLIMAX): string[] => {
   const errs: string[] = [];

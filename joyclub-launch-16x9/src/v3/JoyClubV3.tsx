@@ -26,9 +26,8 @@ const SWEEP_REVEAL = BEAT;
 const nameCircles = (d: DesignId, t: (k: number) => number, out: number): CircleItem[] => {
   const [a, b] = DESIGNS[d].accents;
   return [
-    {x: 1760, y: 1000, d: 420, color: b, inAt: t(1), outAt: out},
-    {x: 1890, y: 690, d: 200, color: a, inAt: t(2), outAt: out},
-    {x: 1000, y: 1110, d: 230, color: a, inAt: t(3), outAt: out},
+    {x: 1830, y: 1030, d: 260, color: b, inAt: t(1), outAt: out},
+    {x: 1900, y: 780, d: 120, color: a, inAt: t(2), outAt: out},
   ];
 };
 
@@ -110,7 +109,8 @@ const climaxCircles = (t: (k: number) => number): CircleItem[] => [
 
 export const JoyClubV3: React.FC = () => {
   const frame = useCurrentFrame();
-  const vol = interpolate(frame, [0, f(0.3), f(TL[TL.length - 1].start), f(END)], [0, 1, 1, 0], {extrapolateRight: 'clamp'});
+  // Lagu = 45s terakhir Snap Back, tamat sendiri di hujung. Tiada fade panjang, cuma 0.1s masuk & 0.3s keluar elak klik.
+  const vol = interpolate(frame, [0, f(0.1), f(END - 0.3), f(END)], [0, 1, 1, 0], {extrapolateRight: 'clamp'});
   const intro = TL[0];
   const climax = TL.find((s) => s.kind === 'climax')!;
   const joy = TL.find((s) => s.kind === 'joyclub')!;

@@ -22,6 +22,8 @@ export const JoyClubEnd: React.FC<{beat: number}> = ({beat}) => {
     <AbsoluteFill style={{background: '#d8d8d8'}}>
       <AbsoluteFill style={{backgroundImage: `url(${asset('pattern-silver.png')})`, backgroundSize: '960px 960px'}} />
       <AbsoluteFill style={{background: 'rgba(216,216,216,0.55)'}} />
+      {/* kawasan logo bersih: corak cuma nampak di tepi dan sudut */}
+      <AbsoluteFill style={{background: 'radial-gradient(ellipse 62% 60% at 50% 52%, #d8d8d8 72%, rgba(216,216,216,0) 100%)'}} />
       {!circlesOut && <Circles items={SILVER_CIRCLES} beat={beat} />}
       <Img src={asset('typo1.png')} style={{position: 'absolute', width: LOGO.w, left: (1920 - LOGO.w) / 2, top: LOGO.cy - (LOGO.w * 1834) / 4500 / 2, opacity: logo, transform: `scale(${logoS})`}} />
       <div style={{position: 'absolute', top: 690, width: '100%', textAlign: 'center', opacity: avail, fontFamily: 'Poppins', fontWeight: 600, fontSize: 56, letterSpacing: '0.42em', marginLeft: '0.21em', color: '#5c484d'}}>AVAILABLE NOW</div>

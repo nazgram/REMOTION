@@ -11,7 +11,7 @@
 **Spec:** `docs/superpowers/specs/2026-11-18-joyclub-launch-v3-design.md`
 
 ## Global Constraints
-- Output 1920x1080, 60fps, max 45.0s. Song = Snap Back 0:01–0:46.
+- Output 1920x1080, 60fps, max 45.0s. Song = Snap Back 2:05.556–2:50.556 (ends naturally).
 - Design order: PEARL → SKY → BLUSH → RUBY → SILVER. Names in Poppins Bold, uppercase, plus "JOY CLUB COLLECTION" small below.
 - Colours: PEARL #ffffff/#a0c4e1 · SKY #a0c4e1/#b11f24 · BLUSH #d1bdc1/#738476 · RUBY #b11f24/#a0c4e1 · SILVER #d8d8d8/#5c484d · olive #545e3a · cream #f5f0e6.
 - No zoom pulse or heartbeat on footage. Motion (scale) on circles only. Slow motion no slower than 50%.

@@ -84,7 +84,7 @@ Nas pilih **1** pada 18 Nov 2026.
   - **C. Shape cutout ikut beat** (gaya draf 2) untuk tukar layout dalam colorway yang sama, contohnya 3 panel ke 2 panel.
   - **B. Match cut vertical ke landscape** pada gerak yang sama, untuk momen close-up.
 - **Bulatan gaya katalog:** bulatan besar warna solid dari tepi frame, lebih banyak, dengan motion scale (pop masuk, membesar, mengecil). Motion hanya pada bulatan, bukan pada footage.
-- **Lagu Snap Back**, habis di 0:46.
+- **Lagu Snap Back**, 45s terakhir: 2:05.6–2:50.6, lagu tamat sendiri di hujung video (Nas, 18 Nov 9:05 PM; asalnya 0:01–0:46).
 - Guna nama design dari katalog.
 - Bina dalam Remotion; footage dipilih oleh Nas.
 
@@ -150,7 +150,7 @@ Peraturan: paling banyak **satu transition setiap bar**. Selebihnya hard cut.
 - Pop halus untuk bulatan dan whoosh lembut untuk dot sapu, pada isipadu rendah di bawah lagu (Nas setuju).
 
 ## 8. Teknikal
-- Lagu: potong 0:01–0:46 (45s). Fade masuk 0.3s, fade keluar sepanjang bar 20.
+- Lagu: potong 2:05.556–2:50.556 (45s), downbeat pertama di 0.25s. Tiada fade panjang (0.1s masuk, 0.3s keluar), lagu tamat sendiri. Beat dikesan pada lagu penuh.
 - **Beat:** kesan beat dengan librosa dan simpan sebagai `beats.json`. Semua potongan dan pop bulatan ikut senarai ini. Anggaran tempo berbeza-beza antara 108 dan 111 BPM, jadi grid tetap tak boleh dipercayai.
 - **Footage:** transcode kedua-dua raw ke proxy untuk preview. Render final ambil terus dari raw (1080 lebar untuk vertical, 1920 untuk landscape).
 - **Pemilihan footage:** sediakan contact sheet bernombor bagi setiap design (vertical dan landscape, satu thumbnail setiap 1s dengan cap masa). Nas pilih nombor untuk setiap slot. Sementara menunggu, pembina isi pilihan sementara. Shot list disimpan dalam satu fail data (`shots.ts`) supaya senang ditukar.

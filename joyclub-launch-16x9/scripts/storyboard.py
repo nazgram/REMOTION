@@ -10,7 +10,7 @@ ITEMS = [
     ('01b_intro_burst', '0:04', 'INTRO · BURST', 'Bar 2: bulatan kecil pecah di tepi setiap separuh beat.'),
     ('02_dot_sapu_masuk', '0:04', 'A · SAPU 1 WARNA', 'Bulatan besar satu warna (warna design seterusnya) pop dari sudut, tutup skrin.'),
     ('03_pearl_grid3', '0:05', 'PEARL · GRID 3', '3 panel vertical penuh skrin, garis putih 4px. Hard cut panel demi panel ikut beat.'),
-    ('04_pearl_nama', '0:07', 'NAMA', 'Nama di bawah kiri atas bulatan sudut. Bulatan aksen di bawah/kanan, jauh dari muka.'),
+    ('04_pearl_nama', '0:07', 'NAMA', 'Nama di bawah kiri atas bulatan kecil di sudut. Satu dua bulatan aksen kecil di bucu kanan bawah.'),
     ('05_cutout_ke_grid2', '0:07', 'C · CUTOUT', 'Grid 2 muncul dalam kotak sejajar panel, satu kotak setiap separuh beat.'),
     ('06_pearl_grid2', '0:09', 'GRID 2', '2 panel separuh badan / detail, hard cut ikut beat.'),
     ('07_landscape_detail', '0:10', 'B · LANDSCAPE', 'Close-up landscape penuh skrin, slow motion 50% (speed ramp).'),
@@ -19,9 +19,9 @@ ITEMS = [
     ('09_sky_nama', '0:13', 'SKY · NAMA', ''),
     ('10_blush_nama', '0:19', 'BLUSH · NAMA', 'Warna bulatan ikut design.'),
     ('11_ruby_nama', '0:27', 'RUBY · NAMA', ''),
-    ('13_klimaks', '0:39', 'KLIMAKS', '5 panel, satu setiap design. Bulatan pop di bawah, tak halang muka.'),
-    ('15_joyclub_logo', '0:42', 'JOY CLUB', 'Bulatan biru & merah jadi huruf O dan U, logo penuh + AVAILABLE NOW.'),
-    ('16_nafesa', '0:44', 'NAFESA', 'Logo olive atas cream, bulatan olive & tan, dot halus. Lagu fade.'),
+    ('13_klimaks', '0:39', 'KLIMAKS', '5 panel, satu setiap design, semua close-up muka depan yang sama level.'),
+    ('15_joyclub_logo', '0:42', 'JOY CLUB', 'Kawasan logo bersih, corak silver cuma di tepi. Bulatan jadi O dan U, + AVAILABLE NOW.'),
+    ('16_nafesa', '0:44', 'NAFESA', 'Logo olive atas cream, bulatan olive & tan, dot halus. Lagu tamat sendiri (2:51).'),
 ]
 tw, th, pad, cap = 600, 338, 26, 92
 cols = 4
