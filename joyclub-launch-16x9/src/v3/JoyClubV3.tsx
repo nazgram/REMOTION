@@ -4,7 +4,7 @@ import beatsData from '../../public/v3/beats.json';
 import {beatAt} from './beats';
 import {Circles, CircleItem} from './components/Circles';
 import {Cutout} from './components/Cutout';
-import {DotSweep} from './components/DotSweep';
+import {DotSweep, SWEEP_COLOR} from './components/DotSweep';
 import {JoyClubEnd, NafesaEnd} from './components/EndCards';
 import {NameCard} from './components/NameCard';
 import {FullLandscape, Panels} from './components/Panels';
@@ -26,9 +26,9 @@ const SWEEP_REVEAL = BEAT;
 const nameCircles = (d: DesignId, t: (k: number) => number, out: number): CircleItem[] => {
   const [a, b] = DESIGNS[d].accents;
   return [
-    {x: 110, y: 150, d: 360, color: b, inAt: t(1), outAt: out},
-    {x: 1830, y: 230, d: 260, color: a, inAt: t(2), outAt: out},
-    {x: 1700, y: 980, d: 420, color: b, inAt: t(3), outAt: out},
+    {x: 1760, y: 1000, d: 420, color: b, inAt: t(1), outAt: out},
+    {x: 1890, y: 690, d: 200, color: a, inAt: t(2), outAt: out},
+    {x: 1000, y: 1110, d: 230, color: a, inAt: t(3), outAt: out},
   ];
 };
 
@@ -65,7 +65,7 @@ const DesignBlock: React.FC<{d: DesignId; k0: number; start: number; last: boole
       </Sequence>
       {!last && (
         <Sequence from={f(t(12) - SWEEP_COVER)} durationInFrames={f(SWEEP_COVER)}>
-          <DotSweep design={ORDER[ORDER.indexOf(d) + 1]} mode="cover" dur={SWEEP_COVER} />
+          <DotSweep color={SWEEP_COLOR[ORDER[ORDER.indexOf(d) + 1]]} mode="cover" dur={SWEEP_COVER} />
         </Sequence>
       )}
     </AbsoluteFill>
@@ -77,25 +77,35 @@ const rectOf = (n: 2 | 3, i: number, y0: number, hFrac: number) => {
   return {x: r.x, y: Math.round(1080 * y0), w: r.w, h: Math.round(1080 * hFrac)};
 };
 
-const INTRO_COLORS = ['#a0c4e1', '#b11f24', '#d1bdc1', '#738476', '#5c484d', '#d8d8d8', '#a0c4e1', '#b11f24'];
-const INTRO_POS = [
-  [180, 200, 340], [1760, 860, 420], [1720, 160, 220], [260, 900, 300], [960, 120, 160], [1100, 980, 200], [620, 540, 140], [1380, 520, 180],
+// Intro punch: bar 1 = satu bulatan besar setiap beat menghentak skrin (warna berganti).
+// Bar 2 = bulatan kecil pecah di tepi setiap separuh beat, kemudian sweep PEARL.
+const PUNCH = [
+  {x: 960, y: 540, d: 1300, c: '#b11f24'},
+  {x: 300, y: 300, d: 1500, c: '#a0c4e1'},
+  {x: 1650, y: 820, d: 1600, c: '#738476'},
+  {x: 960, y: 540, d: 2300, c: '#5c484d'},
+];
+const BURST: [number, number, number, string][] = [
+  [180, 180, 320, '#a0c4e1'], [1760, 900, 380, '#b11f24'], [1740, 150, 240, '#d1bdc1'], [220, 920, 300, '#738476'],
+  [980, 110, 180, '#d8d8d8'], [1120, 990, 220, '#a0c4e1'], [600, 560, 160, '#b11f24'], [1400, 500, 200, '#5c484d'],
 ];
 
 const Intro: React.FC<{end: number}> = ({end}) => {
-  const items: CircleItem[] = INTRO_POS.map(([x, y, d], i) => ({x, y, d, color: INTRO_COLORS[i], inAt: B(i) , outAt: end - SWEEP_COVER - 0.1}));
+  const punch: CircleItem[] = PUNCH.map((p, i) => ({x: p.x, y: p.y, d: p.d, color: p.c, inAt: B(i), outAt: i < 3 ? B(i + 1) + 0.12 : B(4) - 0.05}));
+  const burst: CircleItem[] = BURST.map(([x, y, d, c], i) => ({x, y, d, color: c, inAt: B(4) + (i * BEAT) / 2, outAt: end - SWEEP_COVER - 0.1}));
   return (
     <AbsoluteFill style={{background: CREAM}}>
-      <Circles items={items} beat={BEAT} />
+      <Circles items={punch} beat={BEAT} />
+      <Circles items={burst} beat={BEAT} />
     </AbsoluteFill>
   );
 };
 
 const climaxCircles = (t: (k: number) => number): CircleItem[] => [
-  {x: 60, y: 80, d: 300, color: '#a0c4e1', inAt: t(1)},
-  {x: 1860, y: 1000, d: 340, color: '#b11f24', inAt: t(1.5)},
-  {x: 1880, y: 60, d: 200, color: '#738476', inAt: t(2)},
-  {x: 40, y: 1020, d: 240, color: '#5c484d', inAt: t(2.5)},
+  {x: 80, y: 1040, d: 300, color: '#a0c4e1', inAt: t(1)},
+  {x: 1850, y: 1010, d: 340, color: '#b11f24', inAt: t(1.5)},
+  {x: 760, y: 1110, d: 200, color: '#738476', inAt: t(2)},
+  {x: 1260, y: 1100, d: 240, color: '#5c484d', inAt: t(2.5)},
 ];
 
 export const JoyClubV3: React.FC = () => {
@@ -114,7 +124,7 @@ export const JoyClubV3: React.FC = () => {
         <Intro end={intro.end} />
       </Sequence>
       <Sequence from={f(intro.end - SWEEP_COVER)} durationInFrames={f(SWEEP_COVER)}>
-        <DotSweep design="pearl" mode="cover" dur={SWEEP_COVER} />
+        <DotSweep color={SWEEP_COLOR.pearl} mode="cover" dur={SWEEP_COVER} />
       </Sequence>
       {designs.map((seg, i) => (
         <React.Fragment key={seg.design}>
@@ -123,7 +133,7 @@ export const JoyClubV3: React.FC = () => {
           </Sequence>
           {/* corak design ini terbuka dari tengah, dedahkan grid 3 */}
           <Sequence from={f(seg.start)} durationInFrames={f(SWEEP_REVEAL)}>
-            <DotSweep design={seg.design!} mode="reveal" dur={SWEEP_REVEAL} />
+            <DotSweep color={SWEEP_COLOR[seg.design!]} mode="reveal" dur={SWEEP_REVEAL} />
           </Sequence>
         </React.Fragment>
       ))}

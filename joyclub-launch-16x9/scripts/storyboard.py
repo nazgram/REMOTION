@@ -6,21 +6,21 @@ b = json.load(open('public/v3/beats.json'))['beats']
 F = 'public/v3/Poppins-'
 fb, fr, ft = ImageFont.truetype(F + 'Bold.ttf', 26), ImageFont.truetype(F + 'Medium.ttf', 20), ImageFont.truetype(F + 'Bold.ttf', 46)
 ITEMS = [
-    ('01_intro_bulatan', '0:03', 'INTRO', 'Latar cream. Bulatan semua warna pop satu setiap beat, bernafas ikut beat.'),
-    ('02_dot_sapu_masuk', '0:04', 'A · DOT SAPU', 'Corak PEARL menutup skrin dari tepi (dot membesar berperingkat).'),
+    ('01a_intro_punch', '0:01', 'INTRO · PUNCH', 'Bar 1: satu bulatan besar menghentak skrin setiap beat, warna berganti.'),
+    ('01b_intro_burst', '0:04', 'INTRO · BURST', 'Bar 2: bulatan kecil pecah di tepi setiap separuh beat.'),
+    ('02_dot_sapu_masuk', '0:04', 'A · SAPU 1 WARNA', 'Bulatan besar satu warna (warna design seterusnya) pop dari sudut, tutup skrin.'),
     ('03_pearl_grid3', '0:05', 'PEARL · GRID 3', '3 panel vertical penuh skrin, garis putih 4px. Hard cut panel demi panel ikut beat.'),
-    ('04_pearl_nama', '0:07', 'NAMA', 'Plat bulat + nama design di tengah, 3 bulatan aksen pop dari tepi.'),
+    ('04_pearl_nama', '0:07', 'NAMA', 'Nama di bawah kiri atas bulatan sudut. Bulatan aksen di bawah/kanan, jauh dari muka.'),
     ('05_cutout_ke_grid2', '0:07', 'C · CUTOUT', 'Grid 2 muncul dalam kotak sejajar panel, satu kotak setiap separuh beat.'),
     ('06_pearl_grid2', '0:09', 'GRID 2', '2 panel separuh badan / detail, hard cut ikut beat.'),
     ('07_landscape_detail', '0:10', 'B · LANDSCAPE', 'Close-up landscape penuh skrin, slow motion 50% (speed ramp).'),
-    ('08_sapu_ke_sky', '0:11', 'A · KE SKY', 'Corak SKY menyapu skrin, terbuka semula ke grid SKY.'),
-    ('09_sky_nama', '0:13', 'SKY · NAMA', 'Corak sama untuk setiap design.'),
-    ('10_blush_nama', '0:19', 'BLUSH · NAMA', 'Warna plat dan bulatan ikut design.'),
+    ('08_sapu_ke_sky', '0:11', 'A · KE SKY', 'Bulatan biru SKY menutup skrin dari sudut.'),
+    ('08b_buka_sky', '0:12', 'A · BUKA', 'Bulatan mengecil dan terbuka ke grid SKY.'),
+    ('09_sky_nama', '0:13', 'SKY · NAMA', ''),
+    ('10_blush_nama', '0:19', 'BLUSH · NAMA', 'Warna bulatan ikut design.'),
     ('11_ruby_nama', '0:27', 'RUBY · NAMA', ''),
-    ('12_silver_grid2', '0:35', 'SILVER · GRID 2', 'SILVER design terakhir, hard cut ke klimaks.'),
-    ('13_klimaks', '0:39', 'KLIMAKS', '5 panel, satu setiap design. Bulatan pop di sudut.'),
-    ('14_joyclub_bulatan', '0:41', 'JOY CLUB', 'Latar corak Silver. Bulatan biru & merah bergerak jadi huruf O dan U.'),
-    ('15_joyclub_logo', '0:42', 'JOY CLUB', 'Logo penuh + AVAILABLE NOW.'),
+    ('13_klimaks', '0:39', 'KLIMAKS', '5 panel, satu setiap design. Bulatan pop di bawah, tak halang muka.'),
+    ('15_joyclub_logo', '0:42', 'JOY CLUB', 'Bulatan biru & merah jadi huruf O dan U, logo penuh + AVAILABLE NOW.'),
     ('16_nafesa', '0:44', 'NAFESA', 'Logo olive atas cream, bulatan olive & tan, dot halus. Lagu fade.'),
 ]
 tw, th, pad, cap = 600, 338, 26, 92
