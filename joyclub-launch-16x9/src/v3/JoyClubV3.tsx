@@ -107,6 +107,33 @@ const climaxCircles = (t: (k: number) => number): CircleItem[] => [
   {x: 1260, y: 1100, d: 240, color: '#5c484d', inAt: t(2.5)},
 ];
 
+// SFX buatan sendiri (scripts/sfx.py), -18 dB di bawah lagu.
+const SFX_VOL = Math.pow(10, -18 / 20);
+type Hit = {at: number; file: 'pop' | 'pop-kecil' | 'whoosh'; gain?: number};
+const sfxHits = (): Hit[] => {
+  const hits: Hit[] = [];
+  const intro = TL[0];
+  for (let i = 0; i < 4; i++) hits.push({at: B(i), file: 'pop'});
+  for (let i = 0; i < 8; i++) hits.push({at: B(4) + (i * BEAT) / 2, file: 'pop-kecil', gain: 0.8});
+  hits.push({at: intro.end - SWEEP_COVER, file: 'whoosh'});
+  TL.filter((s) => s.kind === 'design').forEach((seg, i, arr) => {
+    const k0 = 8 + i * 12;
+    hits.push({at: B(k0 + 1), file: 'pop'}); // nama
+    hits.push({at: B(k0 + 2), file: 'pop-kecil', gain: 0.7}); // bulatan aksen
+    hits.push({at: B(k0 + 4), file: 'pop-kecil'}); // cutout kotak 1
+    hits.push({at: B(k0 + 4) + (B(k0 + 5) - B(k0 + 4)) / 2, file: 'pop-kecil'}); // cutout kotak 2
+    if (i < arr.length - 1) hits.push({at: B(k0 + 12) - SWEEP_COVER, file: 'whoosh'});
+  });
+  const climax = TL.find((s) => s.kind === 'climax')!;
+  for (const k of [1, 1.5, 2, 2.5]) hits.push({at: B(68) + k * BEAT, file: 'pop-kecil', gain: 0.8});
+  const joy = TL.find((s) => s.kind === 'joyclub')!;
+  hits.push({at: joy.start, file: 'pop'}, {at: joy.start + 0.1, file: 'pop'}, {at: joy.start + 0.95, file: 'whoosh', gain: 0.7});
+  const naf = TL.find((s) => s.kind === 'nafesa')!;
+  for (const d of [0, 0.15, 0.3, 0.45]) hits.push({at: naf.start + d, file: 'pop-kecil', gain: 0.8});
+  return hits.filter((h) => h.at >= 0 && h.at < END && climax);
+};
+const HITS = sfxHits();
+
 export const JoyClubV3: React.FC = () => {
   const frame = useCurrentFrame();
   // Lagu = 45s terakhir Snap Back, tamat sendiri di hujung. Tiada fade panjang, cuma 0.1s masuk & 0.3s keluar elak klik.
@@ -120,6 +147,11 @@ export const JoyClubV3: React.FC = () => {
     <AbsoluteFill style={{background: '#fff'}}>
       <style>{fontCss}</style>
       <Audio src={asset('song.m4a')} volume={vol} />
+      {HITS.map((h, i) => (
+        <Sequence key={i} from={f(h.at)} durationInFrames={f(1)}>
+          <Audio src={asset(`sfx-${h.file}.wav`)} volume={SFX_VOL * (h.gain ?? 1)} />
+        </Sequence>
+      ))}
       <Sequence durationInFrames={f(intro.end)}>
         <Intro end={intro.end} />
       </Sequence>
