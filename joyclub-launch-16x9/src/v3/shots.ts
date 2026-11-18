@@ -23,15 +23,18 @@ const l = (t: number, speed = 0.5, focusX = 0.5): Shot => ({cam: 'l', t, speed, 
 
 // Setiap klip dari segmen raw berbeza, tiada saat yang dipakai dua kali (kedua-dua kamera sync).
 export const SHOTS: Record<DesignId, DesignShots> = {
-  pearl: {shape3: 'A', shape2: 'E', grid3: [v(90.33), v(98.28, 0.75), v(94.9, 0.95)], grid2: [v(101.9, 0.6, 0.2), {...v(103.95, 0.6, 0), zoom: 1}], detail: l(106.7)},
-  sky: {shape3: 'B', shape2: 'G', grid3: [v(3.25), v(0.05, 1, 0.2), v(11.25, 0.95)], grid2: [v(7.4, 1, 0.2), v(16.4, 1, 0.2)], detail: l(13.62)},
-  blush: {shape3: 'C', shape2: 'G2', grid3: [v(24.2, 1, 0.25), v(31.65, 0.8), v(42.65)], grid2: [v(27.7, 1, 0.2), v(39.9, 0.85, 0.15)], detail: l(36.0)},
+  pearl: {shape3: 'A', shape2: 'E', grid3: [v(90.33), v(98.28, 0.75), v(94.9, 0.95)], grid2: [{...v(103.15, 0.6, 0), zoom: 1}, {...v(100.4, 0.5, 0.15), zoom: 1.4}], detail: l(106.7)},
+  sky: {shape3: 'B', shape2: 'G', grid3: [v(3.25), v(0.05, 1, 0.2), v(11.25, 0.95)], grid2: [v(7.4, 0.5, 0.2), v(16.4, 1, 0.4)], detail: l(13.62)},
+  blush: {shape3: 'C', shape2: 'G2', grid3: [v(24.2, 1, 0.25), v(32.9, 0.7), {...v(42.65, 1, 0.25), focusX: 0.65, zoom: 1.6}], grid2: [{...v(39.9, 0.75, 0.15), focusX: 0, zoom: 1.3}, v(27.7, 1, 0.2)], detail: l(36.0)},
   ruby: {shape3: 'H', shape2: 'G3', grid3: [v(67.05), v(80.0), v(77.45)], grid2: [l(84.4), l(82.85)], detail: l(75.6)},
-  silver: {shape3: 'I', shape2: 'G', grid3: [v(50.15, 0.6), v(55.88, 0.7), v(52.88, 0.6)], grid2: [v(58.85, 0.75, 0.2), v(61.55, 0.9, 0.2)], detail: l(54.3)},
+  silver: {shape3: 'I', shape2: 'G', grid3: [v(50.15, 0.6), v(55.88, 0.7), v(52.88, 0.6)], grid2: [v(58.85, 0.6, 0.2), v(61.55, 0.9, 0.2)], detail: l(54.3)},
 };
 
 // Klimaks: satu panel setiap design (ikut ORDER), close-up muka, dari saat yang belum dipakai.
-export const CLIMAX: Shot[] = [l(100.5, 0.5, 0.2), v(19.3, 0.5, 0.2), v(33.98, 0.5, 0.2), l(70.55, 0.5, 0.6), l(57.95, 0.5, 0.6)];
+// Klimaks: klip sama macam render v3 (Nas kata dah okay), vertical tanpa zoom, satu panel setiap design ikut ORDER.
+// Slow motion 50% dan sedikit anjakan masa supaya tiada klip berulang / cut dalam panel.
+const cv = (t: number): Shot => ({cam: 'v', t, speed: 0.5, focusY: 0.3, zoom: 1});
+export const CLIMAX: Shot[] = [cv(102), cv(9.15), cv(32), cv(71.7), cv(60.9)];
 
 type Use = {label: string; cam: 'v' | 'l'; a: number; b: number; speed: number};
 

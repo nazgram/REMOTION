@@ -7,7 +7,7 @@ import {DotSweep, SWEEP_COLOR} from './components/DotSweep';
 import {JoyClubEnd, NafesaEnd} from './components/EndCards';
 import {NameCard} from './components/NameCard';
 import {FullLandscape, shapePanels, ShapePanels, stripPanels} from './components/Panels';
-import {CREAM, DESIGNS, DesignId, FABRIC, ORDER} from './designs';
+import {CREAM, DESIGNS, DesignId, ORDER} from './designs';
 import {CLIMAX, CLIMAX_END, CLIMAX_ENTER, DETAIL, END2, END3, ENTER2, ENTER3, SHOTS} from './shots';
 import {buildTimeline, END} from './timeline';
 import {asset, f, fontCss} from './util';
@@ -64,35 +64,21 @@ const DesignBlock: React.FC<{d: DesignId; k0: number; start: number; last: boole
   );
 };
 
-// Intro: 5 kain AI penuh frame, satu setiap 3 beat. Kain baru menolak kain lama (slide), kedua-duanya terus beralun.
-const FABRIC_STEP = 3;
-const SLIDE = 0.42;
-const FabricSlide: React.FC<{d: DesignId; first: boolean; life: number; outAt: number | null}> = ({d, first, life, outAt}) => {
+// Intro: video kain dari Nas (Magnific, 1280x720 24fps, 10s): SKY -> BLUSH -> SILVER -> PEARL -> RUBY dengan
+// transition sendiri. Main dari awal, dipotong di hujung intro (dot PEARL tutup atas RUBY). Bunyi asal klip
+// (kain/whoosh) dikekalkan pada aras SFX. Zoom perlahan sedikit supaya tak kaku.
+const INTRO_VIDEO = 'kain/intro-kain.mp4';
+const INTRO_AUDIO = 1.5; // darab SFX_VOL; puncak klip -1.4 dBFS, sama aras dengan SFX lain
+
+const Intro: React.FC<{end: number}> = ({end}) => {
   const t = useCurrentFrame() / 60;
-  const inK = first ? 1 : interpolate(t, [0, SLIDE], [0, 1], {extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)});
-  const outK = outAt === null ? 0 : interpolate(t, [outAt, outAt + SLIDE], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)});
-  const x = (1 - inK) * 1920 - outK * 1920;
+  const scale = 1 + 0.04 * Math.min(1, t / end);
   return (
-    <AbsoluteFill style={{transform: `translateX(${x}px)`}}>
-      <OffthreadVideo src={asset(FABRIC[d])} muted style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${1.02 + 0.03 * Math.min(1, t / life)})`}} />
+    <AbsoluteFill style={{background: CREAM}}>
+      <OffthreadVideo src={asset(INTRO_VIDEO)} volume={SFX_VOL * INTRO_AUDIO} style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})`}} />
     </AbsoluteFill>
   );
 };
-
-const Intro: React.FC<{end: number}> = ({end}) => (
-  <AbsoluteFill style={{background: CREAM}}>
-    {ORDER.map((d, i) => {
-      const from = i === 0 ? 0 : B(i * FABRIC_STEP);
-      const next = i < ORDER.length - 1 ? B((i + 1) * FABRIC_STEP) : null;
-      const until = next === null ? end : next + SLIDE;
-      return (
-        <Sequence key={d} from={f(from)} durationInFrames={f(until) - f(from)} premountFor={30}>
-          <FabricSlide d={d} first={i === 0} life={until - from} outAt={next === null ? null : next - from} />
-        </Sequence>
-      );
-    })}
-  </AbsoluteFill>
-);
 
 const climaxCircles = (t: (k: number) => number): CircleItem[] => [
   {x: 80, y: 1040, d: 300, color: '#a0c4e1', inAt: t(2.5)},
@@ -105,7 +91,6 @@ type Hit = {at: number; file: 'pop' | 'pop-kecil' | 'whoosh'; gain?: number};
 const sfxHits = (): Hit[] => {
   const hits: Hit[] = [];
   const intro = TL[0];
-  for (let i = 1; i < ORDER.length; i++) hits.push({at: B(i * FABRIC_STEP), file: 'whoosh', gain: 0.55});
   hits.push({at: intro.end - SWEEP_COVER, file: 'whoosh'});
   TL.filter((s) => s.kind === 'design').forEach((seg, i, arr) => {
     const k0 = seg.beat0;
