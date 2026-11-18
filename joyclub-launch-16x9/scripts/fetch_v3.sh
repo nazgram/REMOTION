@@ -15,7 +15,7 @@ get 19MM7dsTBmU8mLSxggtChUNs45NSOeeVR sky.svg
 get 1j-9iqZI3SmmUEuss9Qc3BKgZznCfdU9t blush.svg
 get 1kMRrh6B8VH7jJa1XhUeidlrDujiL035S ruby.svg
 get 1T3OziqtyhQqYQG1H_ZYFvbDVgaHSiGHV silver.svg
-# Lagu: 45s terakhir Snap Back, tamat semula jadi di 2:50.9. Downbeat pertama (125.806s) jatuh pada 0.25s video.
-[ -s song.m4a ] || ffmpeg -v error -y -ss 125.556 -t 45 -i snapback.mp3 -vn -c:a aac -b:a 256k song.m4a
+# Lagu: Snap Back 1:47.792 hingga tamat semula jadi (2:50.9), 63.4s. Downbeat pertama (108.042s) jatuh pada 0.25s video.
+[ -s song.m4a ] || ffmpeg -v error -y -ss 107.792 -t 63.4 -i snapback.mp3 -vn -c:a aac -b:a 256k song.m4a
 [ -s Poppins-Bold.ttf ] || unzip -j -o -q poppins.zip '*Poppins-Bold.ttf' '*Poppins-Medium.ttf' '*Poppins-SemiBold.ttf' -x '__MACOSX/*'
 ls -la
