@@ -1,6 +1,6 @@
 # Joy Club — Video Launching 16:9, versi 3 (design)
 
-Tarikh: 18 Nov 2026 · Status: draf design, menunggu kelulusan Nas
+Tarikh: 18 Nov 2026 · Status: **diluluskan Nas** (18 Nov 2026, 8:28 PM). Langkah pertama: still frame storyboard sebelum render video.
 Folder kod: `joyclub-launch-16x9/` (repo nazgram/REMOTION, branch `claude/project-thread-ljjwrj`)
 
 ## 1. Tujuan
@@ -102,7 +102,7 @@ Masa di bawah ialah sasaran. Pembina mesti padankan setiap potongan dengan **bea
 | 15–17 | 0:30.8–0:37.4 | **SILVER** |
 | 18 | 0:37.4–0:39.6 | **Klimaks.** 5 panel vertical penuh skrin, satu setiap design, hard cut serentak atas beat. Bulatan semua warna pop pada tepi. |
 | 19 | 0:39.6–0:42.4 | **JOY CLUB.** Bulatan mengecil dan bergerak masuk menjadi dot dalam huruf O dan U, kemudian logo typography penuh muncul atas **latar design SILVER** (kelabu #d8d8d8 dengan corak dot coklat #5c484d dari SVG, dilembutkan supaya logo jelas), dengan "AVAILABLE NOW" di bawahnya. |
-| 20 | 0:42.4–0:45.0 | **NAFESA.** **Latar olive** (#545e3a, warna logo NAFESA) dengan logo putih (04). Elemen polka dot ditambah: bulatan cream dan tan pop dengan scale di tepi, serta corak dot kecil yang halus. Lagu fade keluar. |
+| 20 | 0:42.4–0:45.0 | **NAFESA.** Ikut katalog: **logo olive (02) atas latar cream**. Elemen polka dot ditambah: bulatan olive dan tan pop dengan scale di tepi, serta corak dot kecil yang halus. Lagu fade keluar. |
 
 **Susunan design:** PEARL → SKY → BLUSH → RUBY → **SILVER**. Nas mahu SILVER di akhir supaya ia bersambung dengan logo JOY CLUB, yang muncul atas latar design Silver. Susunan antara PEARL hingga RUBY ialah pilihan saya, supaya warna bersebelahan sentiasa kontras.
 
