@@ -96,15 +96,15 @@ Masa di bawah ialah sasaran. Pembina mesti padankan setiap potongan dengan **bea
 |---|---|---|
 | 1–2 | 0:00–0:04.4 | **Intro.** Latar cream. Bulatan semua warna pop masuk satu setiap beat dari tepi, membesar dan mengecil, kemudian bergabung ke tengah. Dot sapu (A) dengan corak PEARL membuka colorway pertama. |
 | 3–5 | 0:04.4–0:11.0 | **PEARL** |
-| 6–8 | 0:11.0–0:17.6 | **BLUSH** |
-| 9–11 | 0:17.6–0:24.2 | **SILVER** |
-| 12–14 | 0:24.2–0:30.8 | **SKY** |
-| 15–17 | 0:30.8–0:37.4 | **RUBY** |
+| 6–8 | 0:11.0–0:17.6 | **SKY** |
+| 9–11 | 0:17.6–0:24.2 | **BLUSH** |
+| 12–14 | 0:24.2–0:30.8 | **RUBY** |
+| 15–17 | 0:30.8–0:37.4 | **SILVER** |
 | 18 | 0:37.4–0:39.6 | **Klimaks.** 5 panel vertical penuh skrin, satu setiap design, hard cut serentak atas beat. Bulatan semua warna pop pada tepi. |
-| 19 | 0:39.6–0:42.4 | **JOY CLUB.** Bulatan mengecil dan bergerak masuk menjadi dot dalam huruf O dan U, kemudian logo typography penuh muncul atas latar cream, dengan "AVAILABLE NOW" di bawahnya. |
-| 20 | 0:42.4–0:45.0 | **NAFESA.** Logo olive (02) atas latar cream, bulatan olive dan tan di tepi macam muka akhir katalog. Lagu fade keluar. |
+| 19 | 0:39.6–0:42.4 | **JOY CLUB.** Bulatan mengecil dan bergerak masuk menjadi dot dalam huruf O dan U, kemudian logo typography penuh muncul atas **latar design SILVER** (kelabu #d8d8d8 dengan corak dot coklat #5c484d dari SVG, dilembutkan supaya logo jelas), dengan "AVAILABLE NOW" di bawahnya. |
+| 20 | 0:42.4–0:45.0 | **NAFESA.** **Latar olive** (#545e3a, warna logo NAFESA) dengan logo putih (04). Elemen polka dot ditambah: bulatan cream dan tan pop dengan scale di tepi, serta corak dot kecil yang halus. Lagu fade keluar. |
 
-**Susunan design:** PEARL → BLUSH → SILVER → SKY → RUBY, dari lembut ke garang. RUBY di akhir sebab merah dan biru mudanya terus bersambung dengan warna logo JOY CLUB. *(Pilihan saya.)*
+**Susunan design:** PEARL → SKY → BLUSH → RUBY → **SILVER**. Nas mahu SILVER di akhir supaya ia bersambung dengan logo JOY CLUB, yang muncul atas latar design Silver. Susunan antara PEARL hingga RUBY ialah pilihan saya, supaya warna bersebelahan sentiasa kontras.
 
 ### Corak setiap colorway (3 bar)
 
@@ -123,7 +123,7 @@ Peraturan: paling banyak **satu transition setiap bar**. Selebihnya hard cut.
 
 ### Layout panel
 - 3 panel: setiap panel 640x1080. 2 panel: setiap panel 960x1080. Footage vertical di-cover (crop atas dan bawah), tiada zoom pulse. Gerak drift yang sangat perlahan dibenarkan.
-- Pemisah panel: garis putih nipis 4px. *(Pilihan saya, sebab "tiada benda lain". Boleh jadi 0px kalau Nas nak.)*
+- Pemisah panel: garis putih nipis 4px (Nas setuju).
 - Klimaks 5 panel: setiap panel 384x1080.
 
 ### Teks
@@ -147,7 +147,7 @@ Peraturan: paling banyak **satu transition setiap bar**. Selebihnya hard cut.
 - Frame interpolation AI tidak digunakan, sebab ia boleh merosakkan tangan dan tepi kain.
 
 ## 7. SFX
-- Pop halus untuk bulatan dan whoosh lembut untuk dot sapu, pada isipadu rendah di bawah lagu. *(Pilihan saya, mengikut rancangan asal "SFX buat sendiri".)*
+- Pop halus untuk bulatan dan whoosh lembut untuk dot sapu, pada isipadu rendah di bawah lagu (Nas setuju).
 
 ## 8. Teknikal
 - Lagu: potong 0:01–0:46 (45s). Fade masuk 0.3s, fade keluar sepanjang bar 20.
