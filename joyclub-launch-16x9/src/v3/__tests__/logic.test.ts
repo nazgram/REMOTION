@@ -12,7 +12,7 @@ describe('layout', () => {
     for (const n of [2, 3, 5] as const) {
       const r = panelRects(n);
       expect(r[0].x).toBe(0);
-      expect(r.at(-1)!.x + r.at(-1)!.w).toBe(1920);
+      expect(r[r.length - 1].x + r[r.length - 1].w).toBe(1920);
     }
   });
   test('panelRects 3 gaps are 4px', () => {
@@ -41,7 +41,7 @@ describe('timeline', () => {
     const tl = buildTimeline(fakeBeats(0.557));
     expect(tl.filter((s) => s.kind === 'design').map((s) => s.design)).toEqual(['pearl', 'sky', 'blush', 'ruby', 'silver']);
     expect(tl[0].start).toBe(0);
-    expect(tl.at(-1)!.end).toBe(45);
+    expect(tl[tl.length - 1].end).toBe(45);
     for (let i = 1; i < tl.length; i++) expect(tl[i].start).toBe(tl[i - 1].end);
     expect(tl.find((s) => s.kind === 'design')!.bars).toHaveLength(3);
   });
