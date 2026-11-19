@@ -6,7 +6,7 @@ describe('pilihan shot', () => {
     expect(validateShots()).toEqual([]);
   });
   it('tolak awal shot', () => {
-    const bad = {...SHOTS, pearl: {...SHOTS.pearl, panels: [{...SHOTS.pearl.panels[0], t: 1.0}, SHOTS.pearl.panels[1], SHOTS.pearl.panels[2]] as typeof SHOTS.pearl.panels}};
+    const bad = {...SHOTS, pearl: {...SHOTS.pearl, panels: [{...SHOTS.pearl.panels[0], t: 34.5}, SHOTS.pearl.panels[1], SHOTS.pearl.panels[2]] as typeof SHOTS.pearl.panels}};
     expect(validateShots(bad).some((e) => e.includes('awal shot'))).toBe(true);
   });
   it('tolak saat berulang', () => {

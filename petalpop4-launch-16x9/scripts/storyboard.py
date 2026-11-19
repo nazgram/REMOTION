@@ -32,7 +32,7 @@ cols = 4
 rows = (len(ITEMS) + cols - 1) // cols
 img = Image.new('RGB', (cols * tw + (cols + 1) * pad, 130 + rows * (th + cap + pad)), (250, 247, 242))
 d = ImageDraw.Draw(img)
-d.text((pad, 40), 'PETAL POP DROP 4 · Teaser LED 16:9 (26.5 s) · Storyboard v1', font=ft, fill=(30, 30, 30))
+d.text((pad, 40), 'PETAL POP DROP 4 · Teaser LED 16:9 (26.5 s) · Storyboard v2 (footage VIDEO GRADE)', font=ft, fill=(30, 30, 30))
 for i, (fn, fr_, title, desc) in enumerate(ITEMS):
     t = f'{fr_ / 60:.1f}s'
     x = pad + (i % cols) * (tw + pad); y = 130 + (i // cols) * (th + cap + pad)

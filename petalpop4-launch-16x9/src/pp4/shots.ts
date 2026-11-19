@@ -13,32 +13,27 @@ export const ENTER = [0, 1, 2];
 // Klimaks: 6 jalur masuk setiap separuh beat.
 export const CLIMAX_ENTER = [0, 0.5, 1, 1.5, 2, 2.5];
 
-const s = (raw: string, t: number, o: Partial<Shot> = {}): Shot => ({raw, t, speed: 0.6, ...o});
-const det = (raw: string, t: number, o: Partial<Shot> = {}): Shot => s(raw, t, {detail: true, zoom: 1.35, ...o});
-
-// Dipilih dari contact sheet + skor gegar (scripts/pp4_shake.json): tiada orang halang, model ready, tak gegar,
-// tiada 2 s pertama raw, tiada saat berulang. Panel tengah = detail print.
+const s = (t: number, o: Partial<Shot> = {}): Shot => ({raw: 'VG', t, speed: 0.6, ...o});
+const det = (t: number, o: Partial<Shot> = {}): Shot => s(t, {detail: true, zoom: 1.35, ...o});
+// Masa dalam VIDEO GRADE .mp4 (footage Nas sudah grade, 19 Nov 14:21). Dipilih dari contact sheet VG: tiada orang halang,
+// model ready, tak gegar, bukan awal segmen, tiada saat berulang. Panel tengah = detail print.
 export const SHOTS: Record<DesignId, DesignShots> = {
-  pearl: {shape: 'A', panels: [s('C4574', 15.0, {focusY: 0.25}), det('C4575', 48.8, {focusY: 0.5}), s('C4575', 62.0, {focusY: 0.3})]},
-  dusty: {shape: 'B', panels: [s('C4589', 6.2, {focusY: 0.25}), det('C4588', 34.5, {focusY: 0.5}), s('C4588', 47.8, {focusY: 0.3})]},
-  lilac: {shape: 'C', panels: [s('C4596', 6.0, {focusY: 0.3}), det('C4595', 18.5, {focusX: 0.5, focusY: 0.42, zoom: 1.35}), s('C4597', 17.0, {focusY: 0.3})]},
-  sage: {shape: 'H', panels: [s('C4605', 24.3, {focusY: 0.3}), det('C4605', 40.6, {focusY: 0.5}), s('C4603', 7.0, {focusY: 0.35})]},
-  powder: {shape: 'I', panels: [s('C4580', 6.0, {focusY: 0.25}), det('C4580', 14.2, {focusY: 0.65, zoom: 1.4}), s('C4584', 12.2, {focusY: 0.35})]},
-  dahlia: {shape: 'K', panels: [s('C4569', 4.5, {focusY: 0.3}), det('C4570', 5.0, {focusY: 0.5, zoom: 1.2}), s('C4568', 14.0, {focusY: 0.3})]},
+  pearl: {shape: 'A', panels: [s(45.5, {focusY: 0.25}), det(59.6, {focusY: 0.5}), s(51.8, {focusY: 0.3})]},
+  dusty: {shape: 'B', panels: [s(132.5, {focusY: 0.3}), det(121.0, {focusY: 0.5}), s(124.0, {focusY: 0.3})]},
+  lilac: {shape: 'C', panels: [s(149.5, {focusY: 0.3}), det(154.6, {focusX: 0.5, focusY: 0.42}), s(182.5, {focusY: 0.3})]},
+  sage: {shape: 'H', panels: [s(211.0, {focusY: 0.3}), det(224.7, {focusY: 0.5}), s(218.3, {focusY: 0.35})]},
+  powder: {shape: 'I', panels: [s(70.0, {focusY: 0.3}), det(76.0, {focusY: 1.0, zoom: 1.4}), s(90.0, {focusY: 0.3})]},
+  dahlia: {shape: 'K', panels: [s(21.0, {focusY: 0.3}), det(28.9, {focusY: 0.5, zoom: 1.2}), s(14.0, {focusY: 0.3})]},
 };
-
 // Klimaks: muka depan, satu jalur setiap design (ikut ORDER), slow-mo 50%.
-const c = (raw: string, t: number): Shot => ({raw, t, speed: 0.5, focusY: 0.28, zoom: 1.1});
-export const CLIMAX: Shot[] = [c('C4575', 19.0), c('C4589', 9.0), c('C4595', 21.6), c('C4605', 49.6), c('C4580', 21.4), c('C4568', 4.4)];
-
-// Panjang raw (s) dan cut dalaman yang dikesan (lompatan frame besar).
-export const RAW_DUR: Record<string, number> = {
-  C4567: 33.0, C4568: 25.0, C4569: 20.0, C4570: 25.5, C4574: 23.0, C4575: 79.0, C4580: 43.0, C4581: 13.5, C4582: 14.5, C4583: 31.5, C4584: 33.0,
-  C4588: 59.6, C4589: 20.5, C4590: 25.5, C4594: 12.0, C4595: 25.5, C4596: 45.0, C4597: 51.6, C4598: 15.5, C4603: 30.5, C4604: 12.0, C4605: 56.1,
+const c = (t: number): Shot => ({raw: 'VG', t, speed: 0.5, focusY: 0.28, zoom: 1.1});
+export const CLIMAX: Shot[] = [c(55.5), c(116.5), c(157.7), c(205.5), c(78.3), c(8.2)];
+// Panjang VIDEO GRADE dan cut antara segmen (dikesan dari beza frame 10 fps, +-0.1 s).
+export const RAW_DUR: Record<string, number> = {VG: 230.1};
+export const RAW_CUTS: Record<string, number[]> = {
+  VG: [7.6, 13.1, 16.5, 19.0, 28.3, 31.2, 34.4, 51.2, 54.8, 58.2, 62.7, 64.8, 69.1, 73.2, 79.4, 88.5, 96.9, 100.5, 103.7, 109.7, 115.4, 120.4, 123.1, 131.1, 136.9, 142.5, 147.7, 152.6, 160.5, 161.6, 168.0, 173.2, 181.4, 188.2, 195.1, 199.6, 202.6, 210.5, 214.1, 226.9],
 };
-export const RAW_CUTS: Record<string, number[]> = {C4567: [6, 24, 30], C4568: [10], C4570: [11, 17, 21], C4575: [13, 29, 31, 54], C4588: [11, 16, 38], C4595: [5, 24], C4597: [49], C4603: [29], C4605: [17, 32, 54]};
-
-export const MIN_START = 2.0; // jangan ambil awal shot
+export const MIN_START = 0.5; // jangan ambil awal shot: sekurang-kurangnya 0.5 s selepas mula segmen
 export const MAX_ZOOM = 1.4;
 const BEAT = 60 / beatsData.bpm;
 export const SWEEP_TAIL = 0.1; // margin selepas blok (reveal mula 3 frame awal)
@@ -55,24 +50,26 @@ export const allUses = (shots = SHOTS, climax = CLIMAX): Use[] => {
   return out;
 };
 
+const inDesign = (d: DesignId, sh: Shot) => sh.t >= DESIGNS[d].vg[0] && sh.t <= DESIGNS[d].vg[1];
 export const validateShots = (shots = SHOTS, climax = CLIMAX): string[] => {
   const errs: string[] = [];
   for (const d of ORDER) {
     const p = shots[d].panels;
     if (p.filter((x) => x.detail).length !== 1) errs.push(`${d}: mesti ada tepat 1 shot detail`);
-    for (const sh of p) if (!DESIGNS[d].raws.includes(sh.raw)) errs.push(`${d}: ${sh.raw} bukan raw design ini`);
+    for (const sh of p) if (!inDesign(d, sh)) errs.push(`${d}: ${sh.t}s bukan dalam julat design ini`);
   }
   climax.forEach((sh, k) => {
-    if (!DESIGNS[ORDER[k]].raws.includes(sh.raw)) errs.push(`climax[${k}]: ${sh.raw} bukan raw ${ORDER[k]}`);
+    if (!inDesign(ORDER[k], sh)) errs.push(`climax[${k}]: ${sh.t}s bukan dalam julat ${ORDER[k]}`);
   });
   const uses = allUses(shots, climax);
   for (const u of uses) {
     const {shot: sh} = u;
     if (sh.speed < 0.5) errs.push(`${u.label}: speed ${sh.speed} < 0.5`);
     if ((sh.zoom ?? 1) > MAX_ZOOM) errs.push(`${u.label}: zoom ${sh.zoom} > ${MAX_ZOOM}`);
-    if (u.a < MIN_START) errs.push(`${u.label}: mula ${u.a}s, awal shot (< ${MIN_START}s)`);
-    if (u.b > (RAW_DUR[sh.raw] ?? 0) - 0.3) errs.push(`${u.label}: ${u.b.toFixed(2)}s lepas hujung raw ${sh.raw}`);
-    for (const cut of RAW_CUTS[sh.raw] ?? []) if (u.a < cut + 1 && u.b > cut - 0.2) errs.push(`${u.label}: melintas cut ${cut}s dalam ${sh.raw}`);
+    const segStart = Math.max(0, ...(RAW_CUTS[sh.raw] ?? []).filter((c) => c <= u.a));
+    if (u.a - segStart < MIN_START) errs.push(`${u.label}: mula ${u.a}s, awal shot (segmen mula ${segStart}s)`);
+    if (u.b > (RAW_DUR[sh.raw] ?? 0) - 0.3) errs.push(`${u.label}: ${u.b.toFixed(2)}s lepas hujung ${sh.raw}`);
+    for (const cut of RAW_CUTS[sh.raw] ?? []) if (u.a < cut && u.b > cut - 0.2) errs.push(`${u.label}: melintas cut ${cut}s dalam ${sh.raw}`);
   }
   for (let i = 0; i < uses.length; i++)
     for (let k = i + 1; k < uses.length; k++) {

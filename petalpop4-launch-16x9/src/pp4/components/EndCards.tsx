@@ -110,11 +110,35 @@ export const ComingSoon: React.FC<{times: ComingTimes}> = ({times: T}) => {
   );
 };
 
-// NAFESA: hitam, logo putih fade in 0.8 s. Tiada animasi lain.
+// NAFESA: hitam, logo putih fade in 0.8 s. Sedikit bunga print (campur 6 design) di bucu kiri atas dan kanan bawah,
+// fade in perlahan bersama logo dan bergoyang sikit (Nas 19 Nov: "bagi ada bunga sikit").
+const NAF_UNITS = UNITS.filter((u) => u.r >= 55 && u.r <= 110 && u.p.length >= 12);
+const NAF_CORNER: [number, number, number][] = [
+  [60, 50, 150], [240, 10, 95], [10, 240, 100], [200, 175, 60], [370, 30, 48], [40, 400, 46], [330, 140, 34],
+];
+const nafFlowers = [0, 1].flatMap((side) =>
+  NAF_CORNER.map(([dx, dy, size], i) => {
+    const u = NAF_UNITS[(side * 23 + i * 7 + 3) % NAF_UNITS.length];
+    const x = side === 0 ? dx : W - dx, y = side === 0 ? dy : H - dy;
+    return {u, x, y, s: size / u.r, d: ORDER[(i + side * 3) % ORDER.length] as DesignId, k: side * 7 + i};
+  }),
+);
 export const NafesaFade: React.FC = () => {
   const t = useCurrentFrame() / FPS;
   return (
     <AbsoluteFill style={{background: `rgba(0,0,0,${ease(t, 0, 0.25, Easing.linear)})`, alignItems: 'center', justifyContent: 'center'}}>
+      <svg width={W} height={H} style={{position: 'absolute', left: 0, top: 0}}>
+        {nafFlowers.map(({u, x, y, s, d, k}) => {
+          const o = ease(t, 0.2 + (k % 7) * 0.06, 0.9 + (k % 7) * 0.06, Easing.inOut(Easing.sin));
+          if (o <= 0) return null;
+          const g = 0.85 + 0.15 * o;
+          return (
+            <g key={k} opacity={o} transform={`translate(${x} ${y}) rotate(${Math.sin(t * 1.6 + k) * 5}) scale(${s * g}) translate(${-u.x} ${-u.y})`}>
+              <UnitG u={u} colors={colorsOf(d)} k={1} />
+            </g>
+          );
+        })}
+      </svg>
       <Img src={asset('logo-nafesa-putih.png')} style={{width: 560, opacity: ease(t, 0.15, 0.95, Easing.inOut(Easing.sin))}} />
     </AbsoluteFill>
   );
