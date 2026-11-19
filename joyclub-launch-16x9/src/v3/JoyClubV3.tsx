@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Easing, interpolate, OffthreadVideo, Sequence, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Audio, Easing, Img, interpolate, OffthreadVideo, Sequence, useCurrentFrame} from 'remotion';
 import beatsData from '../../public/v3/beats.json';
 import {beatAt} from './beats';
 import {Circles, CircleItem} from './components/Circles';
@@ -64,18 +64,23 @@ const DesignBlock: React.FC<{d: DesignId; k0: number; start: number; last: boole
   );
 };
 
-// Intro: video kain dari Nas (Magnific, 1280x720 24fps, 10s): SKY -> BLUSH -> SILVER -> PEARL -> RUBY dengan
-// transition sendiri. Main dari awal, dipotong di hujung intro (dot PEARL tutup atas RUBY). Bunyi asal klip
-// (kain/whoosh) dikekalkan pada aras SFX. Zoom perlahan sedikit supaya tak kaku.
-const INTRO_VIDEO = 'kain/intro-kain.mp4';
-const INTRO_AUDIO = 1.5; // darab SFX_VOL; puncak klip -1.4 dBFS, sama aras dengan SFX lain
+// Intro: video "intro kain" dari Nas (1920x1080 24fps, 8.04s): SKY -> PEARL -> BLUSH -> SILVER -> RUBY, dengan SFX sendiri
+// (dipakai terus, tiada whoosh tambahan). Video lebih pendek dari intro (4 bar, ~9.15s), jadi frame akhir (RUBY)
+// dipegang di belakang sampai dot PEARL tutup skrin. Zoom perlahan berterusan supaya frame akhir tak nampak beku.
+const INTRO_VIDEO = 'kain/intro-kain-v2.mp4';
+const INTRO_LAST = 'kain/intro-kain-v2-last.jpg';
+const INTRO_VIDEO_DUR = 8.04;
+const INTRO_AUDIO = 1.5; // darab SFX_VOL; puncak klip -4.4 dBFS
 
 const Intro: React.FC<{end: number}> = ({end}) => {
   const t = useCurrentFrame() / 60;
-  const scale = 1 + 0.04 * Math.min(1, t / end);
+  const fill: React.CSSProperties = {position: 'absolute', width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${1 + 0.04 * Math.min(1, t / end)})`};
   return (
     <AbsoluteFill style={{background: CREAM}}>
-      <OffthreadVideo src={asset(INTRO_VIDEO)} volume={SFX_VOL * INTRO_AUDIO} style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})`}} />
+      <Img src={asset(INTRO_LAST)} style={fill} />
+      <Sequence durationInFrames={f(INTRO_VIDEO_DUR) - 1} layout="none">
+        <OffthreadVideo src={asset(INTRO_VIDEO)} volume={SFX_VOL * INTRO_AUDIO} style={fill} />
+      </Sequence>
     </AbsoluteFill>
   );
 };
@@ -101,7 +106,8 @@ const sfxHits = (): Hit[] => {
   const climax = TL.find((s) => s.kind === 'climax')!;
   for (const k of CLIMAX_ENTER) hits.push({at: B(climax.beat0 + k), file: 'pop-kecil', gain: 0.8});
   const joy = TL.find((s) => s.kind === 'joyclub')!;
-  hits.push({at: joy.start, file: 'pop'}, {at: joy.start + 0.1, file: 'pop'}, {at: joy.start + 0.95, file: 'whoosh', gain: 0.7});
+  for (let i = 0; i < 7; i++) hits.push({at: joy.start + i * (BEAT / 2), file: 'pop-kecil', gain: 0.9}); // huruf J O Y C L U B
+  hits.push({at: joy.start + 4 * BEAT, file: 'whoosh', gain: 0.5}); // AVAILABLE NOW
   const naf = TL.find((s) => s.kind === 'nafesa')!;
   for (const d of [0, 0.15, 0.3, 0.45]) hits.push({at: naf.start + d, file: 'pop-kecil', gain: 0.8});
   return hits.filter((h) => h.at >= 0 && h.at < END);
