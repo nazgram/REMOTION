@@ -6,7 +6,7 @@ export const asset = (p: string) => staticFile(`pp4/${p}`);
 export const NAME_FONT = 'Transcity';
 export const SERIF = 'DM Serif Display';
 if (typeof document !== 'undefined' && typeof FontFace !== 'undefined') {
-  const h = delayRender('fonts');
+  const h = delayRender('fonts', {timeoutInMilliseconds: 120000, retries: 2});
   Promise.all(
     [
       [NAME_FONT, 'fonts/Transcity.otf'],
