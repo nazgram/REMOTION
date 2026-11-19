@@ -1,0 +1,7 @@
+node_modules
+out
+public/pp4/clips/
+public/pp4/*.m4a
+public/pp4/*.wav
+public/pp4/*.jpg
+public/pp4/raw/
