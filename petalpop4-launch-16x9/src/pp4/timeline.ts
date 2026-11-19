@@ -8,7 +8,7 @@ export const END = 26.5;
 export const INTRO_BEATS = 2;
 export const DESIGN_BEATS = 5;
 export const CLIMAX_BEATS = 4;
-export const COMING_BEATS = 5;
+export const COMING_BEATS = 7; // dipanjangkan 2 beat (dari 5) supaya logo sempat dibaca; NAFESA jadi ~1.5 s
 
 export const buildTimeline = (beats: number[]): Segment[] => {
   const at = (k: number) => (k === 0 ? 0 : beatAt(k, beats));

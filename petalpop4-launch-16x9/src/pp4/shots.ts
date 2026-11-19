@@ -21,7 +21,7 @@ const det = (raw: string, t: number, o: Partial<Shot> = {}): Shot => s(raw, t, {
 export const SHOTS: Record<DesignId, DesignShots> = {
   pearl: {shape: 'A', panels: [s('C4574', 15.0, {focusY: 0.25}), det('C4575', 48.8, {focusY: 0.5}), s('C4575', 62.0, {focusY: 0.3})]},
   dusty: {shape: 'B', panels: [s('C4589', 6.2, {focusY: 0.25}), det('C4588', 34.5, {focusY: 0.5}), s('C4588', 47.8, {focusY: 0.3})]},
-  lilac: {shape: 'C', panels: [s('C4596', 6.0, {focusY: 0.3}), det('C4594', 4.6, {focusX: 0.55, focusY: 0.45, zoom: 1.4}), s('C4597', 17.0, {focusY: 0.3})]},
+  lilac: {shape: 'C', panels: [s('C4596', 6.0, {focusY: 0.3}), det('C4595', 18.5, {focusX: 0.5, focusY: 0.42, zoom: 1.35}), s('C4597', 17.0, {focusY: 0.3})]},
   sage: {shape: 'H', panels: [s('C4605', 24.3, {focusY: 0.3}), det('C4605', 40.6, {focusY: 0.5}), s('C4603', 7.0, {focusY: 0.35})]},
   powder: {shape: 'I', panels: [s('C4580', 6.0, {focusY: 0.25}), det('C4580', 14.2, {focusY: 0.65, zoom: 1.4}), s('C4584', 12.2, {focusY: 0.35})]},
   dahlia: {shape: 'K', panels: [s('C4569', 4.5, {focusY: 0.3}), det('C4570', 5.0, {focusY: 0.5, zoom: 1.2}), s('C4568', 14.0, {focusY: 0.3})]},

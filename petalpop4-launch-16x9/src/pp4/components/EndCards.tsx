@@ -1,0 +1,121 @@
+import React from 'react';
+import {AbsoluteFill, Easing, Img, useCurrentFrame} from 'remotion';
+import {colorsOf, DesignId, ORDER, UNITS} from '../designs';
+import {H, W} from '../layout';
+import {LOGO, LOGO_H, LOGO_W} from '../logo';
+import {asset, ease, FPS, pop, SERIF} from '../util';
+import {BloomSweep, SweepTiming, UnitG, unitLightness} from './Bloom';
+
+export const COMING_SWEEP: SweepTiming = {pre: 0.7, maskLag: 0.1, spread: 0.35, grow: 0.4, settle: 0.5};
+// Masa (saat tempatan dari mula segmen) dikira dari beat dalam PetalPop4Launch.
+export type ComingTimes = {letters: number[]; shrink: number; ring: number; logoLetters: number[]; motifs: number; pill: number; drops: number[]};
+
+const TEXT = 'COMING SOON';
+const RING_C: [number, number] = [W / 2, 468];
+const RING_R = 380;
+const LOGO_S = 0.54;
+
+// Unit kecil cerah Black Dahlia yang mekar di sekeliling tulisan.
+const dahliaColors = colorsOf('dahlia');
+const SMALL = UNITS.filter((u) => u.r >= 30 && u.r <= 70 && u.p.length >= 4 && unitLightness(u, dahliaColors) > 0.45).slice(0, 8);
+const SMALL_POS: [number, number][] = [[300, 420], [1620, 430], [180, 640], [1740, 650], [520, 300], [1400, 300], [560, 790], [1360, 790]];
+// Bulatan bunga: unit campur 6 design.
+const RING_UNITS = UNITS.filter((u) => u.r >= 50 && u.r <= 95 && u.p.length >= 6);
+const RING_N = 30;
+const ring = Array.from({length: RING_N}, (_, i) => {
+  const u = RING_UNITS[(i * 13) % RING_UNITS.length];
+  const a = (i / RING_N) * Math.PI * 2 - Math.PI / 2;
+  return {u, a, d: ORDER[i % ORDER.length] as DesignId, s: (i % 2 === 0 ? 70 : 54) / u.r};
+});
+
+const Letters: React.FC<{t: number; at: number[]}> = ({t, at}) => {
+  let li = 0;
+  return (
+    <div style={{fontFamily: SERIF, fontSize: 168, color: '#fff', letterSpacing: '0.05em', whiteSpace: 'nowrap', lineHeight: 1}}>
+      {TEXT.split('').map((ch, i) => {
+        if (ch === ' ') return <span key={i} style={{display: 'inline-block', width: '0.35em'}} />;
+        const a = at[li++];
+        const k = ease(t, a, a + 0.32, Easing.out(Easing.back(1.8)));
+        const o = ease(t, a, a + 0.12, Easing.linear);
+        return (
+          <span key={i} style={{display: 'inline-block', opacity: o, transform: `translateY(${(1 - Math.min(1, k)) * 30}px) scale(${k})`, transformOrigin: '50% 100%'}}>
+            {ch}
+          </span>
+        );
+      })}
+    </div>
+  );
+};
+
+// COMING SOON atas print Black Dahlia (unit cerah), kemudian bulatan bunga + logo Petal Pop 4 putih. t = 0 mula segmen.
+export const ComingSoon: React.FC<{times: ComingTimes}> = ({times: T}) => {
+  const t = useCurrentFrame() / FPS;
+  const vig = ease(t, 0.45, 0.95);
+  const sh = ease(t, T.shrink, T.shrink + 0.45, Easing.inOut(Easing.cubic));
+  const ty = 540 + (985 - 540) * sh, sc = 1 - 0.6 * sh;
+  const smallOut = ease(t, T.shrink, T.shrink + 0.3, Easing.in(Easing.back(1.4)));
+  let li = 0;
+  return (
+    <AbsoluteFill style={{background: '#000'}}>
+      <BloomSweep design="dahlia" origin="center" timing={COMING_SWEEP} light />
+      <AbsoluteFill style={{opacity: vig, background: `radial-gradient(ellipse ${760 + 200 * sh}px ${420 + 200 * sh}px at 50% ${50 - 8 * sh}%, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0) 100%)`}} />
+      <svg width={W} height={H} style={{position: 'absolute', left: 0, top: 0}}>
+        {SMALL.map((u, i) => {
+          const k = pop(t, T.letters[Math.min(T.letters.length - 1, i + 1)], 10) * (1 - smallOut);
+          if (k <= 0.001) return null;
+          const [x, y] = SMALL_POS[i];
+          return (
+            <g key={i} transform={`translate(${x} ${y}) rotate(${Math.sin(t * 2 + i) * 8}) scale(${(55 / u.r) * k}) translate(${-u.x} ${-u.y})`}>
+              <UnitG u={u} colors={dahliaColors} k={1} />
+            </g>
+          );
+        })}
+        <g transform={`translate(${RING_C[0]} ${RING_C[1]}) rotate(${(t - T.ring) * 5})`}>
+          {ring.map(({u, a, d, s}, i) => {
+            const k = pop(t, T.ring + i * 0.022, 10);
+            if (k <= 0.001) return null;
+            return (
+              <g key={i} transform={`translate(${Math.cos(a) * RING_R} ${Math.sin(a) * RING_R}) rotate(${(a * 180) / Math.PI + 90}) scale(${s * k}) translate(${-u.x} ${-u.y})`}>
+                <UnitG u={u} colors={colorsOf(d)} k={1} />
+              </g>
+            );
+          })}
+        </g>
+        <g transform={`translate(${RING_C[0]} ${RING_C[1]}) scale(${LOGO_S}) translate(${-LOGO_W / 2} ${-(327 + 1022) / 2})`}>
+          {LOGO.map((p, i) => {
+            const [bx, by, bw, bh] = p.box;
+            const cx = bx + bw / 2, cy = by + bh / 2;
+            let at: number;
+            if (p.role === 'letter') at = T.logoLetters[li++];
+            else if (p.role === 'pill') at = T.pill;
+            else if (p.role === 'drop') at = T.drops[p.order - 17];
+            else at = T.motifs + (p.order % 7) * 0.05;
+            if (t < at) return null;
+            if (p.role === 'letter' || p.role === 'drop') {
+              const k = ease(t, at, at + 0.3, Easing.out(Easing.back(1.8)));
+              const o = ease(t, at, at + 0.1, Easing.linear);
+              return <path key={i} d={p.d} fill={p.fill} opacity={o} transform={`translate(0 ${(1 - Math.min(1, k)) * 50}) translate(${cx} ${by + bh}) scale(${k}) translate(${-cx} ${-(by + bh)})`} />;
+            }
+            const k = pop(t, at, 9);
+            const spin = p.role === 'flower' ? (1 - Math.min(1, k)) * -120 : 0;
+            const sx = p.role === 'pill' ? Math.max(0.05, k) : k, sy = p.role === 'pill' ? 0.4 + 0.6 * Math.min(1, k) : k;
+            return <path key={i} d={p.d} fill={p.fill} transform={`translate(${cx} ${cy}) rotate(${spin}) scale(${sx} ${sy}) translate(${-cx} ${-cy})`} />;
+          })}
+        </g>
+      </svg>
+      <div style={{position: 'absolute', left: 0, width: W, top: ty, display: 'flex', justifyContent: 'center', transform: `translateY(-50%) scale(${sc})`}}>
+        <Letters t={t} at={T.letters} />
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// NAFESA: hitam, logo putih fade in 0.8 s. Tiada animasi lain.
+export const NafesaFade: React.FC = () => {
+  const t = useCurrentFrame() / FPS;
+  return (
+    <AbsoluteFill style={{background: `rgba(0,0,0,${ease(t, 0, 0.25, Easing.linear)})`, alignItems: 'center', justifyContent: 'center'}}>
+      <Img src={asset('logo-nafesa-putih.png')} style={{width: 560, opacity: ease(t, 0.15, 0.95, Easing.inOut(Easing.sin))}} />
+    </AbsoluteFill>
+  );
+};

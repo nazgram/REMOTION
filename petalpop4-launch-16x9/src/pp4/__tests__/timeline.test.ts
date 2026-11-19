@@ -24,9 +24,9 @@ describe('timeline', () => {
     const c = tl.find((s) => s.kind === 'climax')!;
     expect([c.start, c.end]).toEqual([at(32), at(36)]);
     const m = tl.find((s) => s.kind === 'coming')!;
-    expect([m.start, m.end]).toEqual([at(36), at(41)]);
+    expect([m.start, m.end]).toEqual([at(36), at(43)]);
     const n = tl.find((s) => s.kind === 'nafesa')!;
-    expect([n.start, n.end]).toEqual([at(41), END]);
+    expect([n.start, n.end]).toEqual([at(43), END]);
     expect(END).toBe(26.5);
   });
   it('lagu dipotong atas beat', () => {

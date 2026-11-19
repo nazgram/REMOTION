@@ -1,5 +1,5 @@
-"""Jana SFX sendiri (tiada AI): pop, pop kecil, whoosh. Output public/v3/sfx-*.wav, puncak -1 dBFS.
-Aras dalam video diturunkan ke -18 dB di bawah lagu (lihat SFX_VOL dalam src/v3/Sfx.tsx)."""
+"""Jana SFX sendiri (tiada AI): pop, pop kecil, whoosh. Output public/pp4/sfx-*.wav, puncak -1 dBFS.
+Aras dalam video diturunkan ke -18 dB di bawah lagu (lihat SFX_VOL dalam src/pp4/PetalPop4Launch.tsx)."""
 import numpy as np, soundfile as sf
 
 SR = 48000
@@ -36,7 +36,7 @@ def whoosh(dur):
     return norm(out * env * fade)
 
 
-sf.write('public/v3/sfx-pop.wav', pop(900, 260, 0.14), SR)
-sf.write('public/v3/sfx-pop-kecil.wav', pop(1400, 600, 0.08), SR)
-sf.write('public/v3/sfx-whoosh.wav', whoosh(0.8), SR)
+sf.write('public/pp4/sfx-pop.wav', pop(900, 260, 0.14), SR)
+sf.write('public/pp4/sfx-pop-kecil.wav', pop(1400, 600, 0.08), SR)
+sf.write('public/pp4/sfx-whoosh.wav', whoosh(0.8), SR)
 print('ok')
