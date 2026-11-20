@@ -5,3 +5,7 @@ public/kain
 public/*.m4a
 public/*.otf
 public/v3/
+public/teaser/clips/
+public/teaser/*.m4a
+public/teaser/*.ttf
+public/teaser/*.png
