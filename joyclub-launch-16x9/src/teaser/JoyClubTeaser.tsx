@@ -49,6 +49,9 @@ export const SHOTS: Shot[] = [
   {clip: 'r5', off: 0.2, k0: 35, k1: 36, z: 1.2, ox: 50, oy: 35},
   {clip: 'r3', off: 1.0, k0: 36, k1: 38, z: 1.25, ox: 50, oy: 45, tr: {type: 'whipL'}},
   {clip: 'r5', off: 1.4, k0: 38, k1: 40, z: 1.3, ox: 50, oy: 30},
+  {clip: 'c_pearl', off: 0.3, k0: 44, k1: 46, z: 1.0, ox: 50, oy: 40, tr: {type: 'dots', color: C.pearl}},
+  {clip: 'c_blush', off: 0.4, k0: 46, k1: 48, z: 1.0, ox: 30, oy: 35, tr: {type: 'whipL'}},
+  {clip: 'c_ruby', off: 0.4, k0: 48, k1: 50, z: 1.0, ox: 65, oy: 35, tr: {type: 'whipR'}},
 ];
 export const END1 = B(50); // JOY CLUB endcard
 export const END2 = B(58); // NAFESA
@@ -158,16 +161,16 @@ const NameCard: React.FC<{d: DesignId; inAt: number; outAt: number}> = ({d, inAt
   const out = interpolate(t, [outAt, outAt + 0.3], [1, 0], {...clamp, easing: Easing.in(Easing.cubic)});
   const plate = scl(t, inAt, 0.45) * out;
   const txt = interpolate(t, [inAt + 0.18, inAt + 0.5], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)}) * out;
-  const D = 640;
+  const D = 440;
   const c1 = scl(t, inAt + BEAT, 0.4) * out, c2 = scl(t, inAt + BEAT * 1.5, 0.4) * out;
   return (
     <AbsoluteFill style={{pointerEvents: 'none'}}>
-      <div style={{position: 'absolute', left: 1040 - 150, top: 230 - 150, width: 300, height: 300, borderRadius: '50%', background: p.acc[0], transform: `scale(${c1})`, boxShadow: '0 0 0 6px rgba(255,255,255,0.0)'}} />
-      <div style={{position: 'absolute', left: 930 - 60, top: 420 - 60, width: 120, height: 120, borderRadius: '50%', background: p.acc[1], transform: `scale(${c2})`}} />
-      <div style={{position: 'absolute', left: 150 - D / 2, top: 1470 - D / 2, width: D, height: D, borderRadius: '50%', background: p.bg, transform: `scale(${plate})`}} />
-      <div style={{position: 'absolute', left: 62, top: 1310, opacity: txt, transform: `translateY(${(1 - txt) * 30}px)`}}>
-        <div style={{fontFamily: 'Poppins', fontWeight: 700, fontSize: 118, color: p.fg, letterSpacing: '0.03em', lineHeight: 1}}>{d.toUpperCase()}</div>
-        <div style={{fontFamily: 'Poppins', fontWeight: 500, fontSize: 25, color: p.fg, letterSpacing: '0.3em', marginTop: 12}}>JOY CLUB COLLECTION</div>
+      <div style={{position: 'absolute', left: 1040 - 110, top: 230 - 110, width: 220, height: 220, borderRadius: '50%', background: p.acc[0], transform: `scale(${c1})`, boxShadow: '0 0 0 6px rgba(255,255,255,0.0)'}} />
+      <div style={{position: 'absolute', left: 950 - 45, top: 380 - 45, width: 90, height: 90, borderRadius: '50%', background: p.acc[1], transform: `scale(${c2})`}} />
+      <div style={{position: 'absolute', left: 110 - D / 2, top: 1460 - D / 2, width: D, height: D, borderRadius: '50%', background: p.bg, transform: `scale(${plate})`}} />
+      <div style={{position: 'absolute', left: 52, top: 1380, opacity: txt, transform: `translateY(${(1 - txt) * 30}px)`}}>
+        <div style={{fontFamily: 'Poppins', fontWeight: 700, fontSize: 70, color: p.fg, letterSpacing: '0.03em', lineHeight: 1}}>{d.toUpperCase()}</div>
+        <div style={{fontFamily: 'Poppins', fontWeight: 500, fontSize: 16, color: p.fg, letterSpacing: '0.3em', marginTop: 8}}>JOY CLUB COLLECTION</div>
       </div>
     </AbsoluteFill>
   );
@@ -193,8 +196,8 @@ const PaneVideo: React.FC<{p: Pane; x: number; y: number; w: number; h: number; 
 };
 const Panes: React.FC = () => {
   const t = useCurrentFrame() / FPS; // global (Sequence from 0)
-  if (t < PANE_START - 0.05 || t > END1 + 0.6) return null;
-  const inStrips = t >= STRIP_START;
+  if (t < PANE_START - 0.05 || t >= STRIP_START) return null;
+  const inStrips = false;
   const bandH = (H - GAP * 2) / 3;
   const stripW = (W - GAP * 4) / 5;
   return (
