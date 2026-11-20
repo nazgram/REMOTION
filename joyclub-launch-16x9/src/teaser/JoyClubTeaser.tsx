@@ -161,16 +161,17 @@ const NameCard: React.FC<{d: DesignId; inAt: number; outAt: number}> = ({d, inAt
   const out = interpolate(t, [outAt, outAt + 0.3], [1, 0], {...clamp, easing: Easing.in(Easing.cubic)});
   const plate = scl(t, inAt, 0.45) * out;
   const txt = interpolate(t, [inAt + 0.18, inAt + 0.5], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)}) * out;
-  const D = 440;
+  const D = 320;
   const c1 = scl(t, inAt + BEAT, 0.4) * out, c2 = scl(t, inAt + BEAT * 1.5, 0.4) * out;
   return (
     <AbsoluteFill style={{pointerEvents: 'none'}}>
       <div style={{position: 'absolute', left: 1040 - 110, top: 230 - 110, width: 220, height: 220, borderRadius: '50%', background: p.acc[0], transform: `scale(${c1})`, boxShadow: '0 0 0 6px rgba(255,255,255,0.0)'}} />
       <div style={{position: 'absolute', left: 950 - 45, top: 380 - 45, width: 90, height: 90, borderRadius: '50%', background: p.acc[1], transform: `scale(${c2})`}} />
-      <div style={{position: 'absolute', left: 110 - D / 2, top: 1460 - D / 2, width: D, height: D, borderRadius: '50%', background: p.bg, transform: `scale(${plate})`}} />
-      <div style={{position: 'absolute', left: 52, top: 1380, opacity: txt, transform: `translateY(${(1 - txt) * 30}px)`}}>
-        <div style={{fontFamily: 'Poppins', fontWeight: 700, fontSize: 70, color: p.fg, letterSpacing: '0.03em', lineHeight: 1}}>{d.toUpperCase()}</div>
-        <div style={{fontFamily: 'Poppins', fontWeight: 500, fontSize: 16, color: p.fg, letterSpacing: '0.3em', marginTop: 8}}>JOY CLUB COLLECTION</div>
+      <div style={{position: 'absolute', left: 48, top: 1450 - D / 2, width: D, height: D, borderRadius: '50%', background: p.bg, transform: `scale(${plate})`, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+        <div style={{opacity: txt, transform: `translateY(${(1 - txt) * 20}px)`, textAlign: 'center'}}>
+          <div style={{fontFamily: 'Poppins', fontWeight: 700, fontSize: 62, color: p.fg, letterSpacing: '0.03em', lineHeight: 1}}>{d.toUpperCase()}</div>
+          <div style={{fontFamily: 'Poppins', fontWeight: 500, fontSize: 13, color: p.fg, letterSpacing: '0.3em', marginLeft: '0.3em', marginTop: 8}}>JOY CLUB COLLECTION</div>
+        </div>
       </div>
     </AbsoluteFill>
   );
