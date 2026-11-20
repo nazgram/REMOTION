@@ -49,22 +49,17 @@ export const SHOTS: Shot[] = [
   {clip: 'r5', off: 0.2, k0: 35, k1: 36, z: 1.2, ox: 50, oy: 35},
   {clip: 'r3', off: 1.0, k0: 36, k1: 38, z: 1.25, ox: 50, oy: 45, tr: {type: 'whipL'}},
   {clip: 'r5', off: 1.4, k0: 38, k1: 40, z: 1.3, ox: 50, oy: 30},
-  {clip: 'w2', off: 0.5, k0: 40, k1: 42, z: 1.25, ox: 50, oy: 35, tr: {type: 'dots', color: C.pearl}},
-  {clip: 'w4', off: 1.2, k0: 42, k1: 44, z: 1.3, ox: 50, oy: 30},
-  {clip: 'b1', off: 2.0, k0: 44, k1: 46, z: 1.3, ox: 50, oy: 30, tr: {type: 'whipR'}},
-  {clip: 's2', off: 1.6, k0: 46, k1: 48, z: 1.3, ox: 50, oy: 30, tr: {type: 'slideUp'}},
-  {clip: 'w1', off: 1.6, k0: 48, k1: 50, z: 1.3, ox: 50, oy: 35},
 ];
 export const END1 = B(50); // JOY CLUB endcard
 export const END2 = B(58); // NAFESA
 
-const WHIP = 0.24; // tempoh whip/slide (saat), berpusat pada cut
+const WHIP = 0.5; // tempoh whip/slide (saat), berpusat pada cut
 const ease = Easing.inOut(Easing.cubic);
 
 // Kedudukan satu shot pada masa t: {x,y,blur} atau null jika tak nampak.
 const shotPose = (i: number, t: number) => {
   const s = SHOTS[i];
-  const t0 = B(s.k0), t1 = i === SHOTS.length - 1 ? END1 + 0.4 : B(s.k1);
+  const t0 = B(s.k0), t1 = B(s.k1);
   const next = SHOTS[i + 1];
   const inTr = s.tr && ['whipL', 'whipR', 'slideUp'].includes(s.tr.type) ? s.tr.type : null;
   const outTr = next?.tr && ['whipL', 'whipR', 'slideUp'].includes(next.tr.type) ? next.tr.type : null;
@@ -76,12 +71,12 @@ const shotPose = (i: number, t: number) => {
   if (inTr && t < t0 + WHIP / 2) {
     const p = ease((t - (t0 - WHIP / 2)) / WHIP);
     const [vx, vy] = vec(inTr);
-    x = -vx * (1 - p); y = -vy * (1 - p); blur = 40 * Math.sin(Math.PI * p);
+    x = -vx * (1 - p); y = -vy * (1 - p); blur = 26 * Math.sin(Math.PI * p);
   }
   if (outTr && t > t1 - WHIP / 2) {
     const p = ease((t - (t1 - WHIP / 2)) / WHIP);
     const [vx, vy] = vec(outTr);
-    x = vx * p; y = vy * p; blur = 40 * Math.sin(Math.PI * p);
+    x = vx * p; y = vy * p; blur = 26 * Math.sin(Math.PI * p);
   }
   return {x, y, blur, t0, t1, lo};
 };
@@ -124,17 +119,115 @@ const DotField: React.FC<{color: string; p: number; second?: string}> = ({color,
     )}
   </AbsoluteFill>
 );
-const COVER = BEAT * 0.75, REVEAL = BEAT * 0.75;
+const COVER = BEAT * 1.5, REVEAL = BEAT * 1.1;
 const Sweep: React.FC<{at: number; color: string; second?: string; cover?: number; reveal?: number}> = ({at, color, second, cover = COVER, reveal = REVEAL}) => {
   const t = useCurrentFrame() / FPS;
-  if (t < at - cover || t > at + reveal) return null;
-  const p = t < at ? (t - (at - cover)) / cover : 1 - (t - at) / reveal;
+  if (t < at - cover || t > at + reveal + 2 / FPS) return null;
+  const hold = 2 / FPS;
+  const p = t < at ? (t - (at - cover)) / cover : 1 - Math.max(0, t - at - hold) / reveal;
   return <DotField color={color} second={second} p={Math.max(0, Math.min(1, p))} />;
 };
 const Flash: React.FC<{at: number}> = ({at}) => {
   const t = useCurrentFrame() / FPS;
   const o = interpolate(t, [at, at + 0.25], [0.85, 0], clamp);
   return t < at || o <= 0 ? null : <AbsoluteFill style={{background: '#fff', opacity: o}} />;
+};
+
+
+// ---------- NAMA DESIGN (gaya launch: plate bulat dari sudut bawah kiri, teks dalam zon selamat 1521px) ----------
+type DesignId = 'sky' | 'blush' | 'silver' | 'pearl' | 'ruby';
+const PLATE: Record<DesignId, {bg: string; fg: string; acc: [string, string]}> = {
+  pearl: {bg: '#a0c4e1', fg: '#ffffff', acc: ['#a0c4e1', '#dce9f4']},
+  sky: {bg: '#b11f24', fg: '#ffffff', acc: ['#a0c4e1', '#b11f24']},
+  blush: {bg: '#738476', fg: '#ffffff', acc: ['#d1bdc1', '#738476']},
+  ruby: {bg: '#a0c4e1', fg: '#b11f24', acc: ['#b11f24', '#a0c4e1']},
+  silver: {bg: '#5c484d', fg: '#ffffff', acc: ['#d8d8d8', '#5c484d']},
+};
+export const NAMES: {d: DesignId; inAt: number; outAt: number}[] = [
+  {d: 'sky', inAt: B(0) + 0.15, outAt: B(8) - 0.75},
+  {d: 'blush', inAt: B(9), outAt: B(18) - 0.75},
+  {d: 'silver', inAt: B(19), outAt: B(24) - 0.45},
+  {d: 'pearl', inAt: B(24) + 0.3, outAt: B(28) - 0.3},
+  {d: 'ruby', inAt: B(32) + 0.15, outAt: B(40) - 0.75},
+];
+const scl = (t: number, a0: number, d0: number) => interpolate(t, [a0, a0 + d0], [0, 1], {...clamp, easing: Easing.out(Easing.back(1.4))});
+const NameCard: React.FC<{d: DesignId; inAt: number; outAt: number}> = ({d, inAt, outAt}) => {
+  const t = useCurrentFrame() / FPS;
+  if (t < inAt || t > outAt + 0.4) return null;
+  const p = PLATE[d];
+  const out = interpolate(t, [outAt, outAt + 0.3], [1, 0], {...clamp, easing: Easing.in(Easing.cubic)});
+  const plate = scl(t, inAt, 0.45) * out;
+  const txt = interpolate(t, [inAt + 0.18, inAt + 0.5], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)}) * out;
+  const D = 640;
+  const c1 = scl(t, inAt + BEAT, 0.4) * out, c2 = scl(t, inAt + BEAT * 1.5, 0.4) * out;
+  return (
+    <AbsoluteFill style={{pointerEvents: 'none'}}>
+      <div style={{position: 'absolute', left: 1040 - 150, top: 230 - 150, width: 300, height: 300, borderRadius: '50%', background: p.acc[0], transform: `scale(${c1})`, boxShadow: '0 0 0 6px rgba(255,255,255,0.0)'}} />
+      <div style={{position: 'absolute', left: 930 - 60, top: 420 - 60, width: 120, height: 120, borderRadius: '50%', background: p.acc[1], transform: `scale(${c2})`}} />
+      <div style={{position: 'absolute', left: 150 - D / 2, top: 1470 - D / 2, width: D, height: D, borderRadius: '50%', background: p.bg, transform: `scale(${plate})`}} />
+      <div style={{position: 'absolute', left: 62, top: 1310, opacity: txt, transform: `translateY(${(1 - txt) * 30}px)`}}>
+        <div style={{fontFamily: 'Poppins', fontWeight: 700, fontSize: 118, color: p.fg, letterSpacing: '0.03em', lineHeight: 1}}>{d.toUpperCase()}</div>
+        <div style={{fontFamily: 'Poppins', fontWeight: 500, fontSize: 25, color: p.fg, letterSpacing: '0.3em', marginTop: 12}}>JOY CLUB COLLECTION</div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// ---------- 3 PANEL (B40-B44) & 5 STRIP SEMUA DESIGN (B44-B50), ambil dari video launch ----------
+type Pane = {clip: string; off: number; fy: number; fx?: number; z?: number};
+const PANE_START = B(40), STRIP_START = B(44);
+const BANDS: Pane[] = [{clip: 'p_sky', off: 0.2, fy: 0.4, fx: 0.62, z: 1.15}, {clip: 'p_silver', off: 0.2, fy: 0.38, fx: 0.62, z: 1.15}, {clip: 'p_ruby', off: 0.2, fy: 0.42, fx: 0.67, z: 1.6}];
+const STRIPS: Pane[] = [{clip: 'c_sky', off: 0.2, fy: 0.3, fx: 0.34}, {clip: 'c_blush', off: 0.2, fy: 0.33, fx: 0.3}, {clip: 'c_silver', off: 0.2, fy: 0.3, fx: 0.5}, {clip: 'c_ruby', off: 0.2, fy: 0.32, fx: 0.67}, {clip: 'c_pearl', off: 0.2, fy: 0.36, fx: 0.48, z: 1.6}];
+const GAP = 8;
+const PaneVideo: React.FC<{p: Pane; x: number; y: number; w: number; h: number; z: number; startSec: number; seqFrom: number}> = ({p, x, y, w, h, z, startSec, seqFrom}) => {
+  const vw = W * z, vh = H * z;
+  const cl = (v: number, lo: number) => Math.min(0, Math.max(lo, v));
+  const left = w / 2 - vw * (p.fx ?? 0.5), top = h / 2 - vh * p.fy;
+  return (
+    <div style={{position: 'absolute', left: x, top: y, width: w, height: h, overflow: 'hidden'}}>
+      <Sequence from={seqFrom} layout="none">
+        <OffthreadVideo src={a(`clips/${p.clip}.mp4`)} startFrom={Math.round(startSec * FPS)} muted style={{position: 'absolute', left: cl(left, w - vw), top: cl(top, h - vh), width: vw, height: vh}} />
+      </Sequence>
+    </div>
+  );
+};
+const Panes: React.FC = () => {
+  const t = useCurrentFrame() / FPS; // global (Sequence from 0)
+  if (t < PANE_START - 0.05 || t > END1 + 0.6) return null;
+  const inStrips = t >= STRIP_START;
+  const bandH = (H - GAP * 2) / 3;
+  const stripW = (W - GAP * 4) / 5;
+  return (
+    <AbsoluteFill style={{background: '#fff'}}>
+      {!inStrips && BANDS.map((p, i) => {
+        const at = PANE_START + i * BEAT;
+        const k = interpolate(t, [at, at + 0.45], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+        const y = i * (bandH + GAP);
+        const dir = i % 2 ? 1 : -1;
+        return (
+          <div key={i} style={{position: 'absolute', left: 0, top: y, width: W, height: bandH, background: C.pearl, overflow: 'hidden'}}>
+            <div style={{position: 'absolute', inset: 0, transform: `translateX(${dir * (1 - k) * W}px)`}}>
+              <PaneVideo p={p} x={0} y={0} w={W} h={bandH} z={p.z ?? 1} startSec={p.off} seqFrom={fr(at - 0.05)} />
+            </div>
+          </div>
+        );
+      })}
+      {inStrips && STRIPS.map((p, i) => {
+        const at = STRIP_START + i * (BEAT / 2);
+        const k = interpolate(t, [at, at + 0.45], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+        const x = i * (stripW + GAP);
+        const dir = i % 2 ? 1 : -1;
+        const col = [C.sky, C.blush, C.silver, C.ruby, C.pearl][i];
+        return (
+          <div key={i} style={{position: 'absolute', left: x, top: 0, width: stripW, height: H, background: col, overflow: 'hidden'}}>
+            <div style={{position: 'absolute', inset: 0, transform: `translateY(${dir * (1 - k) * H}px)`}}>
+              <PaneVideo p={p} x={0} y={0} w={stripW} h={H} z={p.z ?? 1} startSec={p.off} seqFrom={fr(at - 0.05)} />
+            </div>
+          </div>
+        );
+      })}
+    </AbsoluteFill>
+  );
 };
 
 // ---------- ENDCARD (sama gaya video launch JOY CLUB, tanpa kain) ----------
@@ -251,7 +344,7 @@ export const JoyClubTeaser: React.FC = () => {
         const pad = 0.3;
         const from = Math.max(0, fr(B(s.k0) - pad));
         const startFrame = Math.max(0, Math.round((s.off - (B(s.k0) - from / FPS)) * FPS));
-        const endT = i === SHOTS.length - 1 ? END1 + 0.5 : B(s.k1) + pad;
+        const endT = B(s.k1) + pad;
         return (
           <Sequence key={i} from={from} durationInFrames={fr(endT) - from}>
             <ShotLayer i={i} from={from} startFrame={startFrame} />
@@ -260,14 +353,17 @@ export const JoyClubTeaser: React.FC = () => {
       })}
       {SHOTS.map((s, i) => (s.tr?.type === 'dots' ? <Sweep key={`sw${i}`} at={B(s.k0)} color={s.tr.color!} second={C.red} /> : null))}
       {SHOTS.map((s, i) => (s.tr?.type === 'flash' ? <Flash key={`fl${i}`} at={B(s.k0)} /> : null))}
+      <Panes />
+      <Sweep at={PANE_START} color={C.pearl} second={C.blue} />
+      {NAMES.map((n) => <NameCard key={n.d} {...n} />)}
       <Sequence from={fr(END1)} durationInFrames={fr(END2 - END1) + 2}>
         <JoyClubEnd />
       </Sequence>
-      <Sweep at={END1} color={C.silver} second={C.blue} cover={BEAT} reveal={BEAT * 0.8} />
+      <Sweep at={END1} color={C.silver} second={C.blue} />
       <Sequence from={fr(END2)}>
         <NafesaEnd />
       </Sequence>
-      <Sweep at={END2} color={C.cream} second={C.olive} cover={BEAT} reveal={BEAT * 0.8} />
+      <Sweep at={END2} color={C.cream} second={C.olive} />
       <Audio src={a('song31.m4a')} />
     </AbsoluteFill>
   );
