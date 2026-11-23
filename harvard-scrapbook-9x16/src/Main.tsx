@@ -22,54 +22,54 @@ type Card = {
 
 // ---------------- gallery cards ----------------
 const CARDS: Card[] = [
-  {img: 'p01', w: 604, h: 873, y: 905, rot: -3, zoom: 1, fy: 0.45, frame: 'polaroid', st: [
+  {img: 'p01', w: 724, h: 1047, y: 975, rot: -3, zoom: 1, fy: 0.45, frame: 'polaroid', st: [
     {t: 'star', c: C.yellow, dx: -0.5, dy: -0.47, s: 130},
     {t: 'sparkle', c: C.white, dx: 0.34, dy: -0.36, s: 70, pen: true},
     {t: 'arrow', c: C.lilac, dx: 0.6, dy: 0.32, s: 150, r: 8},
   ]},
-  {img: 'p02', w: 526, h: 694, y: 1330, rot: 4, zoom: 1.18, fy: 0.3, frame: 'border', tape: C.pink, st: [
+  {img: 'p02', w: 631, h: 832, y: 1400, rot: 4, zoom: 1.18, fy: 0.3, frame: 'border', tape: C.pink, st: [
     {t: 'heart', c: C.pink, dx: 0.5, dy: -0.47, s: 120},
     {t: 'underline', c: C.blue, dx: 0, dy: 0.6, s: 170},
     {t: 'smiley', c: C.yellow, dx: -0.52, dy: 0.36, s: 110},
   ]},
-  {img: 'p03', w: 582, h: 851, y: 905, rot: -6, zoom: 1, fy: 0.4, frame: 'tape', tape: C.lilac, st: [
+  {img: 'p03', w: 698, h: 1021, y: 975, rot: -6, zoom: 1, fy: 0.4, frame: 'tape', tape: C.lilac, st: [
     {t: 'sparkle', c: C.yellow, dx: -0.55, dy: -0.18, s: 95},
     {t: 'heartOutline', c: C.white, dx: 0.32, dy: 0.36, s: 80, pen: true},
     {t: 'swirl', c: C.pink, dx: 0.52, dy: 0.47, s: 105},
     {t: 'plus', c: C.lilac, dx: 0.62, dy: -0.42, s: 46},
   ]},
-  {img: 'p04', w: 515, h: 672, y: 1330, rot: -2, zoom: 1.22, fy: 0.3, frame: 'polaroid', st: [
+  {img: 'p04', w: 618, h: 806, y: 1400, rot: -2, zoom: 1.22, fy: 0.3, frame: 'polaroid', st: [
     {t: 'spiky', c: C.yellow, dx: 0.48, dy: -0.45, s: 115},
     {t: 'dots', c: C.blue, dx: -0.1, dy: -0.6, s: 80},
     {t: 'circle', c: C.pink, dx: -0.5, dy: 0.48, s: 150, r: -10},
   ]},
-  {img: 'p05', w: 593, h: 851, y: 905, rot: 3, zoom: 1, fy: 0.45, frame: 'border', tape: C.blue, st: [
+  {img: 'p05', w: 711, h: 1021, y: 975, rot: 3, zoom: 1, fy: 0.45, frame: 'border', tape: C.blue, st: [
     {t: 'flower', c: C.pink, dx: -0.5, dy: -0.46, s: 120},
     {t: 'starOutline', c: C.white, dx: 0.34, dy: -0.34, s: 80, pen: true},
     {t: 'scribble', c: C.lilac, dx: 0.42, dy: 0.55, s: 130, r: -8},
   ]},
-  {img: 'p06', w: 526, h: 694, y: 1330, rot: 5, zoom: 1.15, fy: 0.3, frame: 'tape', tape: C.yellow, st: [
+  {img: 'p06', w: 631, h: 832, y: 1400, rot: 5, zoom: 1.15, fy: 0.3, frame: 'tape', tape: C.yellow, st: [
     {t: 'burst', c: C.yellow, dx: -0.52, dy: -0.5, s: 120},
     {t: 'smiley', c: C.lilac, dx: 0.52, dy: 0.42, s: 115},
     {t: 'sparkle', c: C.white, dx: -0.33, dy: 0.3, s: 66, pen: true},
   ]},
-  {img: 'p07', w: 582, h: 851, y: 905, rot: -4, zoom: 1, fy: 0.42, frame: 'polaroid', st: [
+  {img: 'p07', w: 698, h: 1021, y: 975, rot: -4, zoom: 1, fy: 0.42, frame: 'polaroid', st: [
     {t: 'heart', c: C.lilac, dx: -0.52, dy: 0.38, s: 120},
     {t: 'cloud', c: C.blue, dx: 0.56, dy: -0.36, s: 110},
     {t: 'underline', c: C.pink, dx: 0, dy: -0.6, s: 160},
   ]},
-  {img: 'p08', w: 515, h: 683, y: 1330, rot: 3, zoom: 1.2, fy: 0.3, frame: 'border', tape: C.lilac, st: [
+  {img: 'p08', w: 618, h: 819, y: 1400, rot: 3, zoom: 1.2, fy: 0.3, frame: 'border', tape: C.lilac, st: [
     {t: 'star', c: C.lilac, dx: 0.5, dy: 0.46, s: 120},
     {t: 'swirl', c: C.blue, dx: -0.54, dy: -0.4, s: 100},
     {t: 'sparkle', c: C.white, dx: 0.33, dy: -0.34, s: 66, pen: true},
     {t: 'plus', c: C.yellow, dx: -0.6, dy: 0.2, s: 46},
   ]},
-  {img: 'p09', w: 593, h: 862, y: 905, rot: -2, zoom: 1, fy: 0.45, frame: 'tape', tape: C.pink, st: [
+  {img: 'p09', w: 711, h: 1034, y: 975, rot: -2, zoom: 1, fy: 0.45, frame: 'tape', tape: C.pink, st: [
     {t: 'spiky', c: C.pink, dx: -0.5, dy: -0.44, s: 110},
     {t: 'arrow', c: C.yellow, dx: 0.6, dy: 0.3, s: 140, r: -6},
     {t: 'heartOutline', c: C.white, dx: -0.3, dy: 0.34, s: 76, pen: true},
   ]},
-  {img: 'p10', w: 537, h: 705, y: 1330, rot: -4, zoom: 1.15, fy: 0.3, frame: 'polaroid', st: [
+  {img: 'p10', w: 644, h: 846, y: 1400, rot: -4, zoom: 1.15, fy: 0.3, frame: 'polaroid', st: [
     {t: 'smiley', c: C.yellow, dx: 0.5, dy: -0.46, s: 120},
     {t: 'heart', c: C.pink, dx: -0.52, dy: 0.4, s: 110},
     {t: 'burst', c: C.lilac, dx: 0.5, dy: 0.48, s: 110},
@@ -77,7 +77,7 @@ const CARDS: Card[] = [
   ]},
 ];
 
-const D = 440; // world spacing between cards
+const D = 520; // world spacing between cards
 // time at which card k is centred
 const DUR = [42, 38, 44, 30, 44, 40, 46, 30, 44];
 const T: number[] = [14];
@@ -109,23 +109,23 @@ const startFrame = (k: number) => {
 // ---------------- collage ----------------
 type Col = {img: string; w: number; h: number; x: number; y: number; rot: number; zoom: number; fy: number; t0: number; ex: number; ey: number; es: number; frame: Card['frame']; tape?: string; st: St[]};
 const COLLAGE: Col[] = [
-  {img: 'p01', w: 460, h: 660, x: 300, y: 720, rot: -7, zoom: 1, fy: 0.45, t0: 386, ex: 150, ey: 330, es: 0.78, frame: 'polaroid', st: [
+  {img: 'p01', w: 529, h: 758, x: 300, y: 760, rot: -7, zoom: 1, fy: 0.45, t0: 386, ex: 150, ey: 330, es: 0.9, frame: 'polaroid', st: [
     {t: 'star', c: C.yellow, dx: -0.48, dy: -0.46, s: 110},
     {t: 'swirl', c: C.lilac, dx: 0.52, dy: -0.3, s: 90},
   ]},
-  {img: 'p04', w: 420, h: 560, x: 790, y: 690, rot: 6, zoom: 1.22, fy: 0.3, t0: 393, ex: 930, ey: 330, es: 0.78, frame: 'border', tape: C.pink, st: [
+  {img: 'p04', w: 482, h: 644, x: 790, y: 730, rot: 6, zoom: 1.22, fy: 0.3, t0: 393, ex: 930, ey: 330, es: 0.9, frame: 'border', tape: C.pink, st: [
     {t: 'heart', c: C.pink, dx: 0.46, dy: -0.48, s: 110},
     {t: 'sparkle', c: C.white, dx: -0.32, dy: 0.34, s: 64, pen: true},
   ]},
-  {img: 'p09', w: 420, h: 600, x: 270, y: 1450, rot: 5, zoom: 1, fy: 0.45, t0: 400, ex: 150, ey: 1620, es: 0.78, frame: 'tape', tape: C.blue, st: [
+  {img: 'p09', w: 482, h: 690, x: 270, y: 1490, rot: 5, zoom: 1, fy: 0.45, t0: 400, ex: 150, ey: 1620, es: 0.9, frame: 'tape', tape: C.blue, st: [
     {t: 'smiley', c: C.lilac, dx: -0.46, dy: 0.42, s: 105},
     {t: 'underline', c: C.yellow, dx: 0.3, dy: 0.6, s: 140},
   ]},
-  {img: 'p10', w: 430, h: 570, x: 815, y: 1460, rot: -6, zoom: 1.15, fy: 0.3, t0: 407, ex: 930, ey: 1620, es: 0.78, frame: 'polaroid', st: [
+  {img: 'p10', w: 494, h: 655, x: 815, y: 1500, rot: -6, zoom: 1.15, fy: 0.3, t0: 407, ex: 930, ey: 1620, es: 0.9, frame: 'polaroid', st: [
     {t: 'spiky', c: C.yellow, dx: 0.48, dy: 0.44, s: 105},
     {t: 'plus', c: C.blue, dx: -0.56, dy: -0.4, s: 44},
   ]},
-  {img: 'p06', w: 500, h: 660, x: 550, y: 1090, rot: -1.5, zoom: 1.15, fy: 0.3, t0: 416, ex: 540, ey: 2350, es: 0.9, frame: 'border', tape: C.lilac, st: [
+  {img: 'p06', w: 575, h: 758, x: 550, y: 1130, rot: -1.5, zoom: 1.15, fy: 0.3, t0: 416, ex: 540, ey: 2350, es: 0.9, frame: 'border', tape: C.lilac, st: [
     {t: 'sparkle', c: C.yellow, dx: -0.54, dy: -0.34, s: 90},
     {t: 'flower', c: C.pink, dx: 0.52, dy: 0.4, s: 110},
     {t: 'arrow', c: C.blue, dx: 0.62, dy: -0.36, s: 120, r: 190},
@@ -231,7 +231,7 @@ export const Main: React.FC = () => {
         <AbsoluteFill style={{transform: `scale(${zoom})`, filter: blur > 0.3 ? 'url(#mblur)' : undefined}}>
           {CARDS.map((c, k) => {
             const sx = cam - k * D;
-            if (sx < -500 || sx > 1600) return null;
+            if (sx < -600 || sx > 1700) return null;
             const near = Math.exp(-(((sx - 540) / 330) ** 2));
             const s = 1 + 0.05 * near;
             const st0 = startFrame(k);
@@ -280,36 +280,14 @@ const TITLE_OUT = 584;
 const NAF0 = 594;
 const EndCard: React.FC<{frame: number}> = ({frame}) => {
   const l = frame - LOGO0;
-  const out = interpolate(frame, [TITLE_OUT, TITLE_OUT + 12], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic)});
+  // empty slot for Nas's own title until NAF0
+  void l;
+  const _out = interpolate(frame, [TITLE_OUT, TITLE_OUT + 12], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.in(Easing.cubic)});
   const n = frame - NAF0;
   const logoS = interpolate(n, [0, 14], [0.82, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(1.5))});
   const logoO = interpolate(n, [0, 8], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const title = 'Harvard';
   return (
     <AbsoluteFill style={{zIndex: 400}}>
-      {out < 1 ? (
-        <AbsoluteFill style={{opacity: 1 - out, transform: `translateY(${-40 * out}px) scale(${1 - 0.08 * out})`}}>
-          <div style={{position: 'absolute', left: 0, right: 0, top: 790, textAlign: 'center', fontFamily: 'DMSerif', fontStyle: 'italic', fontSize: 190, lineHeight: 1, color: '#1E3A2C'}}>
-            {title.split('').map((ch, i) => {
-              const li = l - 4 - i * 2.4;
-              const o = interpolate(li, [0, 5], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-              const y = interpolate(li, [0, 11], [50, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(2.2))});
-              const r = interpolate(li, [0, 11], [i % 2 ? 8 : -8, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.back(2))});
-              return (
-                <span key={i} style={{display: 'inline-block', opacity: o, transform: `translateY(${y}px) rotate(${r}deg)`}}>
-                  {ch}
-                </span>
-              );
-            })}
-          </div>
-          <Sticker type="underline" color={C.pink} x={560} y={1040} size={330} start={LOGO0 + 20} frame={frame} seed={901} />
-          <div style={{position: 'absolute', left: 0, right: 0, top: 1085, textAlign: 'center', fontFamily: 'Caveat', fontSize: 66, color: '#8C76B8', opacity: interpolate(l, [26, 34], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})}}>
-            the collection
-          </div>
-          <Sticker type="sparkle" color={C.yellow} x={880} y={800} size={74} start={LOGO0 + 24} frame={frame} seed={905} />
-          <Sticker type="heart" color={C.lilac} x={200} y={1110} size={62} start={LOGO0 + 32} frame={frame} seed={906} />
-        </AbsoluteFill>
-      ) : null}
       <Img
         src={staticFile('nafesa_ink.png')}
         style={{position: 'absolute', left: 540 - 260, top: 760, width: 520, transform: `scale(${logoS})`, opacity: logoO}}
@@ -318,4 +296,25 @@ const EndCard: React.FC<{frame: number}> = ({frame}) => {
       <Sticker type="star" color={C.blue} x={250} y={1080} size={56} start={NAF0 + 16} frame={frame} seed={904} />
     </AbsoluteFill>
   );
+};
+
+// ---------- SFX cue list ----------
+const DRAWN: StickerType[] = ['arrow', 'circle', 'burst', 'underline', 'scribble', 'swirl'];
+export const sfxEvents = () => {
+  const ev: {f: number; k: string}[] = [];
+  CARDS.forEach((c, k) => {
+    const st0 = startFrame(k);
+    c.st.forEach((t, j) => ev.push({f: st0 + j * 7 + (k % 2) * 3, k: DRAWN.includes(t.t) ? 'scribble' : t.t === 'sparkle' || t.t === 'plus' ? 'twinkle' : 'pop'}));
+  });
+  for (let k = 0; k < 9; k++) ev.push({f: T[k] + Math.round(DUR[k] / 2) - 8, k: DUR[k] <= 30 ? 'whooshBig' : 'whoosh'});
+  ev.push({f: WHIP_START + 4, k: 'whooshBig'});
+  COLLAGE.forEach((c, k) => {
+    ev.push({f: c.t0 + 6, k: 'slap'});
+    c.st.forEach((t, j) => ev.push({f: COL_ST0 + k * 6 + j * 13, k: DRAWN.includes(t.t) ? 'scribble' : t.t === 'sparkle' || t.t === 'plus' ? 'twinkle' : 'pop'}));
+  });
+  ev.push({f: BOUNCE, k: 'boing'});
+  ev.push({f: EXIT0 + 2, k: 'whoosh'});
+  ev.push({f: NAF0, k: 'chimeLow'});
+  ev.push({f: NAF0 + 10, k: 'twinkle'});
+  return ev.sort((a, b) => a.f - b.f);
 };
