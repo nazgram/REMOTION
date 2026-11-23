@@ -108,6 +108,7 @@ const startFrame = (k: number) => {
 
 // ---------------- collage ----------------
 type Col = {img: string; w: number; h: number; x: number; y: number; rot: number; zoom: number; fy: number; t0: number; ex: number; ey: number; es: number; frame: Card['frame']; tape?: string; st: St[]};
+export const COLLAGE_T0 = 386;
 const COLLAGE: Col[] = [
   {img: 'p01', w: 529, h: 758, x: 300, y: 760, rot: -7, zoom: 1, fy: 0.45, t0: 386, ex: 150, ey: 330, es: 0.9, frame: 'polaroid', st: [
     {t: 'star', c: C.yellow, dx: -0.48, dy: -0.46, s: 110},
@@ -195,12 +196,12 @@ const BG_ITEMS = (() => {
   }));
 })();
 
-export const Main: React.FC = () => {
+export const Main: React.FC<{skipGallery?: boolean}> = ({skipGallery}) => {
   const frame = useCurrentFrame();
   const cam = CAM[Math.min(frame, DURATION)];
   const vel = CAM[Math.min(frame + 1, DURATION)] - CAM[Math.max(frame - 1, 0)];
   const blur = Math.min(Math.max((Math.abs(vel) / 2 - 11) * 0.5, 0), 12);
-  const galleryOn = frame < WHIP_END + 4;
+  const galleryOn = !skipGallery && frame < WHIP_END + 4;
 
   // gentle camera breathing zoom (no beat pulse)
   const zoom = 1.02 + 0.02 * Math.sin((frame / DURATION) * Math.PI * 2.2);

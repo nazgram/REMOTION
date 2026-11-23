@@ -1,7 +1,7 @@
 import sys,glob
 from PIL import Image,ImageDraw,ImageFont
 fs=sorted(glob.glob('out/st/f*.png')); ims=[Image.open(f).convert('RGB') for f in fs]
-w,h=ims[0].size; cols=6; pad=16; top=110
+w,h=ims[0].size; cols=8; pad=16; top=110
 font=ImageFont.load_default(size=26); big=ImageFont.load_default(size=40)
 rows=(len(ims)+cols-1)//cols; sh=Image.new('RGB',(cols*(w+pad)+pad,top+rows*(h+60)),'#2b2433')
 d=ImageDraw.Draw(sh); d.text((pad,30),sys.argv[2],fill='white',font=big)

@@ -339,6 +339,10 @@ export const DoodleDefs: React.FC = () => (
         <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 2.05" result="g" />
         <feComposite in="d" in2="g" operator="in" />
       </filter>
+      <filter id="crayonEdge" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves={2} seed={7} result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale={30} xChannelSelector="R" yChannelSelector="G" />
+      </filter>
     </defs>
   </svg>
 );

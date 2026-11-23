@@ -2,6 +2,7 @@ import React from 'react';
 import {Composition, continueRender, delayRender, staticFile} from 'remotion';
 import {loadFont} from '@remotion/fonts';
 import {DURATION, FPS, Main} from './Main';
+import {Full, FULL_DURATION} from './Full';
 
 const h = delayRender('fonts', {timeoutInMilliseconds: 120000});
 Promise.all([
@@ -10,5 +11,8 @@ Promise.all([
 ]).then(() => continueRender(h)).catch(() => continueRender(h));
 
 export const RemotionRoot: React.FC = () => (
-  <Composition id="HarvardScrapbook" component={Main} durationInFrames={DURATION} fps={FPS} width={1080} height={1920} />
+  <>
+    <Composition id="HarvardScrapbook" component={Main} durationInFrames={DURATION} fps={FPS} width={1080} height={1920} />
+    <Composition id="HarvardFull" component={Full} durationInFrames={FULL_DURATION} fps={FPS} width={1080} height={1920} />
+  </>
 );
