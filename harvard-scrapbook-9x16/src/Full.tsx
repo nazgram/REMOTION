@@ -242,3 +242,21 @@ export const Full: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+// ---------- SFX cue list ----------
+import {sfxEvents} from './Main';
+export const sfxEventsFull = () => {
+  const ev: {f: number; k: string}[] = [];
+  for (let i = 0; i < N; i++) {
+    const s0 = i * SLOT;
+    if (i > 0) {
+      const t = TRANS[i - 1];
+      ev.push({f: s0, k: t === 'scribble' ? 'scribble' : t === 'cutout' ? 'slap' : 'whoosh'});
+    }
+    ev.push({f: s0 + DRAW0, k: 'line'});
+    RIDE[i].forEach((st) => ev.push({f: s0 + DRAW0 + Math.round(st.t * DRAWLEN) + 1, k: st.type === 'sparkle' ? 'twinkle' : 'pop'}));
+  }
+  ev.push({f: PH_END - 6, k: 'whoosh'});
+  sfxEvents().filter((e) => e.f >= COLLAGE_T0).forEach((e) => ev.push({f: e.f + MAIN_OFF, k: e.k}));
+  return ev.sort((a, b) => a.f - b.f);
+};

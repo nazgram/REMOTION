@@ -1,7 +1,7 @@
-import json, numpy as np
+import json, sys, numpy as np
 from scipy.io import wavfile
 from scipy.signal import butter, sosfilt
-SR=48000; DUR=21.0; N=int(SR*DUR)
+SR=48000; DUR=float(sys.argv[3]) if len(sys.argv)>3 else 21.0; N=int(SR*DUR)
 out=np.zeros((N,2))
 rng=np.random.default_rng(3)
 def env(n,a,d): t=np.arange(n)/SR; return np.minimum(t/a,1)*np.exp(-t/d)
@@ -18,6 +18,11 @@ def scribble(v):
     n=int(.42*SR); t=np.arange(n)/SR; x=rng.normal(0,1,n)
     x=bp(x,1800,6500); am=0.5+0.5*np.sin(2*np.pi*(11+3*v)*t)**2
     return x*am*env(n,.02,.25)*0.16
+def line(v):
+    n=int(.8*SR); t=np.arange(n)/SR; x=rng.normal(0,1,n)
+    x=bp(x,2200,7000); am=0.55+0.45*np.abs(np.sin(2*np.pi*(5+2*v)*t))
+    e=np.minimum(t/.03,1)*np.minimum((t[-1]-t)/.15,1)
+    return x*am*e*0.09
 def whoosh(big):
     n=int((.55 if big else .45)*SR); t=np.arange(n)/SR; x=rng.normal(0,1,n)
     lo=np.linspace(300,1400 if big else 900,n); y=np.zeros(n)
@@ -37,14 +42,14 @@ def chime(base):
     for k,m in enumerate([1,1.25,1.5,2]):
         o=int(k*.07*SR); d=np.zeros(n); d[o:]=np.sin(2*np.pi*base*m*t[:n-o])*np.exp(-t[:n-o]/.5)*(0.9**k); s=s+d
     return s*0.12
-ev=json.load(open('scripts/events.json'))
+ev=json.load(open(sys.argv[1] if len(sys.argv)>1 else 'scripts/events.json'))
 for i,e in enumerate(ev):
     v=1+0.15*rng.uniform(-1,1); k=e['k']
     s={'pop':lambda:pop(v),'twinkle':lambda:twinkle(v),'scribble':lambda:scribble(v),'whoosh':lambda:whoosh(False),
-       'whooshBig':lambda:whoosh(True),'slap':lambda:slap(v),'boing':boing,'chime':lambda:chime(784),'chimeLow':lambda:chime(523)}[k]()
+       'whooshBig':lambda:whoosh(True),'slap':lambda:slap(v),'boing':boing,'line':lambda:line(v),'chime':lambda:chime(784),'chimeLow':lambda:chime(523)}[k]()
     st=int(e['f']/30*SR); pan=rng.uniform(-.35,.35)
     seg=s[:max(0,N-st)]
     out[st:st+len(seg),0]+=seg*(1-pan); out[st:st+len(seg),1]+=seg*(1+pan)
 out/=max(1e-9,np.abs(out).max())/0.8
-wavfile.write('public/sfx.wav',SR,(out*32767).astype(np.int16))
+wavfile.write(sys.argv[2] if len(sys.argv)>2 else 'public/sfx.wav',SR,(out*32767).astype(np.int16))
 print('ok')
