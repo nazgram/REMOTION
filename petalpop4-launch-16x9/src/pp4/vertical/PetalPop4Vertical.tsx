@@ -67,7 +67,7 @@ export const PetalPop4Vertical: React.FC = () => (
         <ClipSeq key={u.label} use={u} base={0} />
       ))}
       <Sequence from={f(COMING.start)} premountFor={30}>
-        <ComingSoon times={COMING_T} />
+        <ComingSoon times={COMING_T} overlay />
       </Sequence>
       <Sequence from={f(NAF.start)}>
         <NafesaFade />

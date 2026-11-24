@@ -36,7 +36,7 @@ export const vOrigin = (i: number) => (i === 0 ? 'bottom' : ORIGINS[i]);
 
 const climaxStart = CLIMAX_SEG.start;
 export const V_CLIMAX_AT = [0, 1, 2, 3, 4, 5].map((k) => at(CLIMAX_SEG.beat0 + (k * 2) / 3));
-export const V_CLIMAX_END = COMING.start + 0.75; // klip terakhir kekal sampai print Black Dahlia penuh
+export const V_CLIMAX_END = COMING.start + 0.85; // klip terakhir kekal sampai print Black Dahlia penuh
 
 export const V_BLOCKS: VBlock[] = BLOCKS.map((s, i) => {
   const d = s.design!;

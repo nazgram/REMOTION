@@ -7,6 +7,8 @@ import {asset, ease, FPS, pop, SERIF} from '../util';
 import {BloomSweep, SweepTiming, UnitG, unitLightness} from './Bloom';
 
 export const COMING_SWEEP: SweepTiming = {pre: 0.7, maskLag: 0.1, spread: 0.35, grow: 0.4, settle: 0.5};
+// Atas klip (9:16): mask lebih lambat supaya bunga sentiasa tutup tepinya.
+export const COMING_SWEEP_OVER: SweepTiming = {...COMING_SWEEP, maskLag: 0.25};
 // Masa (saat tempatan dari mula segmen) dikira dari beat dalam PetalPop4Launch.
 export type ComingTimes = {letters: number[]; shrink: number; ring: number; logoLetters: number[]; motifs: number; pill: number; drops: number[]};
 
@@ -61,7 +63,8 @@ const Letters: React.FC<{t: number; at: number[]; size: number; lines: 1 | 2}> =
 };
 
 // COMING SOON atas print Black Dahlia (unit cerah), kemudian bulatan bunga + logo Petal Pop 4 putih. t = 0 mula segmen.
-export const ComingSoon: React.FC<{times: ComingTimes}> = ({times: T}) => {
+// overlay (9:16): tiada latar hitam, bunga Black Dahlia mekar terus atas klip klimaks terakhir.
+export const ComingSoon: React.FC<{times: ComingTimes; overlay?: boolean}> = ({times: T, overlay = false}) => {
   const t = useCurrentFrame() / FPS;
   const {fmt, W, H} = useFmt();
   const L = LAY[fmt];
@@ -72,8 +75,8 @@ export const ComingSoon: React.FC<{times: ComingTimes}> = ({times: T}) => {
   const smallOut = ease(t, T.shrink, T.shrink + 0.3, Easing.in(Easing.back(1.4)));
   let li = 0;
   return (
-    <AbsoluteFill style={{background: '#000'}}>
-      <BloomSweep design="dahlia" origin="center" timing={COMING_SWEEP} light />
+    <AbsoluteFill style={{background: overlay ? undefined : '#000'}}>
+      <BloomSweep design="dahlia" origin="center" timing={overlay ? COMING_SWEEP_OVER : COMING_SWEEP} light />
       <AbsoluteFill style={{opacity: vig, background: `radial-gradient(${L.vig(sh)}, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0) 100%)`}} />
       <svg width={W} height={H} style={{position: 'absolute', left: 0, top: 0}}>
         {SMALL.map((u, i) => {
