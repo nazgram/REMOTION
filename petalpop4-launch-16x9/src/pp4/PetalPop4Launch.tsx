@@ -39,7 +39,7 @@ const blocks = BLOCKS.map((s, i) => {
 const climaxAt = CLIMAX_ENTER.map((k) => at(CLIMAX_SEG.beat0 + k));
 const climaxEnd = COMING.start + 0.75; // jalur kekal sampai print Black Dahlia penuh
 const cb = (k: number) => at(COMING.beat0 + k) - COMING.start;
-const COMING_T: ComingTimes = {
+export const COMING_T: ComingTimes = {
   letters: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => cb(0.75 + i * 0.25)),
   shrink: cb(3.5),
   ring: cb(3.5),

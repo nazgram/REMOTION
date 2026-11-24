@@ -1,21 +1,27 @@
 import React from 'react';
 import {AbsoluteFill, Easing, Img, useCurrentFrame} from 'remotion';
 import views from '../views.json';
+import viewsV from '../views_v.json';
+import {DIMS, Fmt, useFmt} from '../fmt';
 import {BLOOM_UNITS, colorsOf, DesignId, Unit, UNITS} from '../designs';
-import {H, W} from '../layout';
 import {asset, ease, FPS, pop, rand} from '../util';
 
-// Pandangan print 16:9 setiap design (sama dengan public/pp4/view_<id>.jpg): viewBox [vx, vy, VW, VH] dalam koordinat tile.
-const V = views as unknown as {w: number; h: number; views: Record<string, [number, number]>};
-export const VS = W / V.w; // piksel skrin per unit tile
-export const viewOf = (id: DesignId) => V.views[id];
-export const toScreen = (id: DesignId, u: Unit): [number, number] => {
-  const [vx, vy] = viewOf(id);
+// Pandangan print setiap design (sama dengan public/pp4/view_<id>.jpg, 9:16 = view_<id>_v.jpg): viewBox [vx, vy, VW, VH]
+// dalam koordinat tile. Skala sama untuk kedua-dua format (1920/1620 = 1080/911.25).
+type Views = {w: number; h: number; views: Record<string, [number, number]>};
+const VIEWS: Record<Fmt, Views> = {h: views as unknown as Views, v: viewsV as unknown as Views};
+export const VS = 1920 / VIEWS.h.w; // piksel skrin per unit tile
+export const viewOf = (id: DesignId, fmt: Fmt = 'h') => VIEWS[fmt].views[id];
+export const toScreen = (id: DesignId, u: Unit, fmt: Fmt = 'h'): [number, number] => {
+  const [vx, vy] = viewOf(id, fmt);
   return [(u.x - vx) * VS, (u.y - vy) * VS];
 };
 
 // Print penuh skrin (raster), satu frame dengan unit vektor.
-export const PrintBg: React.FC<{design: DesignId}> = ({design}) => <Img src={asset(`view_${design}.jpg`)} style={{position: 'absolute', left: 0, top: 0, width: W, height: H}} />;
+export const PrintBg: React.FC<{design: DesignId}> = ({design}) => {
+  const {fmt, W, H} = useFmt();
+  return <Img src={asset(`view_${design}${fmt === 'v' ? '_v' : ''}.jpg`)} style={{position: 'absolute', left: 0, top: 0, width: W, height: H}} />;
+};
 
 // Satu unit bunga (vektor), skala k dan putaran rot di sekeliling pusatnya; koordinat tile.
 export const UnitG: React.FC<{u: Unit; colors: string[]; k: number; rot?: number}> = ({u, colors, k, rot = 0}) => (
@@ -36,7 +42,8 @@ const hexL = (hex: string) => {
 export const unitLightness = (u: Unit, colors: string[]) => u.p.reduce((s, [, c]) => s + hexL(colors[c]), 0) / u.p.length;
 
 export type Origin = 'center' | 'bottom' | 'bl' | 'tr' | 'br';
-export const ORIGIN: Record<Origin, [number, number]> = {center: [W / 2, H / 2], bottom: [W / 2, H + 120], bl: [-60, H + 60], tr: [W + 60, -60], br: [W + 60, H + 60]};
+export const originOf = (o: Origin, W: number, H: number): [number, number] =>
+  ({center: [W / 2, H / 2], bottom: [W / 2, H + 120], bl: [-60, H + 60], tr: [W + 60, -60], br: [W + 60, H + 60]} as Record<Origin, [number, number]>)[o];
 
 export type SweepTiming = {pre: number; maskLag: number; spread: number; grow: number; settle: number};
 // Blok design: sweep mula 0.8 s sebelum blok, print penuh 0.1 s sebelum blok, unit mendarat atas print selepas blok mula.
@@ -44,13 +51,14 @@ export const DESIGN_SWEEP: SweepTiming = {pre: 0.8, maskLag: 0.2, spread: 0.35, 
 export const COVER = 2.1;
 
 type BU = {u: Unit; delay: number; rot: number};
-const sweepUnits = (design: DesignId, origin: Origin, spread: number, light: boolean): {list: BU[]; dmax: number} => {
-  const [ox, oy] = ORIGIN[origin];
+const sweepUnits = (design: DesignId, origin: Origin, spread: number, light: boolean, fmt: Fmt): {list: BU[]; dmax: number} => {
+  const {W, H} = DIMS[fmt];
+  const [ox, oy] = originOf(origin, W, H);
   const dmax = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(x - ox, y - oy)));
   const colors = colorsOf(design);
   const list: BU[] = [];
   BLOOM_UNITS.forEach((u) => {
-    const [sx, sy] = toScreen(design, u);
+    const [sx, sy] = toScreen(design, u, fmt);
     if (sx < -120 || sx > W + 120 || sy < -120 || sy > H + 120) return;
     if (light && unitLightness(u, colors) < 0.35) return;
     const i = UNITS.indexOf(u);
@@ -65,23 +73,26 @@ const cache = new Map<string, ReturnType<typeof sweepUnits>>();
 // Bloom sweep (gaya Petal Pop Drop 3): unit bunga design SETERUSNYA mekar 0 -> 2.1x dari origin, print design itu
 // muncul di belakangnya melalui mask bulat lembut yang ketinggalan; lepas blok mula unit mengecil semula ke 1x dan
 // mendarat tepat atas bunga yang sama dalam print. t = 0 pada mula sweep (Sequence).
-export const BloomSweep: React.FC<{design: DesignId; origin: Origin; timing: SweepTiming; light?: boolean}> = ({design, origin, timing, light = false}) => {
+// land = false (9:16): unit mengecil ke 0 dan hilang selepas tutup skrin (bukan mendarat), children = kandungan di belakang mask (default print).
+export const BloomSweep: React.FC<{design: DesignId; origin: Origin; timing: SweepTiming; light?: boolean; land?: boolean; children?: React.ReactNode}> = ({design, origin, timing, light = false, land = true, children}) => {
   const t = useCurrentFrame() / FPS;
+  const {fmt, W, H} = useFmt();
   const {maskLag, spread, grow, settle, pre} = timing;
-  const key = `${design}-${origin}-${spread}-${light}`;
-  if (!cache.has(key)) cache.set(key, sweepUnits(design, origin, spread, light));
+  const key = `${design}-${origin}-${spread}-${light}-${fmt}`;
+  if (!cache.has(key)) cache.set(key, sweepUnits(design, origin, spread, light, fmt));
   const {list, dmax} = cache.get(key)!;
-  const [ox, oy] = ORIGIN[origin];
+  const [ox, oy] = originOf(origin, W, H);
   const R = ease(t, maskLag, maskLag + spread + 0.15, Easing.inOut(Easing.sin)) * (dmax + 260);
   const mask = `radial-gradient(circle at ${ox}px ${oy}px, #000 ${Math.max(0, R - 240)}px, rgba(0,0,0,0) ${R}px)`;
   const colors = colorsOf(design);
-  const [vx, vy] = viewOf(design);
-  const hold = pre + 0.05;
+  const [vx, vy] = viewOf(design, fmt);
+  const V = VIEWS[fmt];
+  const hold = land ? pre + 0.05 : Math.max(pre, grow) + 0.05;
   return (
     <AbsoluteFill>
       {R > 0 && (
         <AbsoluteFill style={{WebkitMaskImage: R >= dmax + 250 ? undefined : mask, maskImage: R >= dmax + 250 ? undefined : mask}}>
-          <PrintBg design={design} />
+          {children ?? <PrintBg design={design} />}
         </AbsoluteFill>
       )}
       <svg width={W} height={H} viewBox={`${vx} ${vy} ${V.w} ${V.h}`} style={{position: 'absolute', left: 0, top: 0}}>
@@ -91,9 +102,10 @@ export const BloomSweep: React.FC<{design: DesignId; origin: Origin; timing: Swe
           const st = hold + delay * 0.6;
           const s = ease(t, st, st + settle, Easing.inOut(Easing.sin));
           if (s >= 1) return null;
-          const k = COVER * g + (1 - COVER) * s;
+          const k = land ? COVER * g + (1 - COVER) * s : COVER * g * (1 - s);
+          const o = Math.min(1, (t - delay) / 0.14) * (land ? 1 : 1 - ease(t, st + settle * 0.5, st + settle, Easing.linear));
           return (
-            <g key={i} opacity={Math.min(1, (t - delay) / 0.14)}>
+            <g key={i} opacity={o}>
               <UnitG u={u} colors={colors} k={k} rot={rot * (1 - g) + rot * 0.25 * Math.sin(s * Math.PI)} />
             </g>
           );
@@ -110,6 +122,7 @@ export const sweepDone = (tm: SweepTiming) => tm.pre + 0.05 + tm.spread * 0.66 +
 // t = 0 bila accent mula; outAt = saat tempatan mula keluar.
 export const BloomAccent: React.FC<{design: DesignId; corner: 'br' | 'tr' | 'bl'; outAt: number}> = ({design, corner, outAt}) => {
   const t = useCurrentFrame() / FPS;
+  const {W, H} = useFmt();
   const colors = colorsOf(design);
   const picks = accentUnits(design);
   const [cx, cy] = corner === 'br' ? [W - 40, H - 30] : corner === 'tr' ? [W - 40, 30] : [40, H - 30];
