@@ -3,12 +3,13 @@ import {AbsoluteFill, Audio, Easing, Sequence, useCurrentFrame} from 'remotion';
 import logo from '../logo.json';
 import {colorsOf, DesignId, Unit, UNITS} from '../designs';
 import {UnitG} from '../components/Bloom';
-import {asset, ease, f, FPS, pop, rand} from '../util';
+import {asset, ease, f, FPS, pop, rand, SERIF} from '../util';
 
 // Logo motion Petal Pop Drop 4 (10 s, 1080x1920, 60 fps). Nas 25 Nov: logo + bunga dari print Drop 4,
 // 0:00-0:04 diam (gambar tenang), animasi mula 0:04.
 export const LM_FRAMES = f(10);
 export const START = 4; // animasi mula
+export const SWAP = 7; // Nas 25 Nov: logo tukar jadi COMING SOON pada 0:07
 const W = 1080, H = 1920;
 const BG = '#efe6e1';
 const C: [number, number] = [540, 830]; // pusat logo + bulatan
@@ -130,6 +131,9 @@ const Logo: React.FC<{t: number}> = ({t}) => {
       {LOGO_P.map((p, i) => {
         const [bx, by, bw, bh] = p.box;
         const cx = bx + bw / 2, cy = by + bh / 2;
+        const out = ease(t, SWAP - 0.2 + (i % 6) * 0.03, SWAP + 0.1 + (i % 6) * 0.03, Easing.in(Easing.back(1.7)));
+        if (out >= 1) return null;
+        const exitTf = out > 0 ? `translate(${cx} ${cy}) scale(${Math.max(0, 1 - out)}) translate(${-cx} ${-cy}) ` : '';
         let tf = '';
         if (i >= 1 && i <= 8) {
           // huruf melompat ikut gelombang
@@ -154,9 +158,36 @@ const Logo: React.FC<{t: number}> = ({t}) => {
           const jump = bump((t - a) / 0.3) * 18;
           tf = `translate(0 ${-jump})`;
         }
-        return <path key={i} d={p.d} fill={p.fill} transform={tf} />;
+        return <path key={i} d={p.d} fill={p.fill} transform={exitTf + tf} />;
       })}
     </g>
+  );
+};
+
+// COMING SOON (0:07): huruf pop satu-satu dalam kalungan, 2 baris, kemudian bernafas perlahan.
+const LINES = ['COMING', 'SOON'];
+export const LETTER_AT = Array.from({length: 10}, (_, k) => SWAP + 0.12 + k * 0.07);
+const ComingSoon: React.FC<{t: number}> = ({t}) => {
+  if (t < SWAP) return null;
+  const breathe = 1 + 0.012 * Math.sin((t - SWAP) * 2.4) * ease(t, SWAP + 1, SWAP + 1.8);
+  let k = 0;
+  return (
+    <div style={{position: 'absolute', left: 0, width: W, top: C[1], transform: `translateY(-50%) scale(${breathe})`, textAlign: 'center', fontFamily: SERIF, fontSize: 168, lineHeight: 0.98, color: '#111', letterSpacing: '0.04em'}}>
+      {LINES.map((ln) => (
+        <div key={ln}>
+          {ln.split('').map((ch, j) => {
+            const a = LETTER_AT[k++];
+            const g = ease(t, a, a + 0.34, Easing.out(Easing.back(1.9)));
+            const o = ease(t, a, a + 0.1, Easing.linear);
+            return (
+              <span key={j} style={{display: 'inline-block', opacity: o, transform: `translateY(${(1 - Math.min(1, g)) * 40}px) scale(${g})`, transformOrigin: '50% 100%'}}>
+                {ch}
+              </span>
+            );
+          })}
+        </div>
+      ))}
+    </div>
   );
 };
 
@@ -169,6 +200,8 @@ export const LM_HITS: Hit[] = [
   ...RING.map((_, i) => i).filter((i) => !restFor.has(i)).map((i) => ({t: START + 1.0 + (i % 7) * 0.07 + rand(i) * 0.1, file: 'pop-kecil' as const, gain: 0.5})),
   {t: START + 1.5, file: 'pop', gain: 0.8},
   {t: START + 2.0, file: 'whoosh', gain: 0.5},
+  {t: SWAP - 0.25, file: 'whoosh', gain: 0.8},
+  ...LETTER_AT.map((a) => ({t: a + 0.05, file: 'pop-kecil' as const, gain: 0.5})),
 ];
 const VOL = Math.pow(10, -6 / 20);
 
@@ -181,6 +214,7 @@ export const PetalPop4LogoMotion: React.FC<{withAudio?: boolean}> = ({withAudio 
         <RingFlowers t={t} />
         <Logo t={t} />
       </svg>
+      <ComingSoon t={t} />
       {withAudio &&
         LM_HITS.map((h, i) => (
           <Sequence key={i} from={f(h.t)} durationInFrames={f(1)} layout="none">
