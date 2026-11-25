@@ -47,3 +47,17 @@ def tone(f, st, d):
     return np.sin(2 * np.pi * f * t) * e
 sf.write('public/raya/sfx-notif.wav', norm(tone(1318.5, 0, 0.06) + 0.8 * tone(1760, 0.09, 0.08)), SR)
 print('notif ok')
+# v2 (typografi bermotion): hentakan, tik, swish pendek
+def thud(dur=0.45):
+    tt = np.arange(int(SR * dur)) / SR
+    f = 45 + 110 * np.exp(-tt / 0.05)
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt / 0.12)
+    click = rng.standard_normal(len(tt)) * np.exp(-tt / 0.006) * 0.5
+    return norm(body + click)
+def tick():
+    tt = np.arange(int(SR * 0.035)) / SR
+    return norm(np.sin(2 * np.pi * 2600 * tt) * np.exp(-tt / 0.006) + 0.3 * rng.standard_normal(len(tt)) * np.exp(-tt / 0.003))
+sf.write('public/raya/sfx-thud.wav', thud(), SR)
+sf.write('public/raya/sfx-tick.wav', tick(), SR)
+sf.write('public/raya/sfx-swish.wav', whoosh(0.32), SR)
+print('v2 ok')
