@@ -32,7 +32,7 @@ const FONTS: [string, string, string][] = [
   ['Poppins', 'fonts/Poppins-ExtraBold.ttf', '800'],
 ];
 if (typeof document !== 'undefined') {
-  const h = delayRender('fonts');
+  const h = delayRender('fonts', {timeoutInMilliseconds: 120000});
   Promise.all(FONTS.map(([fam, f, wt]) => new FontFace(fam, `url(${a(f)})`, {weight: wt}).load().then((ff) => document.fonts.add(ff))))
     .then(() => continueRender(h))
     .catch(() => continueRender(h));
@@ -319,21 +319,13 @@ const SellCard: React.FC = () => {
 const EndCard: React.FC = () => {
   const t = useT();
   const bg = rise(t, 0, 0.4);
-  const logo = rise(t, 0.3, 0.8);
-  const cres = pop(t, 0.9, 0.5);
-  const tag = rise(t, 1.2, 0.6);
+  const logo = rise(t, 0.3, 0.9);
+  const LW = 560, LH = Math.round((560 * 975) / 1400);
   return (
-    <AbsoluteFill style={{opacity: bg}}>
-      <Card bg={C.olive} pat={C.gold} patO={0.1}>
-        <div style={{position: 'absolute', top: 560, left: (W - 560) / 2, width: 560, opacity: logo, transform: `scale(${0.92 + 0.08 * logo})`}}>
-          <Img src={a('img/logo_gold.png')} style={{width: 560}} />
-          <div style={{position: 'absolute', top: -70, right: -40, transform: `scale(${cres}) rotate(-12deg)`}}>
-            <Crescent size={84} color={C.gold} />
-          </div>
-        </div>
-        <div style={{position: 'absolute', top: 1010, left: 390, width: 300, height: 2, background: C.gold, transform: `scaleX(${tag})`}} />
-        <div style={{position: 'absolute', top: 1050, width: W, textAlign: 'center', fontFamily: POP, fontWeight: 500, fontSize: 34, letterSpacing: '0.55em', marginLeft: '0.27em', color: C.cream, opacity: tag}}>MODEST LUXURY</div>
-      </Card>
+    <AbsoluteFill style={{opacity: bg, background: C.olive}}>
+      <div style={{position: 'absolute', top: (H - LH) / 2 - 60, left: (W - LW) / 2, width: LW, opacity: logo, transform: `scale(${0.94 + 0.06 * logo})`}}>
+        <Img src={a('img/logo_gold.png')} style={{width: LW}} />
+      </div>
     </AbsoluteFill>
   );
 };
@@ -398,6 +390,32 @@ const musicVol = (f: number) => {
   return base * fadeIn * fadeOut;
 };
 
+
+// ---------- SFX (sintesis sendiri, scripts/sfx.py) ----------
+type Fx = {at: number; f: 'pop' | 'pop-small' | 'whoosh' | 'notif'; v: number};
+const FX: Fx[] = [
+  {at: LEAD, f: 'pop-small', v: 0.2}, {at: LEAD + 0.33, f: 'pop', v: 0.18},
+  {at: 1.9, f: 'whoosh', v: 0.14}, {at: 2.88, f: 'pop', v: 0.16},
+  ...[0.21, 0.75, 1.25].map((d) => ({at: V[2] + d, f: 'notif' as const, v: 0.2})),
+  ...[6.54, 7.32, 8.25].map((at) => ({at, f: 'pop-small' as const, v: 0.18})),
+  {at: 12.85, f: 'whoosh', v: 0.15}, {at: 13.3, f: 'pop', v: 0.22}, {at: 14.13, f: 'pop-small', v: 0.18},
+  ...[19.53, 20.17, 21.06].map((at) => ({at, f: 'pop-small' as const, v: 0.18})),
+  {at: 21.75, f: 'whoosh', v: 0.14}, {at: 22.04, f: 'pop', v: 0.24},
+  ...[25.87, 26.97, 28.32].map((at) => ({at, f: 'pop-small' as const, v: 0.16})),
+  {at: V[6] + 0.3, f: 'notif', v: 0.2}, {at: V[6] + 2.1, f: 'notif', v: 0.2},
+  ...[30.83, 34.99, 38.09, 41.45, 44.6, 45.42].map((at) => ({at, f: 'pop-small' as const, v: 0.16})),
+  {at: 46.41, f: 'pop', v: 0.18}, {at: END_CARD - 0.45, f: 'whoosh', v: 0.14},
+];
+const SfxTrack: React.FC = () => (
+  <>
+    {FX.map((x, i) => (
+      <Sequence key={i} from={fr(x.at)} durationInFrames={fr(1.0)}>
+        <Audio src={a(`sfx-${x.f}.wav`)} volume={x.v} />
+      </Sequence>
+    ))}
+  </>
+);
+
 export const RayaAgent: React.FC<{withAudio?: boolean}> = ({withAudio}) => (
   <AbsoluteFill style={{background: C.cream}}>
     <Seq from={0} to={2.2}><HiCard /></Seq>
@@ -417,6 +435,7 @@ export const RayaAgent: React.FC<{withAudio?: boolean}> = ({withAudio}) => (
       <>
         <VOAudio />
         <Audio src={a('music.mp3')} volume={musicVol} />
+        <SfxTrack />
       </>
     )}
   </AbsoluteFill>
