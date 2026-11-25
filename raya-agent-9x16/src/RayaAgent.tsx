@@ -22,6 +22,7 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 const outCubic = Easing.out(Easing.cubic);
 const back = Easing.out(Easing.back(1.6));
 
+import {FONT64} from './fonts64';
 // ---------- fonts ----------
 const FONTS: [string, string, string][] = [
   ['Dream Avenue', 'fonts/DreamAvenue.ttf', '400'],
@@ -31,12 +32,20 @@ const FONTS: [string, string, string][] = [
   ['Poppins', 'fonts/Poppins-Bold.ttf', '700'],
   ['Poppins', 'fonts/Poppins-ExtraBold.ttf', '800'],
 ];
-if (typeof document !== 'undefined') {
-  const h = delayRender('fonts', {timeoutInMilliseconds: 120000});
-  Promise.all(FONTS.map(([fam, f, wt]) => new FontFace(fam, `url(${a(f)})`, {weight: wt}).load().then((ff) => document.fonts.add(ff))))
-    .then(() => continueRender(h))
-    .catch(() => continueRender(h));
-}
+let fontsP: Promise<unknown> | null = null;
+const loadFonts = () => {
+  if (!fontsP) {
+    const all = Promise.all(FONTS.map(([fam, f, wt]) => new FontFace(fam, `url(data:font/ttf;base64,${FONT64[f.replace('fonts/', '').replace('.ttf', '')]})`, {weight: wt}).load().then((ff) => document.fonts.add(ff))));
+    fontsP = Promise.race([all, new Promise((r) => setTimeout(r, 15000))]).catch(() => null);
+  }
+  return fontsP;
+};
+const useFonts = () => {
+  const [h] = React.useState(() => delayRender('fonts', {timeoutInMilliseconds: 60000}));
+  React.useEffect(() => {
+    loadFonts().then(() => continueRender(h));
+  }, [h]);
+};
 const DREAM = '"Dream Avenue", serif';
 const POP = 'Poppins, sans-serif';
 
@@ -416,7 +425,9 @@ const SfxTrack: React.FC = () => (
   </>
 );
 
-export const RayaAgent: React.FC<{withAudio?: boolean}> = ({withAudio}) => (
+export const RayaAgent: React.FC<{withAudio?: boolean}> = ({withAudio}) => {
+  useFonts();
+  return (
   <AbsoluteFill style={{background: C.cream}}>
     <Seq from={0} to={2.2}><HiCard /></Seq>
     {SHOTS.map((s) => (
@@ -439,4 +450,5 @@ export const RayaAgent: React.FC<{withAudio?: boolean}> = ({withAudio}) => (
       </>
     )}
   </AbsoluteFill>
-);
+  );
+};
