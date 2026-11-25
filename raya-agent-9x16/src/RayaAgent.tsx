@@ -42,7 +42,7 @@ const POP = 'Poppins, sans-serif';
 
 // ---------- footage ----------
 // AI = klip Higgsfield (Nas simpan dalam Mac "AI clips/"); sementara belum ada, papar placeholder.
-const AI_READY: Record<string, boolean> = {A1: false, B1: false, R2: false, V4: false};
+const AI_READY: Record<string, boolean> = {A1: true, B1: true, R2: true, V4: true};
 const AI_LABEL: Record<string, string> = {A1: 'AI · Jiran A1 (lambai)', B1: 'AI · Jiran B1 (balang kuih)', R2: 'AI · Rumah 2 (taip mesej)', V4: 'AI · Versi 4 (taip mesej)'};
 type Shot = {id: string; from: number; to: number; off?: number; z?: number; ox?: number; oy?: number};
 export const SHOTS: Shot[] = [
