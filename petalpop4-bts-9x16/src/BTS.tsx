@@ -1,14 +1,20 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, Easing, spring, staticFile, useCurrentFrame, useVideoConfig, delayRender, continueRender} from 'remotion';
-import {loadFont} from '@remotion/fonts';
 import plan from '../public/bts/plan.json';
 
 // ---------- fonts ----------
-const fontHandle = delayRender('fonts');
-Promise.all([
-  ...[300, 400, 500, 600].map((w) => loadFont({family: 'Poppins', url: staticFile(`bts/fonts/poppins-${w}.woff2`), weight: String(w)})),
-  loadFont({family: 'Transcity', url: staticFile('bts/fonts/Transcity.otf')}),
-]).then(() => continueRender(fontHandle));
+const fontHandle = delayRender('fonts', {timeoutInMilliseconds: 120000});
+let fontsDone = false;
+const finishFonts = () => { if (!fontsDone) { fontsDone = true; continueRender(fontHandle); } };
+const FONT_LIST: [string, string, string][] = [
+  ...[300, 400, 500, 600].map((w) => ['Poppins', `bts/fonts/poppins-${w}.woff2`, String(w)] as [string, string, string]),
+  ['Transcity', 'bts/fonts/Transcity.otf', '400'],
+];
+Promise.all(FONT_LIST.map(async ([fam, url, weight]) => {
+  const ff = new FontFace(fam, `url(${staticFile(url)})`, {weight});
+  await ff.load(); document.fonts.add(ff);
+})).catch((e) => console.warn('font', e)).finally(finishFonts);
+setTimeout(finishFonts, 20000); // jangan sangkut kalau satu tab lambat
 
 // ---------- data ----------
 type Shot = {id: string; src: string; inS: number; from_: number; dur: number; chap: string; cap: string};
@@ -177,7 +183,7 @@ const Caption: React.FC<{text: string; style: number; dur: number}> = ({text, st
 
 const Credit: React.FC = () => {
   const f = useCurrentFrame();
-  return <div style={{position: 'absolute', left: 0, right: 0, top: 1420, textAlign: 'center', fontFamily: 'Poppins', fontWeight: 400, fontSize: 24, letterSpacing: 1, color: 'white', opacity: 0.88 * interpolate(f, [0, 10], [0, 1], clamp), textShadow: shadow}}>Pétal Pop Drop 4 · Diarkib oleh NAFESA</div>;
+  return <div style={{position: 'absolute', left: 0, right: 0, top: 1420, textAlign: 'center', fontFamily: 'Poppins', fontWeight: 400, fontSize: 24, letterSpacing: 1, color: 'white', opacity: 0.88 * interpolate(f, [0, 10], [0, 1], clamp), textShadow: shadow}}>Pétal Pop Drop 4 · Archived by NAFESA</div>;
 };
 
 // ---------- title BEHIND the SCENE ----------
@@ -204,11 +210,11 @@ const Title: React.FC = () => {
         <div style={{position: 'absolute', left: 120, top: 26, ...small, opacity: fade(18)}}>Project<br />of the day</div>
         <div style={{position: 'absolute', left: 300, top: -22, fontFamily: 'Transcity', fontSize: 150, color: PINK, transform: 'rotate(-7deg)', clipPath: `inset(0 ${(1 - the) * 100}% 0 0)`, textShadow: '0 3px 14px rgba(0,0,0,0.2)'}}>the</div>
         <div style={{position: 'absolute', left: 585, top: 28, padding: '8px 26px', borderRadius: 30, background: PINK, fontFamily: 'Poppins', fontWeight: 600, fontSize: 30, color: 'white', letterSpacing: 3, transform: `scale(${pill})`}}>DROP 4</div>
-        <div style={{position: 'absolute', right: 110, top: 26, ...small, opacity: fade(24)}}>5 colourway<br />1 hari shoot</div>
+        <div style={{position: 'absolute', right: 110, top: 26, ...small, opacity: fade(24)}}>6 colourways<br />1 day shoot</div>
       </div>
       <div style={{position: 'absolute', top: 610, left: 0, right: 0, textAlign: 'center', ...big}}>{sc}</div>
-      <div style={{position: 'absolute', top: 834, left: 0, right: 0, ...small, fontSize: 30, lineHeight: '40px', opacity: fade(28), transform: `translateY(${(1 - fade(28)) * 16}px)`}}>Pétal Pop Drop 4 by NAFESA<br />rakaman sebenar di sebalik tabir</div>
-      <div style={{position: 'absolute', top: 1420, left: 0, right: 0, ...small, fontWeight: 400, fontSize: 24, opacity: 0.88 * fade(30)}}>Diarkib oleh NAFESA</div>
+      <div style={{position: 'absolute', top: 834, left: 0, right: 0, ...small, fontSize: 30, lineHeight: '40px', opacity: fade(28), transform: `translateY(${(1 - fade(28)) * 16}px)`}}>Pétal Pop Drop 4 by NAFESA<br />the real shoot, unfiltered</div>
+      <div style={{position: 'absolute', top: 1420, left: 0, right: 0, ...small, fontWeight: 400, fontSize: 24, opacity: 0.88 * fade(30)}}>Archived by NAFESA</div>
     </AbsoluteFill>
   );
 };
@@ -240,7 +246,7 @@ const Film: React.FC = () => {
       <div style={{position: 'absolute', inset: 0, transform: `scale(${pop})`}}>{content}</div>
       <div style={{position: 'absolute', left: 92, top: 140, width: 3, height: 92, background: 'white', opacity: 0.9}} />
       <div style={{position: 'absolute', left: 116, top: 146, fontFamily: 'Poppins', fontSize: 24, color: 'rgba(255,255,255,0.75)', letterSpacing: 4}}>FRAME {String(k + 21).padStart(2, '0')}A</div>
-      <div style={{position: 'absolute', left: 0, right: 0, top: 1500, textAlign: 'center', fontFamily: 'Poppins', fontWeight: 400, fontSize: 24, color: 'white', opacity: 0.85}}>Arkib BTS · Pétal Pop Drop 4</div>
+      <div style={{position: 'absolute', left: 0, right: 0, top: 1500, textAlign: 'center', fontFamily: 'Poppins', fontWeight: 400, fontSize: 24, color: 'white', opacity: 0.85}}>BTS Archive · Pétal Pop Drop 4</div>
       <AbsoluteFill style={{background: 'white', opacity: flash}} />
     </AbsoluteFill>
   );
@@ -271,13 +277,14 @@ const EndCard: React.FC = () => {
               <Img src={staticFile(`bts/${s}.png`)} style={{width: 340, height: 340, marginLeft: -40, marginTop: -40}} /></div>); })}
         </div>
         <div style={{position: 'absolute', top: 1290, left: 0, right: 0, textAlign: 'center', fontFamily: 'Poppins', color: INK, opacity: txt, transform: `translateY(${(1 - txt) * 24}px)`}}>
-          <div style={{fontWeight: 500, fontSize: 44}}>Terima kasih, team!</div>
-          <div style={{fontWeight: 400, fontSize: 28, marginTop: 10, letterSpacing: 1}}>6 colourway Pétal Pop Drop 4 kini di NAFESA</div>
+          <div style={{fontWeight: 600, fontSize: 64, letterSpacing: interpolate(txt, [0, 1], [40, 10]), color: OLIVE, filter: `blur(${(1 - txt) * 8}px)`}}>COMING SOON</div>
+          <div style={{fontWeight: 400, fontSize: 28, marginTop: 10, letterSpacing: 1}}>6 new colourways · only at NAFESA</div>
         </div>
       </AbsoluteFill>
       <AbsoluteFill style={{background: OLIVE, clipPath: `circle(${iris * 120}% at 50% 42%)`}}>
         <div style={{position: 'absolute', left: 240, top: 560, width: 600, height: 418, opacity: naf, transform: `scale(${0.92 + naf * 0.08})`, filter: `blur(${(1 - naf) * 10}px)`}}>
           <Img src={staticFile('bts/logo-nafesa-putih.png')} style={{width: 600}} />
+          <div style={{position: 'absolute', top: 470, left: -100, right: -100, textAlign: 'center', fontFamily: 'Poppins', fontWeight: 500, fontSize: 30, letterSpacing: 9, color: GOLD, opacity: interpolate(f, [nf + 30, nf + 46], [0, 1], clamp)}}>PÉTAL POP DROP 4 · COMING SOON</div>
           <div style={{position: 'absolute', inset: 0, background: `linear-gradient(105deg, rgba(255,255,255,0) ${shimmer * 100 - 12}%, rgba(232,214,180,0.55) ${shimmer * 100}%, rgba(255,255,255,0) ${shimmer * 100 + 12}%)`, mixBlendMode: 'overlay', WebkitMaskImage: `url(${staticFile('bts/logo-nafesa-putih.png')})`, WebkitMaskSize: '100% 100%'}} />
         </div>
       </AbsoluteFill>
