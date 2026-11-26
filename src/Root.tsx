@@ -12,6 +12,8 @@ import teaser1 from './teaser1/timeline.json';
 import { PetalPopDrop2 } from './drop2/PetalPopDrop2';
 import { PetalPopDrop3Catalog } from './drop3c/PetalPopDrop3Catalog';
 import drop3c from './drop3c/timeline.json';
+import { PetalPopDrop4Catalog } from './drop4c/PetalPopDrop4Catalog';
+import drop4c from './drop4c/timeline.json';
 import { PetalPopDrop3Fabric } from './drop3f/PetalPopDrop3Fabric';
 import drop3f from './drop3f/timeline.json';
 import drop2 from './drop2/timeline.json';
@@ -110,6 +112,15 @@ export const RemotionRoot: React.FC = () => (
       fps={drop3c.FPS}
       width={drop3c.W}
       height={drop3c.H}
+      defaultProps={{ withAudio: false }}
+    />
+      <Composition
+      id="PetalPopDrop4Catalog"
+      component={PetalPopDrop4Catalog}
+      durationInFrames={drop4c.DURATION * drop4c.FPS}
+      fps={drop4c.FPS}
+      width={drop4c.W}
+      height={drop4c.H}
       defaultProps={{ withAudio: false }}
     />
     <Composition
