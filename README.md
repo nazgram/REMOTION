@@ -1,98 +1,95 @@
-[README.md](https://github.com/user-attachments/files/33830696/README.md)
-# REMOTION<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+# Petal Pop
 
-[![Discord Shield](https://img.shields.io/discord/809501355504959528?color=000000&label=Discord&logo=fdgssdf)](https://remotion.dev/discord)
-[![NPM Version](https://img.shields.io/npm/v/remotion.svg?style=flat&color=black)](https://www.npmjs.org/package/remotion)
-[![NPM Downloads](https://img.shields.io/npm/dm/remotion.svg?style=flat&color=black&label=Downloads)](https://npmcharts.com/compare/remotion?minimal=true)
-<a href="https://twitter.com/remotion"><img src="https://img.shields.io/twitter/follow/remotion?label=Twitter&color=black" alt="Twitter"></a>
+A 10-second 9:16 (1080×1920, 30 fps) floral pop video made with Remotion: gouache flower sprigs pop on a
+120 BPM ukulele groove, sway in a gust of wind, wash away like watercolor, and the title PETAL POP pops in letter by letter.
 
-Video tools for the agent era.
-
-## Video Creation
-
-- **Make videos agentically**: Turn your idea into a video using your coding agent.
-- **Make videos interactively**: Edit and animate using drag and drop.
-- **Make videos programmatically**: Connect to data, and manage complexity with code.
-
-React Code is the source of truth. Switch your workflow at any point.
-
-## Video Automation
-
-- **Design systems**: Create a library of animated assets for your organization.
-- **Batch rendering**: Render millions of videos on your own infrastructure.
-- **Applications**: Publish a simple tool or a complex video editor.
-
-## Get started
-
-If you already have Node.JS installed, type
-
-```console
-npx create-video@latest
+```bash
+npm install
+python3 scripts/make_assets.py <folder with the 10 sprig PNGs>   # public/flowers, paper grain, wash masks
+node scripts/layout.js                                           # src/layout.json: positions + pop times
+node audio/song.js                                               # public/music.wav, synced to the same layout
+npx remotion still PetalPop out/frame.png --frame=180            # preview one frame
+npx remotion render PetalPop out/petal-pop.mp4 --props='{"withAudio":true}'
 ```
 
-to get started. Otherwise, read the [installation page](https://www.remotion.dev/docs/) in the documentation.
+`src/layout.json` is the single timeline: the picture (`src/PetalPop.tsx`) and the soundtrack (`audio/song.js`)
+both read it, so every flower's pop lands on its sound. The synth in `audio/engine/` is vendored from the
+animation-studio skill. Title font: DM Serif Display (SIL OFL, `public/fonts`).
 
-## Discover Remotion
+## Petal Pop intro (PetalPopIntro)
 
-Remotion is extensively documented over more than 1000 pages.
+12 s 9:16 intro for NAFESA: the Petal Pop motifs pop on, recolour through five colorways (Dahlia, Bluebell,
+Moonflower, Toffee Rose, Peony), wash away like watercolor, a thin tagline eases in, the Petal Pop
+logo pops in letter by letter, its flower, leaf, tulip and heart land after, and it breathes out, then the NAFESA logo fades in. SFX only, no music.
 
-- Get Started
-  - [Installation](https://remotion.dev/docs)
-  - [Agent Skills](https://www.remotion.dev/docs/ai/skills)
-  - [Prompts](https://www.remotion.dev/prompts)
-  - [Templates](https://remotion.dev/templates)
-- Components
-  - [Elements](https://remotion.dev/elements)
-  - [Effects](https://remotion.dev/effects)
-  - [Shapes](https://remotion.dev/docs/shapes)
-  - [Transitions](https://remotion.dev/transitions)
-  - [Sound Effects](https://remotion.dev/docs/sfx)
-  - [Captions](https://remotion.dev/docs/captions)
-  - [Fonts](https://remotion.dev/docs/fonts)
-- Rendering
-  - [Node.js APIs](https://www.remotion.dev/docs/ssr)
-  - [Lambda](https://www.remotion.dev/docs/lambda)
-  - [Vercel](https://www.remotion.dev/docs/vercel-sandbox)
-  - [Client-side rendering](https://www.remotion.dev/docs/client-side-rendering/)
-  - [Comparison of options](https://remotion.dev/docs/compare-ssr)
-- Making apps
-  - [Player](https://remotion.dev/docs/player)
-  - [Editor Starter](https://remotion.dev/editor-starter)
-  - [Mediabunny](https://remotion.dev/docs/mediabunny)
-- Community
-  - [Discord](https://remotion.dev/discord)
-  - [Experts](https://remotion.dev/experts)
-  - [Resources](https://remotion.dev/resources)
-  - [Contributing](https://remotion.dev/contributing)
-  - Follow us on [X](https://x.com/remotion), [YouTube](https://youtube.com/@remotion_dev), [Instagram](https://instagram.com/remotion), [LinkedIn](https://linkedin.com/company/remotion)
-- Commercial
-  - [License](https://remotion.dev/license)
-  - [Store](https://remotion.pro/store)
-  - [About Remotion](https://remotion.dev/about)
-  - [Showcase](https://remotion.dev/showcase)
-- Help
-  - [Support](https://remotion.dev/support)
-  - [Discord](https://remotion.dev/discord)
-  - [Search](https://remotion.dev/search)
-  - [Ask AI](https://remotion.dev/ai)
-  - [GitHub Issues](https://github.com/remotion-dev/remotion/issues)
+```bash
+python3 scripts/intro_assets.py "<intro video AI folder>"   # public/intro: motifs from FLOWER.png, logo parts, wash masks
+python3 scripts/intro_newlogo.py "<Petal Pop Typography.png>" # public/intro/newlogo: Petal Pop logo cut into layers
+node scripts/intro_layout.js                               # src/intro/layout.json: positions + pop times
+node audio/intro_sfx.js                                    # public/intro/sfx.wav
+npx remotion render PetalPopIntro out/petal-pop-intro.mp4 --props='{"withAudio":true}'
+```
 
-## Documentation
+The Petal Pop logo comes from Nas's `Petal Pop Typography.png` (Fabulosa, Adobe Fonts): the script splits it into
+letters (repainted ivory) and drawn motifs, so no font file is needed.
 
-Documentation: [**remotion.dev/docs**](https://www.remotion.dev/docs)  
-API Reference: [**remotion.dev/api**](https://www.remotion.dev/api)
+## Petal Pop Drop 1 editor reel (PetalPopDrop1)
 
-## License
+18 s 9:16 reel of the Drop 1 catalog (`PetalPop_Drop1_PNG`) in Nas's "editor moves" style: the Petal Pop logo
+appears too big and a cursor free-transforms it down, the cover gets a marquee, each colorway page slides in and an
+an eyedropper picks its colour into a palette strip, then all five are selected and scaled
+into the DROP 1 pill, ending on Petal Pop alone, then NAFESA last on its own. SFX only (Nas's POP 3 pops, clicks, swishes).
 
-Be aware of that Remotion has a special license and requires obtaining a company license in some cases. Read the [LICENSE](LICENSE.md) page for more information.
+```bash
+node scripts/drop1_layout.js                  # src/drop1/timeline.json: every move and sound event
+node audio/drop1_sfx.js                       # public/drop1/sfx.wav
+SCALE=0.4 node scripts/drop1_stills.mjs out/sb PetalPopDrop1 1.0 4.8 7.8   # storyboard stills
+npx remotion render PetalPopDrop1 out/drop1.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
 
-## Contributing
+## Drop 1 behind the scenes (PetalPopBTS)
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) to learn about contributing to this project.
+25 s 9:16 "how we made it" for the Drop 1 reel: hook (reel tears into code, "takde SATU keyframe pun"), then a
+macOS desktop where the brief goes to Claude, the Remotion code types itself, Studio previews with the storyboard,
+the terminal renders, and the reel ends on 18s / 540 frame / 0 keyframe. Clawd (Claude's mascot) helps out. No
+brand logos. Malay voiceover from Magnific TTS (`public/bts/vo`) + SFX; English cut `PetalPopBTSEn` (lang "en", macOS Samantha voice in `public/bts/vo_en`). VO timings in `src/bts/timeline.json`.
+
+```bash
+node audio/bts_sfx.js                           # public/bts/sfx.wav
+npx remotion render PetalPopBTS out/bts.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
+
+## Petal Pop Drop 2 teaser 1 (PetalPopTeaser1)
+
+10 s 9:16 teaser built from Nas's own vectors in `PETAL POP 2/TEASER 1`: the five scarf colourways (Butter Bliss,
+Vanilla Sky, Expresso Poppy, Forest Bloom, Olive Spritz) share one artwork, so `pattern.json` stores the 1096 flowers
+and leaves once plus a 7-colour palette per colourway. Flowers pop in from the edges ("Petal Pop" in the logo's own
+letters), floral wipe to Vanilla Sky ("Blooming Soon"), flower irises through Expresso Poppy and Forest Bloom with the
+logo's DROP 2 pill, floral wipe to Olive Spritz that fills the scarf and zooms out to the whole square ("Stay Tuned"),
+the Petal Pop Drop 2 logo, then NAFESA on Expresso brown. SFX only. Words and logos stay inside the top 1521 px.
+
+```bash
+python3 scripts/teaser1_assets.py "<PETAL POP 2/TEASER 1 folder>"   # src/teaser1/pattern.json + logo.json, public/teaser1/nafesa.png
+node scripts/teaser1_layout.js                                    # src/teaser1/timeline.json
+node audio/teaser1_sfx.js                                         # public/teaser1/sfx.wav
+SCALE=0.4 node scripts/drop1_stills.mjs out/sb PetalPopTeaser1 1.6 4.7 7.8 8.6
+npx remotion render PetalPopTeaser1 out/teaser1.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
+
+## Petal Pop Drop 2 catalog editor reel (PetalPopDrop2)
+
+21 s 9:16 upgrade of the Drop 1 editor reel for the Drop 2 catalog pages (`public/drop2`): the Petal Pop Drop 2
+logo (vector) is free-transformed down and parked in the header, the move cursor carries every page in and drops it on
+a pile, the eyedropper picks each scarf and a round swatch filled with that scarf's real print (from
+`src/teaser1/pattern.json`) flies to the palette strip while scarf flowers pop around the page, then select all ->
+scale into the DROP 2 pill, the logo alone, and the NAFESA back cover last. SFX only.
+
+```bash
+node scripts/drop2_layout.js   # src/drop2/timeline.json
+node audio/drop2_sfx.js        # public/drop2/sfx.wav
+npx remotion render PetalPopDrop2 out/drop2.mp4 --props='{"withAudio":true}' \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+```
