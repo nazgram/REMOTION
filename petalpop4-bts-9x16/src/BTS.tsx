@@ -222,7 +222,7 @@ const Title: React.FC = () => {
 // ---------- B&W film-frame interlude ----------
 const FilmFrame: React.FC<{img: string; x: number; y: number; w: number; h: number; t: number; leak?: boolean}> = ({img, x, y, w, h, t, leak}) => (
   <div style={{position: 'absolute', left: x, top: y, width: w, height: h, overflow: 'hidden', borderRadius: 6, boxShadow: '0 0 40px 18px rgba(0,0,0,0.65) inset'}}>
-    <Img src={staticFile(`bts/clips/${img}.jpg`)} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(1) contrast(1.15) brightness(1.02)', transform: `scale(${1.04 + t * 0.05})`}} />
+    <Img src={staticFile(`bts/clips/${img}.jpg`)} style={{width: '100%', height: '100%', objectFit: 'cover', filter: 'contrast(1.06) saturate(1.05) sepia(0.08) brightness(1.02)', transform: `scale(${1.04 + t * 0.05})`}} />
     <div style={{position: 'absolute', inset: 0, boxShadow: '0 0 60px 30px rgba(20,20,16,0.85) inset'}} />
     {leak && <div style={{position: 'absolute', inset: 0, background: `linear-gradient(${100 + t * 40}deg, rgba(0,0,0,0) 30%, rgba(232,170,96,${0.75 * Math.sin(t * Math.PI)}) 60%, rgba(248,165,203,${0.5 * Math.sin(t * Math.PI)}) 85%)`, mixBlendMode: 'screen'}} />}
   </div>
