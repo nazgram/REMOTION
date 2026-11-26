@@ -1,0 +1,347 @@
+{
+ "fps": 30,
+ "total": 1122,
+ "filmFrom": 570,
+ "filmTo": 665,
+ "endFrom": 930,
+ "nafesaFrom": 1035,
+ "shots": [
+  {
+   "id": "h00",
+   "src": "4063",
+   "inS": 1.5,
+   "from_": 0,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h01",
+   "src": "4161",
+   "inS": 2.5,
+   "from_": 4,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h02",
+   "src": "4066",
+   "inS": 3.5,
+   "from_": 8,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h03",
+   "src": "4088",
+   "inS": 25.8,
+   "from_": 12,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h04",
+   "src": "4119",
+   "inS": 1.0,
+   "from_": 16,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h05",
+   "src": "4160",
+   "inS": 1.5,
+   "from_": 20,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h06",
+   "src": "4064",
+   "inS": 2.0,
+   "from_": 24,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h07",
+   "src": "4167",
+   "inS": 0.5,
+   "from_": 28,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h08",
+   "src": "4169",
+   "inS": 19.0,
+   "from_": 32,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h09",
+   "src": "4123",
+   "inS": 0.4,
+   "from_": 36,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h10",
+   "src": "4068",
+   "inS": 0.5,
+   "from_": 40,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h11",
+   "src": "4162",
+   "inS": 0.3,
+   "from_": 44,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h12",
+   "src": "4087",
+   "inS": 3.3,
+   "from_": 48,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h13",
+   "src": "4070",
+   "inS": 10.0,
+   "from_": 52,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h14",
+   "src": "4061",
+   "inS": 1.0,
+   "from_": 56,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h15",
+   "src": "4168",
+   "inS": 3.9,
+   "from_": 60,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "h16",
+   "src": "4082",
+   "inS": 4.0,
+   "from_": 64,
+   "dur": 4,
+   "chap": "hook",
+   "cap": ""
+  },
+  {
+   "id": "m00",
+   "src": "4070",
+   "inS": 2.0,
+   "from_": 68,
+   "dur": 50,
+   "chap": "title",
+   "cap": ""
+  },
+  {
+   "id": "m01",
+   "src": "4086",
+   "inS": 0.2,
+   "from_": 118,
+   "dur": 51,
+   "chap": "title",
+   "cap": ""
+  },
+  {
+   "id": "m02",
+   "src": "4063",
+   "inS": 0.3,
+   "from_": 169,
+   "dur": 41,
+   "chap": "dahlia",
+   "cap": "Mula dengan styling tudung"
+  },
+  {
+   "id": "m03",
+   "src": "4066",
+   "inS": 1.4,
+   "from_": 210,
+   "dur": 42,
+   "chap": "dahlia",
+   "cap": "Kipas kecil, penyelamat hari panas"
+  },
+  {
+   "id": "m04",
+   "src": "4070",
+   "inS": 9.4,
+   "from_": 252,
+   "dur": 48,
+   "chap": "dahlia",
+   "cap": "Betulkan lipatan setiap take"
+  },
+  {
+   "id": "m05",
+   "src": "4082",
+   "inS": 0.3,
+   "from_": 300,
+   "dur": 33,
+   "chap": "powder",
+   "cap": "Crew standby tepi set"
+  },
+  {
+   "id": "m06",
+   "src": "4096",
+   "inS": 0.5,
+   "from_": 333,
+   "dur": 48,
+   "chap": "powder",
+   "cap": "Set tepi kolam"
+  },
+  {
+   "id": "m07",
+   "src": "4088",
+   "inS": 24.6,
+   "from_": 381,
+   "dur": 49,
+   "chap": "powder",
+   "cap": "Kamera ikut setiap gerak"
+  },
+  {
+   "id": "m08",
+   "src": "4119",
+   "inS": 0.3,
+   "from_": 430,
+   "dur": 48,
+   "chap": "dusty",
+   "cap": "Lampu disusun dulu"
+  },
+  {
+   "id": "m09",
+   "src": "4123",
+   "inS": 0.0,
+   "from_": 478,
+   "dur": 45,
+   "chap": "dusty",
+   "cap": "Take ke berapa dah ni?"
+  },
+  {
+   "id": "m10",
+   "src": "4108",
+   "inS": 2.0,
+   "from_": 523,
+   "dur": 47,
+   "chap": "dusty",
+   "cap": "Pose, tahan... okay!"
+  },
+  {
+   "id": "m11",
+   "src": "4130",
+   "inS": 3.0,
+   "from_": 665,
+   "dur": 37,
+   "chap": "lilac",
+   "cap": "Bunga pun ada watak"
+  },
+  {
+   "id": "m12",
+   "src": "4133",
+   "inS": 6.4,
+   "from_": 702,
+   "dur": 36,
+   "chap": "lilac",
+   "cap": "Cari angle terbaik"
+  },
+  {
+   "id": "m13",
+   "src": "4134",
+   "inS": 5.3,
+   "from_": 738,
+   "dur": 46,
+   "chap": "lilac",
+   "cap": "Satu lagi, last"
+  },
+  {
+   "id": "m14",
+   "src": "4160",
+   "inS": 1.5,
+   "from_": 784,
+   "dur": 38,
+   "chap": "sage",
+   "cap": "Touch-up last minute"
+  },
+  {
+   "id": "m15",
+   "src": "4161",
+   "inS": 1.2,
+   "from_": 822,
+   "dur": 33,
+   "chap": "sage",
+   "cap": "Pin, betulkan, ulang"
+  },
+  {
+   "id": "m16",
+   "src": "4169",
+   "inS": 19.5,
+   "from_": 855,
+   "dur": 39,
+   "chap": "sage",
+   "cap": "Satu team, satu hari"
+  },
+  {
+   "id": "m17",
+   "src": "4181",
+   "inS": 1.0,
+   "from_": 894,
+   "dur": 36,
+   "chap": "sage",
+   "cap": "Dan hasilnya..."
+  }
+ ],
+ "film": [
+  {
+   "id": "f0",
+   "src": "4105",
+   "inS": 8.0
+  },
+  {
+   "id": "f1",
+   "src": "4130",
+   "inS": 10.2
+  },
+  {
+   "id": "f2",
+   "src": "4122",
+   "inS": 1.5
+  },
+  {
+   "id": "f3",
+   "src": "4151",
+   "inS": 3.0
+  }
+ ]
+}
