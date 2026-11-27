@@ -62,9 +62,41 @@ const Letters: React.FC<{t: number; at: number[]; size: number; lines: 1 | 2}> =
   );
 };
 
+// Teks baris sendiri (Nas 27 Nov, versi panjang: "Available on 1 December 2026"): setiap perkataan pop pada masanya
+// (times.letters[i] = perkataan ke-i), huruf dalam perkataan menyusul 0.035 s.
+export type TextLine = {text: string; size: number};
+const LineText: React.FC<{t: number; at: number[]; lines: TextLine[]}> = ({t, at, lines}) => {
+  let wi = 0;
+  return (
+    <div style={{fontFamily: SERIF, color: '#fff', letterSpacing: '0.05em', whiteSpace: 'nowrap', textAlign: 'center'}}>
+      {lines.map((ln, li) => (
+        <div key={li} style={{fontSize: ln.size, lineHeight: 1.02}}>
+          {ln.text.split(' ').map((w, k) => {
+            const a0 = at[Math.min(at.length - 1, wi++)];
+            return (
+              <span key={k} style={{display: 'inline-block', marginLeft: k ? '0.3em' : 0}}>
+                {w.split('').map((ch, j) => {
+                  const a = a0 + j * 0.035;
+                  const kk = ease(t, a, a + 0.32, Easing.out(Easing.back(1.8)));
+                  const o = ease(t, a, a + 0.12, Easing.linear);
+                  return (
+                    <span key={j} style={{display: 'inline-block', opacity: o, transform: `translateY(${(1 - Math.min(1, kk)) * 30}px) scale(${kk})`, transformOrigin: '50% 100%'}}>
+                      {ch}
+                    </span>
+                  );
+                })}
+              </span>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // COMING SOON atas print Black Dahlia (unit cerah), kemudian bulatan bunga + logo Petal Pop 4 putih. t = 0 mula segmen.
 // overlay (9:16): tiada latar hitam, bunga Black Dahlia mekar terus atas klip klimaks terakhir.
-export const ComingSoon: React.FC<{times: ComingTimes; overlay?: boolean}> = ({times: T, overlay = false}) => {
+export const ComingSoon: React.FC<{times: ComingTimes; overlay?: boolean; text?: TextLine[]}> = ({times: T, overlay = false, text}) => {
   const t = useCurrentFrame() / FPS;
   const {fmt, W, H} = useFmt();
   const L = LAY[fmt];
@@ -123,7 +155,7 @@ export const ComingSoon: React.FC<{times: ComingTimes; overlay?: boolean}> = ({t
         </g>
       </svg>
       <div style={{position: 'absolute', left: 0, width: W, top: ty, display: 'flex', justifyContent: 'center', transform: `translateY(-50%) scale(${sc})`}}>
-        <Letters t={t} at={T.letters} size={L.size} lines={L.lines} />
+        {text ? <LineText t={t} at={T.letters} lines={text} /> : <Letters t={t} at={T.letters} size={L.size} lines={L.lines} />}
       </div>
     </AbsoluteFill>
   );

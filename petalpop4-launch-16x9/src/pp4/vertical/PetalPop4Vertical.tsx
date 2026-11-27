@@ -60,7 +60,7 @@ const VerticalTeaser: React.FC<{plan: VPlan}> = ({plan: p}) => {
           <ClipSeq key={u.label} use={u} base={0} />
         ))}
         <Sequence from={f(p.coming)} premountFor={30}>
-          <ComingSoon times={p.comingT} overlay />
+          <ComingSoon times={p.comingT} overlay text={p.text} />
         </Sequence>
         <Sequence from={f(p.nafesa)}>
           <NafesaFade />

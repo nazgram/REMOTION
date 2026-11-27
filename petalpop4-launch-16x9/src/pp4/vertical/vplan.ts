@@ -2,7 +2,7 @@ import beatsShort from '../../../public/pp4/beats.json';
 import beatsLong from '../../../public/pp4/beats_long.json';
 import {beatAt} from '../beats';
 import {Origin, SweepTiming} from '../components/Bloom';
-import {ComingTimes} from '../components/EndCards';
+import {ComingTimes, TextLine} from '../components/EndCards';
 import {DesignId, ORDER} from '../designs';
 import {CLIMAX, Shot, SHOTS} from '../shots';
 import {RampKeys} from './ramp';
@@ -35,6 +35,7 @@ export type VPlan = {
   comingT: ComingTimes;
   nafesa: number;
   songFadeOut: number;
+  text?: TextLine[]; // ganti COMING SOON
 };
 
 type Cfg = {
@@ -50,6 +51,8 @@ type Cfg = {
   comingBeat0: number;
   nafBeat0: number;
   songFadeOut: number;
+  text?: TextLine[];
+  wordBeats?: number[]; // beat (dalam segmen COMING) setiap perkataan teks
 };
 const ORIGINS: Origin[] = ['bottom', 'bottom', 'bl', 'tr', 'center', 'bottom'];
 
@@ -93,7 +96,7 @@ const build = (c: Cfg): VPlan => {
   });
   const cb = (k: number) => at(c.comingBeat0 + k) - coming;
   const comingT: ComingTimes = {
-    letters: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => cb(0.75 + i * 0.25)),
+    letters: c.wordBeats ? c.wordBeats.map(cb) : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => cb(0.75 + i * 0.25)),
     shrink: cb(3.5),
     ring: cb(3.5),
     logoLetters: Array.from({length: 8}, (_, i) => cb(3.75 + i * 0.25)),
@@ -101,7 +104,7 @@ const build = (c: Cfg): VPlan => {
     pill: cb(5.5),
     drops: Array.from({length: 5}, (_, i) => cb(5.6) + i * 0.07),
   };
-  return {id: c.id, end: c.end, song: c.song, blocks, climax, climaxEnd, coming, comingT, nafesa: at(c.nafBeat0), songFadeOut: c.songFadeOut};
+  return {id: c.id, end: c.end, song: c.song, blocks, climax, climaxEnd, coming, comingT, nafesa: at(c.nafBeat0), songFadeOut: c.songFadeOut, text: c.text};
 };
 
 // Pendek: lagu 2:45.5-3:12 (26.5 s). Intro 0-2, design 2-32, klimaks 32-36 (muka setiap 2/3 beat), COMING 36-43, NAFESA 43.
@@ -114,6 +117,9 @@ export const SHORT: VPlan = build({
 export const LONG: VPlan = build({
   id: 'long', beats: beatsLong.beats, end: 51.2, song: 'song_long.m4a', designBeats: 11, cuts: [4, 7], picks: [0, 1, 2],
   climaxBeat0: 68, climaxStep: 1.5, comingBeat0: 77, nafBeat0: 85, songFadeOut: 0.3,
+  // Nas 27 Nov: "Coming Soon" ubah "Available on 1 December 2026". Satu perkataan setiap separuh beat.
+  text: [{text: 'AVAILABLE ON', size: 92}, {text: '1 DECEMBER', size: 150}, {text: '2026', size: 150}],
+  wordBeats: [0.5, 1, 1.5, 2, 2.5],
 });
 
 export const allUses = (p: VPlan): VUse[] => [...p.blocks.flatMap((b) => b.uses), ...p.climax];
